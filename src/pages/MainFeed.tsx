@@ -1,28 +1,33 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth, db } from "../firebase";
+import { onAuthStateChanged, signOut} from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../firebaseClient";
+import type { User } from "firebase/auth";
 import toast from "react-hot-toast";
 
-export default function MainFeed() {
+function MainFeed() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+
+  const [user, setUser] = useState<User | null>(null);
+  const [username, setUsername] = useState<string>("");
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
         navigate("/login");
         return;
       }
 
-      const docRef = doc(db, "users", user.uid);
-      const snap = await getDoc(docRef);
+      setUser(firebaseUser);
+
+      const snap = await getDoc(doc(db, "users", firebaseUser.uid));
 
       if (snap.exists()) {
-        setUsername(snap.data().username);
+        const data = snap.data();
+        setUsername(data.username);
       } else {
-        setUsername(user.email || "");
+        setUsername("User");
       }
     });
 
@@ -40,10 +45,16 @@ export default function MainFeed() {
     }
   };
 
+  if (!user) return null;
+
   return (
     <div>
-      <h1>Welcome {username}!</h1>
-      <button onClick={handleLogout}>Sign Out</button>
+      <h1>Hello, {username}!</h1>
+      <button onClick={handleLogout}>Log Out</button>
     </div>
+
+   
   );
 }
+
+export default MainFeed;

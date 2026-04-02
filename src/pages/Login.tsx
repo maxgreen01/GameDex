@@ -1,42 +1,59 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../services/auth";
 import toast from "react-hot-toast";
+import { login } from "../services/auth";
+import { validateLogin } from "../../shared/validation";
+import { getDoc, doc} from "firebase/firestore";
+import { db } from "../firebaseClient";
 
-export default function Login() {
+
+function Login() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate();
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      await login(email, password);
+      validateLogin(email, password);
+      
+      const { user, token } = await login(email, password);
 
-      toast.success("Login successful!");
-      navigate("/mainfeed");
+      const snap = await getDoc(doc(db, "users", user.uid));
+      const username = snap.data()?.username;
 
-      setLoading(false);
+      await fetch("http://localhost:3000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token }),
+      });
 
+      localStorage.setItem("token", token);
+
+      toast.success(`Welcome back ${user.email}`);
+      navigate(`/mainfeed/${username}`);
     } catch (err: any) {
-      toast.error(err.message || "Login failed");
+      toast.error(err.message);
+    } finally {
       setLoading(false);
-    } 
+    }
   };
 
   const goHome = () => {
     navigate('/');
-  };
+  }
 
   return (
     <div>
-      <h2>Login</h2>
+      <h1>Login</h1>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleLogin}>
         <input
           placeholder="Email"
           value={email}
@@ -55,7 +72,11 @@ export default function Login() {
         </button>
       </form>
 
-      <button type = 'button' onClick={goHome}>Home</button>
+      <button onClick={goHome}>Home</button>
     </div>
+
+    
   );
 }
+
+export default Login;
