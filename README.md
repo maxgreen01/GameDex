@@ -1,6 +1,8 @@
 # Running 
 TO RUN, OPEN 2 TERMINALS:
+
 Terminal 1: npm run dev (frontend)
+
 Terminal 2: npx ts-node server/server.ts (backend server)
 
 
