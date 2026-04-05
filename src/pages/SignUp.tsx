@@ -1,76 +1,74 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signup } from "../services/auth";
+import { validateSignup} from "../../shared/validation";
 import toast from "react-hot-toast";
 
-export default function Signup() {
+function Signup() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate();
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setLoading(true);
 
     try {
-      await signup(email, password, username, displayName);
+      validateSignup(email, password, username, displayName);
 
-      toast.success("Signup successful!");
+      const res = await fetch("http://localhost:3000/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          username,
+          displayName,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Signup failed");
+      }
+
+      toast.success("Account created!");
       navigate("/login");
-
-      setLoading(false);
-
     } catch (err: any) {
-      toast.error(err.message || "Signup failed");
+      toast.error(err.message);
+    } finally {
       setLoading(false);
-    } 
+    }
   };
 
   const goHome = () => {
-    navigate("/");
-  };
+    navigate('/');
+  }
 
   return (
     <div>
-      <h2>Sign Up</h2>
+      <h1>Signup</h1>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-
-        <input
-          placeholder="Display Name"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-        />
-
-        <input
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        <input
-          placeholder="Password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+      <form onSubmit={handleSignup}>
+        <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
+        <input placeholder="Password" type="password" onChange={(e) => setPassword(e.target.value)} />
+        <input placeholder="Username" onChange={(e) => setUsername(e.target.value)} />
+        <input placeholder="Display Name" onChange={(e) => setDisplayName(e.target.value)} />
 
         <button disabled={loading}>
-          {loading ? "Signing up..." : "Sign Up"}
+          {loading ? "Creating..." : "Signup"}
         </button>
       </form>
 
-      <button type = 'button' onClick={goHome}>Home</button>
+      <button onClick={goHome}>Home</button>
     </div>
   );
 }
+
+export default Signup;
