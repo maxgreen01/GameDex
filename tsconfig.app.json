@@ -22,7 +22,12 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    // for Chakra UI 
+    "paths": {           
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src"]
 }
