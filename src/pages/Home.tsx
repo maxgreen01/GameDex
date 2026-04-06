@@ -6,6 +6,7 @@ function Home() {
             <h1>Welcome to GameDex!</h1>
             <h2>Track the games you've played. Discover what to play next.</h2>
 
+
             <Link to = {`/login`}>
                 <button>Login</button>
             </Link>
@@ -13,6 +14,7 @@ function Home() {
             <Link to = {`/signup`}>
                 <button>Signup</button>
             </Link>
+           
         </div>
     )
 }

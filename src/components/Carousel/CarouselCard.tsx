@@ -4,9 +4,12 @@
 //is id int (from api) or slug string
 //most common platforms done only
 //rating rounded down
-
+// called from carousel
+//use asChild in skeleton??
 //IMPORTS/////////////////////////////////////////
 import type { FC } from "react";
+import { useState } from "react";
+import type { Platform, CarouselCardData } from "../../types/games.ts";
 import Rating from "../Rating";
 import {
   FaWindows,
@@ -21,7 +24,7 @@ import { MdOutlinePhoneIphone } from "react-icons/md";
 import type { IconType } from "react-icons";
 
 //UI IMPORTS//////////////////////////////////////
-import { Box, Card, Image, Flex } from "@chakra-ui/react";
+import { Box, Card, Image, Flex, Skeleton } from "@chakra-ui/react";
 
 //API DATA NEEDED
 // componentVar = apiVar           : typeReturned
@@ -29,6 +32,7 @@ import { Box, Card, Image, Flex } from "@chakra-ui/react";
 //              || slug            : string
 // gameImg      = background_image : string
 // platforms    = platforms        : [Objects]
+// gameName     = name             : string
 
 // ex.
 // {
@@ -51,21 +55,9 @@ import { Box, Card, Image, Flex } from "@chakra-ui/react";
 // }
 //-------------------------------------------------//
 
-interface Platform {
-  platform: {
-    id: number;
-    name: string;
-    slug: string;
-  };
-}
-
-interface Props {
+interface Props extends CarouselCardData {
   // Game Card
-  id: string; //assuming slug (see notes)
-  gameImg?: string; //if seeMore, this isn't given, alternatively the game may not have an img
-  gameName: string; //same as above
-  rating: Number; //CALC HERE OR PASSED IN?
-  platforms?: Platform[]; //platforms this game is available on
+  loading?: boolean;
 }
 
 const allPlatforms: Record<string, IconType> = {
@@ -88,6 +80,7 @@ const CarouselCard: FC<Props> = ({
   gameName,
   rating,
   platforms,
+  loading = false,
 }) => {
   let showPlatforms = platforms?.filter((p) => {
     return Object.keys(allPlatforms).includes(p.platform.slug);
@@ -99,31 +92,42 @@ const CarouselCard: FC<Props> = ({
   }));
 
   return (
-    <div key={id}>
-      <Card.Root size="sm" maxW="sm" overflow="hidden" variant="outline">
-        {gameImg ? (
-          <Image src={gameImg} alt="Green double couch with wooden legs" />
-        ) : (
-          <Box w="100%" h="150px" bg="gray.700" />
-        )}
-        <Card.Body gap="2">
-          <Card.Title>{gameName}</Card.Title>
-        </Card.Body>
-        <Card.Footer gap="2">
-          <Flex justify="space-between" w="100%">
-            <Rating
-              readOnly={true}
-              value={Math.round(Number(rating) * 2) / 2}
-            />
-            <Flex>
-              {compPlatforms?.map(({ slug, Icon }) => (
-                <Icon key={slug} style={{ marginLeft: "4px" }} />
-              ))}
+    <Skeleton loading={loading} variant="shine">
+      <div key={id}>
+        <Card.Root
+          size="sm"
+          maxW="sm"
+          overflow="hidden"
+          variant="outline"
+          h="100%"
+          display="flex"
+          flexDirection="column"
+        >
+          {gameImg ? (
+            <Image src={gameImg} alt={`Game image for ${gameName}`} />
+          ) : (
+            <Box w="100%" h="150px" bg="gray.700" />
+          )}
+          <Card.Body flex="1" gap="2">
+            {/*lineClamp={2} to card title to cut off long titles*/} 
+            <Card.Title   minH="12">{gameName}</Card.Title>
+          </Card.Body>
+          <Card.Footer mt="auto" gap="2">
+            <Flex justify="space-between" w="100%">
+              <Rating
+                readOnly={true}
+                value={Math.round(Number(rating) * 2) / 2}
+              />
+              <Flex>
+                {compPlatforms?.map(({ slug, Icon }) => (
+                  <Icon key={slug} style={{ marginLeft: "4px" }} />
+                ))}
+              </Flex>
             </Flex>
-          </Flex>
-        </Card.Footer>
-      </Card.Root>
-    </div>
+          </Card.Footer>
+        </Card.Root>
+      </div>
+    </Skeleton>
   );
 };
 
