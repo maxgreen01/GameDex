@@ -90,13 +90,17 @@ const CarouselCard: FC<Props> = ({
   platforms,
 }) => {
   let showPlatforms = platforms?.filter((p) => {
-    return Object.keys(allPlatforms).includes(p.platform.slug);
+    return (
+      p?.platform?.slug && Object.keys(allPlatforms).includes(p.platform.slug)
+    );
   });
 
-  let compPlatforms = showPlatforms?.map((p) => ({
-    slug: p.platform.slug,
-    Icon: allPlatforms[p.platform.slug],
-  }));
+  let compPlatforms = showPlatforms?.map((p) => {
+    return {
+      slug: p.platform.slug,
+      Icon: allPlatforms[p.platform.slug],
+    };
+  });
 
   return (
     <div key={id}>
