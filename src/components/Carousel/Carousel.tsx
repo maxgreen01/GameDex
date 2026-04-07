@@ -176,7 +176,7 @@ const CarouselRow: FC<Props> = ({ category }) => {
 
   return (
     <div>
-      <Carousel.Root slideCount={cards.length} slidesPerPage={4} gap="4">
+      <Carousel.Root mx="4" slideCount={cards.length} slidesPerPage={4} gap="4">
         <HStack justify="space-between">
           <Span fontWeight="medium">{title}</Span>
           <HStack>
