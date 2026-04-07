@@ -31,106 +31,106 @@ const CarouselRow: FC<Props> = ({ category }) => {
 
   //REMOVE FOR TESTING
   //GENERATE
-  const testCards: CarouselCardData[] = [
-    {
-      id: "elden-ring",
-      gameImg:
-        "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
-      gameName: "Elden Ring",
-      rating: 4.7,
-      platforms: [
-        { platform: { id: 1, name: "PC", slug: "pc" } },
-        { platform: { id: 2, name: "PlayStation 5", slug: "playstation5" } },
-        { platform: { id: 3, name: "Xbox Series X", slug: "xbox-series-x" } },
-      ],
-    },
-    {
-      id: "baldurs-gate-3",
-      gameImg:
-        "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
-      gameName: "Baldur's Gate 3",
-      rating: 4.8,
-      platforms: [
-        { platform: { id: 1, name: "PC", slug: "pc" } },
-        { platform: { id: 2, name: "PlayStation 5", slug: "playstation5" } },
-      ],
-    },
-    {
-      id: "cyberpunk-2077",
-      gameImg:
-        "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
-      gameName: "Cyberpunk 2077",
-      rating: 2.9,
-      platforms: [
-        { platform: { id: 1, name: "PC", slug: "pc" } },
-        { platform: { id: 2, name: "PlayStation 5", slug: "playstation5" } },
-        { platform: { id: 3, name: "Xbox Series X", slug: "xbox-series-x" } },
-      ],
-    },
-    {
-      id: "the-legend-of-zelda-tears-of-the-kingdom",
-      gameImg:
-        "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
-      gameName: "The Legend of Zelda: Tears of the Kingdom",
-      rating: 3.6,
-      platforms: [
-        {
-          platform: { id: 4, name: "Nintendo Switch", slug: "nintendo-switch" },
-        },
-      ],
-    },
-    {
-      id: "hades",
-      gameImg:
-        "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
-      gameName: "Hades",
-      rating: 4.2,
-      platforms: [
-        { platform: { id: 1, name: "PC", slug: "pc" } },
-        {
-          platform: { id: 4, name: "Nintendo Switch", slug: "nintendo-switch" },
-        },
-        { platform: { id: 5, name: "PlayStation 4", slug: "playstation4" } },
-      ],
-    },
-    {
-      id: "red-dead-redemption-2",
-      gameImg:
-        "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
-      gameName: "Red Dead Redemption 2",
-      rating: 1.5,
-      platforms: [
-        { platform: { id: 1, name: "PC", slug: "pc" } },
-        { platform: { id: 6, name: "Xbox One", slug: "xbox-one" } },
-        { platform: { id: 5, name: "PlayStation 4", slug: "playstation4" } },
-      ],
-    },
-    {
-      id: "stardew-valley",
-      gameImg:
-        "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
-      gameName: "Stardew Valley",
-      rating: 2.1,
-      platforms: [
-        { platform: { id: 1, name: "PC", slug: "pc" } },
-        {
-          platform: { id: 4, name: "Nintendo Switch", slug: "nintendo-switch" },
-        },
-        { platform: { id: 7, name: "Mobile", slug: "ios" } },
-      ],
-    },
-    {
-      id: "god-of-war-ragnarok",
-      gameImg:
-        "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
-      gameName: "God of War Ragnarök",
-      rating: 3.4,
-      platforms: [
-        { platform: { id: 2, name: "PlayStation 5", slug: "playstation5" } },
-        { platform: { id: 5, name: "PlayStation 4", slug: "playstation4" } },
-      ],
-    },
-  ];
+  // const testCards: CarouselCardData[] = [
+  //   {
+  //     id: "elden-ring",
+  //     gameImg:
+  //       "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
+  //     gameName: "Elden Ring",
+  //     rating: 4.7,
+  //     platforms: [
+  //       { platform: { id: 1, name: "PC", slug: "pc" } },
+  //       { platform: { id: 2, name: "PlayStation 5", slug: "playstation5" } },
+  //       { platform: { id: 3, name: "Xbox Series X", slug: "xbox-series-x" } },
+  //     ],
+  //   },
+  //   {
+  //     id: "baldurs-gate-3",
+  //     gameImg:
+  //       "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
+  //     gameName: "Baldur's Gate 3",
+  //     rating: 4.8,
+  //     platforms: [
+  //       { platform: { id: 1, name: "PC", slug: "pc" } },
+  //       { platform: { id: 2, name: "PlayStation 5", slug: "playstation5" } },
+  //     ],
+  //   },
+  //   {
+  //     id: "cyberpunk-2077",
+  //     gameImg:
+  //       "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
+  //     gameName: "Cyberpunk 2077",
+  //     rating: 2.9,
+  //     platforms: [
+  //       { platform: { id: 1, name: "PC", slug: "pc" } },
+  //       { platform: { id: 2, name: "PlayStation 5", slug: "playstation5" } },
+  //       { platform: { id: 3, name: "Xbox Series X", slug: "xbox-series-x" } },
+  //     ],
+  //   },
+  //   {
+  //     id: "the-legend-of-zelda-tears-of-the-kingdom",
+  //     gameImg:
+  //       "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
+  //     gameName: "The Legend of Zelda: Tears of the Kingdom",
+  //     rating: 3.6,
+  //     platforms: [
+  //       {
+  //         platform: { id: 4, name: "Nintendo Switch", slug: "nintendo-switch" },
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     id: "hades",
+  //     gameImg:
+  //       "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
+  //     gameName: "Hades",
+  //     rating: 4.2,
+  //     platforms: [
+  //       { platform: { id: 1, name: "PC", slug: "pc" } },
+  //       {
+  //         platform: { id: 4, name: "Nintendo Switch", slug: "nintendo-switch" },
+  //       },
+  //       { platform: { id: 5, name: "PlayStation 4", slug: "playstation4" } },
+  //     ],
+  //   },
+  //   {
+  //     id: "red-dead-redemption-2",
+  //     gameImg:
+  //       "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
+  //     gameName: "Red Dead Redemption 2",
+  //     rating: 1.5,
+  //     platforms: [
+  //       { platform: { id: 1, name: "PC", slug: "pc" } },
+  //       { platform: { id: 6, name: "Xbox One", slug: "xbox-one" } },
+  //       { platform: { id: 5, name: "PlayStation 4", slug: "playstation4" } },
+  //     ],
+  //   },
+  //   {
+  //     id: "stardew-valley",
+  //     gameImg:
+  //       "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
+  //     gameName: "Stardew Valley",
+  //     rating: 2.1,
+  //     platforms: [
+  //       { platform: { id: 1, name: "PC", slug: "pc" } },
+  //       {
+  //         platform: { id: 4, name: "Nintendo Switch", slug: "nintendo-switch" },
+  //       },
+  //       { platform: { id: 7, name: "Mobile", slug: "ios" } },
+  //     ],
+  //   },
+  //   {
+  //     id: "god-of-war-ragnarok",
+  //     gameImg:
+  //       "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
+  //     gameName: "God of War Ragnarök",
+  //     rating: 3.4,
+  //     platforms: [
+  //       { platform: { id: 2, name: "PlayStation 5", slug: "playstation5" } },
+  //       { platform: { id: 5, name: "PlayStation 4", slug: "playstation4" } },
+  //     ],
+  //   },
+  // ];
 
   useEffect(() => {
     // REMOVE FOR TESTING
