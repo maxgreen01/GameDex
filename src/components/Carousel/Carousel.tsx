@@ -5,11 +5,12 @@
 // newest releases ->
 // something outside your box -> opposite alg function
 //IMPORTS/////////////////////////////////////////
+
 import type { FC } from "react";
 import type { CarouselCardData } from "@/types/games.ts";
 import { useState, useEffect } from "react";
-import CarouselCard from "./CarouselCard.tsx"
-
+import CarouselCard from "./CarouselCard.tsx";
+import axios from "axios";
 
 //UI IMPORTS//////////////////////////////////////
 import { Carousel, HStack, IconButton, Span } from "@chakra-ui/react";
@@ -31,146 +32,182 @@ const CarouselRow: FC<Props> = ({ category }) => {
   //REMOVE FOR TESTING
   //GENERATE
   const testCards: CarouselCardData[] = [
-  {
-    id: "elden-ring",
-    gameImg: "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
-    gameName: "Elden Ring",
-    rating: 4.7,
-    platforms: [
-      { platform: { id: 1, name: "PC", slug: "pc" } },
-      { platform: { id: 2, name: "PlayStation 5", slug: "playstation5" } },
-      { platform: { id: 3, name: "Xbox Series X", slug: "xbox-series-x" } },
-    ],
-  },
-  {
-    id: "baldurs-gate-3",
-    gameImg: "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
-    gameName: "Baldur's Gate 3",
-    rating: 4.8,
-    platforms: [
-      { platform: { id: 1, name: "PC", slug: "pc" } },
-      { platform: { id: 2, name: "PlayStation 5", slug: "playstation5" } },
-    ],
-  },
-  {
-    id: "cyberpunk-2077",
-    gameImg: "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
-    gameName: "Cyberpunk 2077",
-    rating: 2.9,
-    platforms: [
-      { platform: { id: 1, name: "PC", slug: "pc" } },
-      { platform: { id: 2, name: "PlayStation 5", slug: "playstation5" } },
-      { platform: { id: 3, name: "Xbox Series X", slug: "xbox-series-x" } },
-    ],
-  },
-  {
-    id: "the-legend-of-zelda-tears-of-the-kingdom",
-    gameImg: "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
-    gameName: "The Legend of Zelda: Tears of the Kingdom",
-    rating: 3.6,
-    platforms: [
-      { platform: { id: 4, name: "Nintendo Switch", slug: "nintendo-switch" } },
-    ],
-  },
-  {
-    id: "hades",
-    gameImg: "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
-    gameName: "Hades",
-    rating: 4.2,
-    platforms: [
-      { platform: { id: 1, name: "PC", slug: "pc" } },
-      { platform: { id: 4, name: "Nintendo Switch", slug: "nintendo-switch" } },
-      { platform: { id: 5, name: "PlayStation 4", slug: "playstation4" } },
-    ],
-  },
-  {
-    id: "red-dead-redemption-2",
-    gameImg: "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
-    gameName: "Red Dead Redemption 2",
-    rating: 1.5,
-    platforms: [
-      { platform: { id: 1, name: "PC", slug: "pc" } },
-      { platform: { id: 6, name: "Xbox One", slug: "xbox-one" } },
-      { platform: { id: 5, name: "PlayStation 4", slug: "playstation4" } },
-    ],
-  },
-  {
-    id: "stardew-valley",
-    gameImg: "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
-    gameName: "Stardew Valley",
-    rating: 2.1,
-    platforms: [
-      { platform: { id: 1, name: "PC", slug: "pc" } },
-      { platform: { id: 4, name: "Nintendo Switch", slug: "nintendo-switch" } },
-      { platform: { id: 7, name: "Mobile", slug: "ios" } },
-    ],
-  },
-  {
-    id: "god-of-war-ragnarok",
-    gameImg: "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
-    gameName: "God of War Ragnarök",
-    rating: 3.4,
-    platforms: [
-      { platform: { id: 2, name: "PlayStation 5", slug: "playstation5" } },
-      { platform: { id: 5, name: "PlayStation 4", slug: "playstation4" } },
-    ],
-  },
-];
-
+    {
+      id: "elden-ring",
+      gameImg:
+        "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
+      gameName: "Elden Ring",
+      rating: 4.7,
+      platforms: [
+        { platform: { id: 1, name: "PC", slug: "pc" } },
+        { platform: { id: 2, name: "PlayStation 5", slug: "playstation5" } },
+        { platform: { id: 3, name: "Xbox Series X", slug: "xbox-series-x" } },
+      ],
+    },
+    {
+      id: "baldurs-gate-3",
+      gameImg:
+        "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
+      gameName: "Baldur's Gate 3",
+      rating: 4.8,
+      platforms: [
+        { platform: { id: 1, name: "PC", slug: "pc" } },
+        { platform: { id: 2, name: "PlayStation 5", slug: "playstation5" } },
+      ],
+    },
+    {
+      id: "cyberpunk-2077",
+      gameImg:
+        "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
+      gameName: "Cyberpunk 2077",
+      rating: 2.9,
+      platforms: [
+        { platform: { id: 1, name: "PC", slug: "pc" } },
+        { platform: { id: 2, name: "PlayStation 5", slug: "playstation5" } },
+        { platform: { id: 3, name: "Xbox Series X", slug: "xbox-series-x" } },
+      ],
+    },
+    {
+      id: "the-legend-of-zelda-tears-of-the-kingdom",
+      gameImg:
+        "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
+      gameName: "The Legend of Zelda: Tears of the Kingdom",
+      rating: 3.6,
+      platforms: [
+        {
+          platform: { id: 4, name: "Nintendo Switch", slug: "nintendo-switch" },
+        },
+      ],
+    },
+    {
+      id: "hades",
+      gameImg:
+        "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
+      gameName: "Hades",
+      rating: 4.2,
+      platforms: [
+        { platform: { id: 1, name: "PC", slug: "pc" } },
+        {
+          platform: { id: 4, name: "Nintendo Switch", slug: "nintendo-switch" },
+        },
+        { platform: { id: 5, name: "PlayStation 4", slug: "playstation4" } },
+      ],
+    },
+    {
+      id: "red-dead-redemption-2",
+      gameImg:
+        "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
+      gameName: "Red Dead Redemption 2",
+      rating: 1.5,
+      platforms: [
+        { platform: { id: 1, name: "PC", slug: "pc" } },
+        { platform: { id: 6, name: "Xbox One", slug: "xbox-one" } },
+        { platform: { id: 5, name: "PlayStation 4", slug: "playstation4" } },
+      ],
+    },
+    {
+      id: "stardew-valley",
+      gameImg:
+        "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
+      gameName: "Stardew Valley",
+      rating: 2.1,
+      platforms: [
+        { platform: { id: 1, name: "PC", slug: "pc" } },
+        {
+          platform: { id: 4, name: "Nintendo Switch", slug: "nintendo-switch" },
+        },
+        { platform: { id: 7, name: "Mobile", slug: "ios" } },
+      ],
+    },
+    {
+      id: "god-of-war-ragnarok",
+      gameImg:
+        "https://www.creativefabrica.com/wp-content/uploads/2023/08/06/Game-Background-Graphics-76306020-1.jpg",
+      gameName: "God of War Ragnarök",
+      rating: 3.4,
+      platforms: [
+        { platform: { id: 2, name: "PlayStation 5", slug: "playstation5" } },
+        { platform: { id: 5, name: "PlayStation 4", slug: "playstation4" } },
+      ],
+    },
+  ];
 
   useEffect(() => {
     // REMOVE FOR TESTING
-      setCards(testCards);
-      setTitle("Recommended For You")
-    if (category) {
-      if (category == "popular") {
-        //get popular cards
-        setTitle("Most Popular");
-      } else if (category == "forYou") {
-        //get cards recommmended for them
-        setTitle("Recommended For You");
-      } else if (category == "newest") {
-        //get newest games
-        setTitle("Newest Releases");
-      } else if (category == "outside") {
-        //get cards NOT recommmended for them
-        setTitle("Outside Your Box");
+    //setCards(testCards);
+    setTitle("Recommended For You");
+
+    async function loadGames() {
+      if (category) {
+        if (category == "popular") {
+          //get popular cards
+          try {
+            let { data } = await axios.get(
+              "http://localhost:3000/api/games/popular",
+            );
+            console.log("results", data.results);
+            setCards(data.results);
+            // CALCULATE RATING
+          } catch (e) {
+            console.error(e);
+          }
+
+          setTitle("Most Popular");
+        } else if (category == "forYou") {
+          //get cards recommmended for them
+          setTitle("Recommended For You");
+          // CALCULATE RATING
+        } else if (category == "newest") {
+          //get newest games
+          setTitle("Newest Releases");
+          // CALCULATE RATING
+        } else if (category == "outside") {
+          //get cards NOT recommmended for them
+          setTitle("Outside Your Box");
+          // CALCULATE RATING
+        }
       }
-      
     }
 
+    loadGames();
     setLoading(false);
   }, [category]);
 
 
   return (
     <div>
-        <Carousel.Root slideCount={cards.length} slidesPerPage={4} gap="4">
-          <HStack justify="space-between">
-            <Span fontWeight="medium">{title}</Span>
-            <HStack>
-              <Carousel.PrevTrigger asChild>
-                <IconButton size="lg" variant="subtle">
-                  <LuChevronLeft />
-                </IconButton>
-              </Carousel.PrevTrigger>
-              <Carousel.NextTrigger asChild>
-                <IconButton size="lg" variant="subtle">
-                  <LuChevronRight />
-                </IconButton>
-              </Carousel.NextTrigger>
-            </HStack>
+      <Carousel.Root slideCount={cards.length} slidesPerPage={4} gap="4">
+        <HStack justify="space-between">
+          <Span fontWeight="medium">{title}</Span>
+          <HStack>
+            <Carousel.PrevTrigger asChild>
+              <IconButton size="lg" variant="subtle">
+                <LuChevronLeft />
+              </IconButton>
+            </Carousel.PrevTrigger>
+            <Carousel.NextTrigger asChild>
+              <IconButton size="lg" variant="subtle">
+                <LuChevronRight />
+              </IconButton>
+            </Carousel.NextTrigger>
           </HStack>
-          <Carousel.ItemGroup>
-            {cards.map((card, index) => (
-              <Carousel.Item key={card.id} index={index}>
-                {/* send what if theres no platforms? undefined or []; react ignores undefined props */}
-                <CarouselCard id={card.id} gameImg={card.gameImg} gameName={card.gameName} rating={card.rating} platforms={card.platforms} loading={loading}/>
-              </Carousel.Item>
-            ))}
-          </Carousel.ItemGroup>
-        </Carousel.Root>
-  
+        </HStack>
+        <Carousel.ItemGroup>
+          {cards.map((card, index) => (
+            <Carousel.Item key={card.id} index={index}>
+              {/* send what if theres no platforms? undefined or []; react ignores undefined props */}
+              <CarouselCard
+                id={card.id}
+                background_image={card.background_image}
+                name={card.name}
+                rating={card.rating}
+                platforms={card.platforms}
+                loading={loading}
+              />
+            </Carousel.Item>
+          ))}
+        </Carousel.ItemGroup>
+      </Carousel.Root>
     </div>
   );
 };
