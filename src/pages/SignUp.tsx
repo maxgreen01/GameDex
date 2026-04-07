@@ -1,6 +1,18 @@
+//IMPORTS////////////////////////////////////////
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { validateSignup} from "../../shared/validation";
+import { validateSignup } from "../../shared/validation";
+
+//UI IMPORTS//////////////////////////////////////
+import {
+  Button,
+  Box,
+  AbsoluteCenter,
+  Input,
+  Stack,
+  IconButton,
+} from "@chakra-ui/react";
+import { LuChevronLeft } from "react-icons/lu";
 import toast from "react-hot-toast";
 
 function Signup() {
@@ -48,25 +60,56 @@ function Signup() {
   };
 
   const goHome = () => {
-    navigate('/');
-  }
+    navigate("/");
+  };
 
   return (
     <div>
-      <h1>Signup</h1>
+      <Box>
+        <IconButton
+          position="absolute"
+          top="4"
+          left="4"
+          onClick={goHome}
+          size="lg"
+          variant="subtle"
+        >
+          <LuChevronLeft />
+        </IconButton>
+        <AbsoluteCenter>
+          <Box>
+            <h1>Signup</h1>
 
-      <form onSubmit={handleSignup}>
-        <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
-        <input placeholder="Password" type="password" onChange={(e) => setPassword(e.target.value)} />
-        <input placeholder="Username" onChange={(e) => setUsername(e.target.value)} />
-        <input placeholder="Display Name" onChange={(e) => setDisplayName(e.target.value)} />
+            <form onSubmit={handleSignup}>
+              <Stack gap="4" maxW="lg">
+              <Input
+                placeholder="Email"
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Input
+                placeholder="Password"
+                type="password"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <Input
+                placeholder="Username"
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              <Input
+                placeholder="Display Name"
+                onChange={(e) => setDisplayName(e.target.value)}
+              />
 
-        <button disabled={loading}>
-          {loading ? "Creating..." : "Signup"}
-        </button>
-      </form>
+              <Button type="submit" disabled={loading}>
+                {loading ? "Creating..." : "Submit"}
+              </Button>
+              </Stack>
+            </form>
 
-      <button onClick={goHome}>Home</button>
+            {/* <button onClick={goHome}>Home</button> */}
+          </Box>
+        </AbsoluteCenter>
+      </Box>
     </div>
   );
 }
