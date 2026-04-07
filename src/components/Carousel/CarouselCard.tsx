@@ -109,8 +109,9 @@ const CarouselCard: FC<Props> = ({
             <Box w="100%" h="150px" bg="gray.700" />
           )}
           <Card.Body flex="1" gap="2">
-            {/*lineClamp={2} to card title to cut off long titles*/} 
-            <Card.Title   minH="12">{gameName}</Card.Title>
+            {/*lineClamp={2} to card title to cut off long titles*/}
+             {/*SHOULD I DO DYNAMIC SIZING -> CAROUSELS  MAY BE DIFF SIZES OR CUT OFFS  */}
+            <Card.Title lineClamp={2} minH="12">{gameName}</Card.Title>
           </Card.Body>
           <Card.Footer mt="auto" gap="2">
             <Flex justify="space-between" w="100%">
