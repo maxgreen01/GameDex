@@ -51,7 +51,7 @@ function MainFeed() {
     <div>
       <h1>Hello, {username}!</h1>
       <button onClick={handleLogout}>Log Out</button>
-      <Carousel />
+      <Carousel category="popular"/>
     </div>
   );
 }

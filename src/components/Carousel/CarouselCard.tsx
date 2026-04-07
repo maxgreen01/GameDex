@@ -8,8 +8,7 @@
 //use asChild in skeleton??
 //IMPORTS/////////////////////////////////////////
 import type { FC } from "react";
-import { useState } from "react";
-import type { Platform, CarouselCardData } from "../../types/games.ts";
+import type { CarouselCardData } from "../../types/games.ts";
 import Rating from "../Rating";
 import {
   FaWindows,
@@ -76,23 +75,33 @@ const allPlatforms: Record<string, IconType> = {
 
 const CarouselCard: FC<Props> = ({
   id,
-  gameImg,
-  gameName,
+  background_image,
+  name,
   rating,
   platforms,
   loading = false,
 }) => {
+
+  //only gets most common platforms from given ones
   let showPlatforms = platforms?.filter((p) => {
     return (
       p?.platform?.slug && Object.keys(allPlatforms).includes(p.platform.slug)
     );
   });
 
+  //prevents repeating icons 
+  const seenPlatformIcons = new Set(); 
+
+  //matches given platforms with their icon
   let compPlatforms = showPlatforms?.map((p) => {
     return {
       slug: p.platform.slug,
       Icon: allPlatforms[p.platform.slug],
     };
+  }).filter((slugIconPair) => {
+    if (seenPlatformIcons.has(slugIconPair.Icon)) return false;
+    seenPlatformIcons.add(slugIconPair.Icon);
+    return true; 
   });
 
   return (
@@ -107,15 +116,25 @@ const CarouselCard: FC<Props> = ({
           display="flex"
           flexDirection="column"
         >
-          {gameImg ? (
-            <Image src={gameImg} alt={`Game image for ${gameName}`} />
+          {background_image ? (
+            <Box w="100%" h="180px" overflow="hidden" flexShrink={0}>
+              <Image
+                src={background_image}
+                alt={`Game image for ${name}`}
+                w="100%"
+                h="100%"
+                objectFit="cover"
+              />
+            </Box>
           ) : (
-            <Box w="100%" h="150px" bg="gray.700" />
+            <Box w="100%" h="180px" bg="gray.700" flexShrink={0} />
           )}
           <Card.Body flex="1" gap="2">
             {/*lineClamp={2} to card title to cut off long titles*/}
-             {/*SHOULD I DO DYNAMIC SIZING -> CAROUSELS  MAY BE DIFF SIZES OR CUT OFFS  */}
-            <Card.Title lineClamp={2} minH="12">{gameName}</Card.Title>
+            {/*SHOULD I DO DYNAMIC SIZING -> CAROUSELS  MAY BE DIFF SIZES OR CUT OFFS  */}
+            <Card.Title lineClamp={2} minH="12">
+              {name}
+            </Card.Title>
           </Card.Body>
           <Card.Footer mt="auto" gap="2">
             <Flex justify="space-between" w="100%">

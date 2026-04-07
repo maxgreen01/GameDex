@@ -11,8 +11,8 @@ export interface Platform {
 
 export interface CarouselCardData {
   id: string;
-  gameImg?: string;
-  gameName: string;
+  background_image?: string;
+  name: string;
   rating: number;
   platforms?: Platform[];
 }
