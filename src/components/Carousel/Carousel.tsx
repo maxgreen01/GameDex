@@ -135,7 +135,7 @@ const CarouselRow: FC<Props> = ({ category }) => {
   useEffect(() => {
     // REMOVE FOR TESTING
     //setCards(testCards);
-    setTitle("Recommended For You");
+    setLoading(true);
 
     async function loadGames() {
       if (category) {
@@ -145,7 +145,7 @@ const CarouselRow: FC<Props> = ({ category }) => {
             let { data } = await axios.get(
               "http://localhost:3000/api/games/popular",
             );
-            console.log("results", data.results);
+            //console.log("results", data.results);
             setCards(data.results);
             // CALCULATE RATING
           } catch (e) {
@@ -155,10 +155,21 @@ const CarouselRow: FC<Props> = ({ category }) => {
           setTitle("Most Popular");
         } else if (category == "forYou") {
           //get cards recommmended for them
+          
           setTitle("Recommended For You");
           // CALCULATE RATING
         } else if (category == "newest") {
           //get newest games
+          try {
+            let { data } = await axios.get(
+              "http://localhost:3000/api/games/newest",
+            );
+            //console.log("results", data.results);
+            setCards(data.results);
+            // CALCULATE RATING
+          } catch (e) {
+            console.error(e);
+          }
           setTitle("Newest Releases");
           // CALCULATE RATING
         } else if (category == "outside") {
@@ -172,7 +183,6 @@ const CarouselRow: FC<Props> = ({ category }) => {
     loadGames();
     setLoading(false);
   }, [category]);
-
 
   return (
     <div>

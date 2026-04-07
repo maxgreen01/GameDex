@@ -105,7 +105,7 @@ const CarouselCard: FC<Props> = ({
   });
 
   return (
-    <Skeleton loading={loading} variant="shine">
+    <Skeleton loading={loading} variant="shine" height="320px">
       <div key={id}>
         <Card.Root
           size="sm"

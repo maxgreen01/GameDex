@@ -56,6 +56,7 @@ function MainFeed() {
       <h1>Hello, {username}!</h1>
       <button onClick={handleLogout}>Log Out</button>
       <Carousel category="popular"/>
+      <Carousel category="newest"/>
     </div>
   );
 }
