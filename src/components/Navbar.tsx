@@ -7,19 +7,43 @@
 
 //IMPORTS/////////////////////////////////////////
 import type { FC } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/logo.svg";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebaseClient";
 
 //UI IMPORTS//////////////////////////////////////
-import { Box, Flex, Avatar, Image, Text } from "@chakra-ui/react";
-
+import {
+  Box,
+  Button,
+  Flex,
+  Avatar,
+  Image,
+  Text,
+  Menu,
+  Portal,
+} from "@chakra-ui/react";
+import toast from "react-hot-toast";
 //-------------------------------------------------//
 
 interface Props {
   username: string;
+  profilePage: boolean;
 }
 
-const Navbar: FC<Props> = ({ username }) => {
+const Navbar: FC<Props> = ({ username, profilePage }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast.success("Logout successful!");
+      navigate("/login");
+    } catch (e: any) {
+      toast.error(e.message || "Logout failed.");
+    }
+  };
+
   return (
     <Box
       w="100%"
@@ -35,19 +59,48 @@ const Navbar: FC<Props> = ({ username }) => {
     >
       <Flex direction={"row"} justify="space-between" align="center">
         {/* logo */}
-        <Flex align="center" gap={2}>
-          <Image src={logo} alt="logo" boxSize="32px" />
-          <Text as="h2" m={0} lineHeight="1">
-            GameDex
-          </Text>
-        </Flex>
+        <Link to={`/mainfeed/:${username}`}>
+          <Flex align="center" gap={2}>
+            <Image src={logo} alt="logo" boxSize="32px" />
+            <Text as="h2" m={0} lineHeight="1">
+              GameDex
+            </Text>
+          </Flex>
+        </Link>
         {/* user icon */}
         <Flex>
-          <Link to={`/profile/${username}`}>
-            <Avatar.Root variant="outline">
-              <Avatar.Fallback name={username} />
-            </Avatar.Root>
-          </Link>
+          {profilePage ? (
+            <Button variant="ghost" onClick={handleLogout}>
+              Logout
+            </Button>
+          ) : (
+            <Menu.Root positioning={{ placement: "bottom" }}>
+              <Menu.Trigger rounded="full" focusRing="outside">
+                <Avatar.Root variant="outline">
+                  <Avatar.Fallback name={username} />
+                </Avatar.Root>
+              </Menu.Trigger>
+              <Portal>
+                <Menu.Positioner>
+                  <Menu.Content>
+                    <Menu.Item
+                      value={`/profile/${username}`}
+                      onClick={() => navigate(`/profile/${username}`)}
+                    >
+                      Profile
+                    </Menu.Item>
+                    <Menu.Item
+                      color="fg.error"
+                      value={`logout`}
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </Menu.Item>
+                  </Menu.Content>
+                </Menu.Positioner>
+              </Portal>
+            </Menu.Root>
+          )}
         </Flex>
       </Flex>
     </Box>
