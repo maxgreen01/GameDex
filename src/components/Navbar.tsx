@@ -21,31 +21,36 @@ interface Props {
 
 const Navbar: FC<Props> = ({ username }) => {
   return (
-    <div>
-      <Box
-        w="100%"
-        p="4"
-        color="white"
-        borderBottomWidth="1px"
-        borderBottomColor="#27272a"
-      >
-        <Flex direction={"row"} justify="space-between" align="center">
-          {/* logo */}
-          <Flex align="center" gap={2}>
-            <Image src={logo} alt="logo" boxSize="32px" />
-            <Text as="h2" m={0} lineHeight="1">GameDex</Text>
-          </Flex>
-          {/* user icon */}
-          <Flex>
-            <Link to={`/profile/${username}`}>
-              <Avatar.Root variant="outline">
-                <Avatar.Fallback name={username} />
-              </Avatar.Root>
-            </Link>
-          </Flex>
+    <Box
+      w="100%"
+      p="4"
+      color="white"
+      borderBottomWidth="1px"
+      borderBottomColor="#27272a"
+      position="sticky"
+      top="0"
+      h="fit-content"
+      backgroundColor={"#16171d"}
+      zIndex="sticky"
+    >
+      <Flex direction={"row"} justify="space-between" align="center">
+        {/* logo */}
+        <Flex align="center" gap={2}>
+          <Image src={logo} alt="logo" boxSize="32px" />
+          <Text as="h2" m={0} lineHeight="1">
+            GameDex
+          </Text>
         </Flex>
-      </Box>
-    </div>
+        {/* user icon */}
+        <Flex>
+          <Link to={`/profile/${username}`}>
+            <Avatar.Root variant="outline">
+              <Avatar.Fallback name={username} />
+            </Avatar.Root>
+          </Link>
+        </Flex>
+      </Flex>
+    </Box>
   );
 };
 
