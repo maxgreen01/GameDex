@@ -1,11 +1,3 @@
-# Running 
-TO RUN, OPEN 2 TERMINALS:
-
-Terminal 1: npm run dev (frontend)
-
-Terminal 2: npx ts-node server/server.ts (backend server)
-
-
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
