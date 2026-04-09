@@ -13,6 +13,7 @@ import type { User } from "firebase/auth";
 
 //UI IMPORTS//////////////////////////////////////
 import Navbar from "@/components/Navbar";
+import Review from "@/components/Reviews/Review";
 import {
   Flex,
   Box,
@@ -151,7 +152,8 @@ const Profile: FC<Props> = ({}) => {
         <Box>
           {showReviewsNotCollections ? 
           (<Text>
-            reviews
+            {/* WHERE REVIEW STACK WILL GO */}
+            {/* <Review></Review> */}
           </Text>) : (<Text>
             collections
           </Text>)

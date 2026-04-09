@@ -9,7 +9,7 @@ import type { User } from "firebase/auth";
 import toast from "react-hot-toast";
 import Carousel from "../components/Carousel/Carousel";
 import Navbar from "@/components/Navbar";
-import SearchBar from "@/components/searchBar";
+import SearchBar from "../components/SearchBar"
 
 function MainFeed() {
   const navigate = useNavigate();
