@@ -13,8 +13,9 @@ import CarouselCard from "./CarouselCard.tsx";
 import axios from "axios";
 
 //UI IMPORTS//////////////////////////////////////
-import { Carousel, HStack, IconButton, Span } from "@chakra-ui/react";
+import { Carousel, HStack, IconButton, Span, Spinner, Center } from "@chakra-ui/react";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
+
 
 //-------------------------------------------------//
 
@@ -186,6 +187,11 @@ const CarouselRow: FC<Props> = ({ category }) => {
 
   return (
     <div>
+      {loading ? (
+        <Center minH="200px">
+          <Spinner size="lg" />
+        </Center>
+      ) : (
       <Carousel.Root mx="4" slideCount={cards.length} slidesPerPage={4} gap="4">
         <HStack justify="space-between">
           <Span fontWeight="medium">{title}</Span>
@@ -218,6 +224,7 @@ const CarouselRow: FC<Props> = ({ category }) => {
           ))}
         </Carousel.ItemGroup>
       </Carousel.Root>
+      )}
     </div>
   );
 };

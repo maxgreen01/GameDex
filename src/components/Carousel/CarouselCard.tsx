@@ -21,9 +21,11 @@ import { BsNintendoSwitch } from "react-icons/bs";
 import { IoLogoAndroid } from "react-icons/io";
 import { MdOutlinePhoneIphone } from "react-icons/md";
 import type { IconType } from "react-icons";
+import { MdOutlineVideogameAssetOff } from "react-icons/md";
 
 //UI IMPORTS//////////////////////////////////////
 import { Box, Card, Image, Flex, Skeleton } from "@chakra-ui/react";
+
 
 //API DATA NEEDED
 // componentVar = apiVar           : typeReturned
@@ -127,7 +129,9 @@ const CarouselCard: FC<Props> = ({
               />
             </Box>
           ) : (
-            <Box w="100%" h="180px" bg="gray.700" flexShrink={0} />
+            <Box w="100%" h="180px" bg="gray.700" flexShrink={0} display="flex" alignItems="center" justifyContent="center">
+              <MdOutlineVideogameAssetOff size={48} />
+            </Box>
           )}
           <Card.Body flex="1" gap="2">
             {/*lineClamp={2} to card title to cut off long titles*/}
