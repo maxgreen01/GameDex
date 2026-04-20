@@ -29,5 +29,9 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "server", "shared/validation.ts"]
+  "include": [
+    "src",
+    "server",
+    "shared"
+  ]
 }
