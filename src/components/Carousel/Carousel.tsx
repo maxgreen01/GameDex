@@ -144,7 +144,7 @@ const CarouselRow: FC<Props> = ({ category }) => {
           //get popular cards
           try {
             let { data } = await axios.get(
-              "http://localhost:3000/api/games/popular",
+              "/api/games/popular",
             );
             //console.log("results", data.results);
             setCards(data.results);
@@ -163,7 +163,7 @@ const CarouselRow: FC<Props> = ({ category }) => {
           //get newest games
           try {
             let { data } = await axios.get(
-              "http://localhost:3000/api/games/newest",
+              "/api/games/newest",
             );
             //console.log("results", data.results);
             setCards(data.results);

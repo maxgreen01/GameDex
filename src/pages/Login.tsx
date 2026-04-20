@@ -36,7 +36,7 @@ function Login() {
       const snap = await getDoc(doc(db, "users", user.uid));
       const username = snap.data()?.username;
 
-      await fetch("http://localhost:3000/auth/login", {
+      await fetch("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
