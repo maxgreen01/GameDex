@@ -24,6 +24,7 @@ function formatGame(game: any) {
     background_image: game.background_image,
     platforms: game.platforms || [],
     rating: game.rating || 0,
+    description: game.description_raw || game.description || "",
   };
 }
 
