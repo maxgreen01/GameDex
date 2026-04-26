@@ -1,6 +1,5 @@
 //NOTES//////////////////////////////////////////
 //FINISH EDIT BUTTON FEATURE
-// CACHE REVIEWS AND COLLECTIONS in case they click back and forth 
 
 //IMPORTS////////////////////////////////////////
 import type { FC } from "react";
@@ -19,11 +18,10 @@ import {
   Box,
   Avatar,
   VStack,
-  HStack,
   Text,
   IconButton,
-  Button,
   Separator,
+  Tabs,
 } from "@chakra-ui/react";
 import { MdModeEdit } from "react-icons/md";
 
@@ -36,11 +34,6 @@ const Profile: FC<Props> = ({}) => {
   const [username, setUsername] = useState<string>("");
   const [displayName, setDisplayName] = useState<string>("");
   const [numFriends, setNumFriends] = useState<number>(0);
-  // true means Collections is active/black/clickedOn, false means Collections is active/black
-  const [activeButton, setActiveButton] = useState<boolean>(false);
-  // true means reviews are being shown, false means collections are being shown
-
-  const [showReviewsNotCollections, setShowReviewsNotCollections] = useState<boolean>(true);
 
   // IS THIS RIGHT
   useEffect(() => {
@@ -70,17 +63,6 @@ const Profile: FC<Props> = ({}) => {
 
     return () => unsubscribe();
   }, [navigate]);
-
-  // Reviews and Collections Section
-  function clickReviews() {
-    setActiveButton(false);
-    setShowReviewsNotCollections(true); 
-  }
-
-  function clickCollections() {
-    setActiveButton(true);
-    setShowReviewsNotCollections(false); 
-  }
 
   return (
     <div>
@@ -129,36 +111,25 @@ const Profile: FC<Props> = ({}) => {
 
         <Separator variant="solid" />
 
-        {/* Reviews and Collections */}
-        <Box w="100%">
-          <HStack m={4}>
-            <Button
-              variant={!activeButton ? "plain" : "solid"}
-              w="50%"
-              onClick={clickReviews}
-            >
+        <Tabs.Root defaultValue="reviews" fitted variant="subtle">
+          <Tabs.List m={4}>
+            <Tabs.Trigger value="reviews">
               Reviews
-            </Button>
-            <Button
-              variant={activeButton ? "plain" : "solid"}
-              w="50%"
-              onClick={clickCollections}
-            >
+            </Tabs.Trigger>
+            <Tabs.Trigger value="collections">
               Collections
-            </Button>
-          </HStack>
-        </Box>
-
-        <Box>
-          {showReviewsNotCollections ? 
-          (<Text>
-            {/* WHERE REVIEW STACK WILL GO */}
-            {/* <Review></Review> */}
-          </Text>) : (<Text>
+            </Tabs.Trigger>
+          </Tabs.List>
+          <Tabs.Content value="reviews">
+            <Text>
+              {/* WHERE REVIEW STACK WILL GO */}
+              {/* <Review></Review> */}
+            </Text>
+          </Tabs.Content>
+          <Tabs.Content value="collections">
             collections
-          </Text>)
-        }
-        </Box>
+          </Tabs.Content>
+        </Tabs.Root>
       </Flex>
     </div>
   );
