@@ -8,3 +8,8 @@ export type User = {
   reviews: string[];
   createdAt: number; // TODO: Replace with Date?
 }
+
+export type ProfileData = {
+  displayName: string;
+  description: string;
+}

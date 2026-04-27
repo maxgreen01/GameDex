@@ -8,10 +8,11 @@ import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../firebaseClient";
 import { doc, getDoc } from "firebase/firestore";
-import type { User } from "../../shared/types";
+import type { ProfileData, User } from "../../shared/types";
 
 //UI IMPORTS//////////////////////////////////////
 import Navbar from "@/components/Navbar";
+import ProfileEditButton from "@/components/Profile/ProfileEditButton.tsx";
 import Review from "@/components/Reviews/Review";
 import {
   Flex,
@@ -19,11 +20,9 @@ import {
   Avatar,
   VStack,
   Text,
-  IconButton,
   Separator,
   Tabs,
 } from "@chakra-ui/react";
-import { MdModeEdit } from "react-icons/md";
 
 const EMPTY_USER: User = {
   username: "N/A",
@@ -40,6 +39,7 @@ const Profile: FC<object> = () => {
   // Logout functionality
   const navigate = useNavigate();
   const [user, setUser] = useState<User>(EMPTY_USER);
+  const [data, setData] = useState<ProfileData>(EMPTY_USER);
 
   // IS THIS RIGHT
   useEffect(() => {
@@ -55,11 +55,17 @@ const Profile: FC<object> = () => {
         const data = snap.data() as User;
         console.log("Data: ", data);
         setUser(data);
+        setData(data);
       }
     });
 
     return () => unsubscribe();
   }, [navigate]);
+
+  const updateUser = () => {
+    // TODO: Update data on server side (once we write the corresponding API call)
+    setUser(user => ({...user, ...data}));
+  };
 
   return (
     <div>
@@ -84,9 +90,7 @@ const Profile: FC<object> = () => {
               </VStack>
 
               <Flex>
-                <IconButton variant="ghost">
-                  <MdModeEdit />
-                </IconButton>
+                <ProfileEditButton data={data} setData={setData} action={updateUser} />
               </Flex>
             </Flex>
 
