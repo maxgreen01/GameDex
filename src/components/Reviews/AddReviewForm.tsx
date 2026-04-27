@@ -6,7 +6,8 @@ import { useState } from "react";
 import getUserDetails from "@/services/users";
 import type { ReviewType } from "@/types/types";
 import { getCurrentDateString } from "../../../shared/validation";
-import * as reviewFunctions from "../../../server/data/reviews";
+import axios from "axios";
+//import * as reviewFunctions from "../../../server/data/reviews";
 
 //UI IMPORTS//////////////////////////////////////
 import {
@@ -33,7 +34,7 @@ const AddReviewForm: FC<Props> = ({
   gameId,
   setUserReview,
   username,
-  displayName
+  displayName,
 }) => {
   let [errorMessage, setErrorMessage] = useState<string | null>(null);
   let [rating, setRating] = useState<number>(0);
@@ -67,17 +68,19 @@ const AddReviewForm: FC<Props> = ({
     setShowForm(false); //idt this is needed by once reivew is given it shud swtich to show the review and not form in game details
 
     //setUserReview(newReview);
-    let newReview = await reviewFunctions.createReview(
+
+    await axios.post(`http://localhost:3000/api/reviews`, {
       gameId,
-      username,
+      userId: username,
       rating,
-      comment,
-      displayName
+      text: comment,
+      displayName,
+    });
+
+    let { data: userReview } = await axios.get(
+      `http://localhost:3000/api/reviews/game/${gameId}/user/${username}`,
     );
-    let userReview = await reviewFunctions.getReviewByGameIdAndUserId(
-      gameId,
-      username,
-    );
+
     if (!userReview) {
       console.log("Error: Review could not be added");
       toast.error("Error: Review could not be added");

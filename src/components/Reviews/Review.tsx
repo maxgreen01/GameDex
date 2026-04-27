@@ -71,12 +71,12 @@ const Review: FC<Props> = ({
   function onSubmitEdit() {
     setEditLoading(true);
     //validation
-    //should be 500 characters or less. 
-    //sql injection? xxs? 
-    
+    //should be 500 characters or less.
+    //sql injection? xxs?
+
     //send editedComment state to database to edit
     console.log(editedComment);
-    //USEEFFECT SO EDITEDCOMMENT IS DISPLAYED wait the state does that alr but we wanna make sure we are pulling from the database. 
+    //USEEFFECT SO EDITEDCOMMENT IS DISPLAYED wait the state does that alr but we wanna make sure we are pulling from the database.
     //give haptic to let them know it was successul
     setEditReview(false);
     setEditLoading(false);

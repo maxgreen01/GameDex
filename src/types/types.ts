@@ -50,6 +50,7 @@ export interface userDetails {
   username: string;
   displayName: string;
 }
+
 export interface ReviewType {
   // _id?: reviewDoc.id;
   gameId: string,

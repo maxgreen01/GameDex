@@ -4,7 +4,7 @@
 //  - get description for games
 //  - add "if loading" logic
 //  - how often do we reload comments?
-//  - add to collection button 
+//  - add to collection button
 // review data would come from
 // a) the signed in user (user info to put their review at the top and get their friends reviews below it)
 // b) the param id (to get game info )
@@ -31,10 +31,17 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import type { Platform, userDetails } from "../types/types.ts";
 import getUserDetails from "@/services/users.ts";
-import * as reviewsFunctions from "../../server/data/reviews.ts"
 import { useNavigate } from "react-router-dom";
 //UI IMPORTS//////////////////////////////////////
-import { Box, Flex, Image, ScrollArea, Card, Heading, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  Image,
+  ScrollArea,
+  Card,
+  Heading,
+  Text,
+} from "@chakra-ui/react";
 import Rating from "./Rating.tsx";
 import Review from "./Reviews/Review.tsx";
 import AddReviewForm from "./Reviews/AddReviewForm.tsx";
@@ -52,13 +59,13 @@ const GameDetails: FC<Props> = ({}) => {
   const [rating, setRating] = useState(0);
   const [platforms, setPlatforms] = useState<Platform[]>([]);
   const [description, setDescription] = useState("");
-  const [reviews, setReviews]= useState<ReviewType[]>([])
-  const [user, setUser] = useState<userDetails|null>(null);
-  const [userReview, setUserReview] = useState<ReviewType|null>(null);
-  //const [showAddReviewButton, setShowAddReviewButton] = useState<boolean>(false); 
+  const [reviews, setReviews] = useState<ReviewType[]>([]);
+  const [user, setUser] = useState<userDetails | null>(null);
+  const [userReview, setUserReview] = useState<ReviewType | null>(null);
+  //const [showAddReviewButton, setShowAddReviewButton] = useState<boolean>(false);
 
   const { id } = useParams();
-  let navigate = useNavigate(); 
+  let navigate = useNavigate();
 
   //fetchingGame
   useEffect(() => {
@@ -82,32 +89,26 @@ const GameDetails: FC<Props> = ({}) => {
 
     async function getReviews() {
       try {
-        //get user details 
-        let userExists = await getUserDetails(); 
-        if(!userExists){
-          //redirect to login 
-          navigate("/login"); 
-          
+        let userExists = await getUserDetails();
+        if (!userExists) {
+          navigate("/login");
+          return;
         }
-        else{
-          setUser(userExists);
+
+        setUser(userExists);
+
+        let { data: gameReviewsExceptCurrUser } = await axios.get(
+          `http://localhost:3000/api/reviews/game/${id}/excluding/${userExists.username}`,
+        );
+        setReviews(gameReviewsExceptCurrUser);
+
+        let { data: currentUserReview } = await axios.get(
+          `http://localhost:3000/api/reviews/game/${id}/user/${userExists.username}`,
+        );
+        if (currentUserReview) {
+          setUserReview(currentUserReview);
         }
-        //DATABASE CALL: get reviews by game id using ${id} except the current users one 
-        //THISMIGHT ERROR 
-        if(user){
-        let gameReviewsExceptCurrUser = await reviewsFunctions.getReviewsExcludingUser(id || "", user.username)
-        setReviews(gameReviewsExceptCurrUser)
-        //if {reviews.length == 0} setReviews([])
-        
-        //DATABASE CALL: get the review for the signed in user for this game 
-        let currentUserReview = await reviewsFunctions.getReviewByGameIdAndUserId(id || "", user.username); 
-        if(currentUserReview){
-          setUserReview(currentUserReview)
-        }
-      }else{
-         navigate("/login"); 
-      }
-      
+
         setLoading(false);
       } catch (e) {
         console.error(e);
@@ -118,15 +119,12 @@ const GameDetails: FC<Props> = ({}) => {
     getReviews();
   }, [id]);
 
-  //if user changes, deletes or adds a review 
+  //if user changes, deletes or adds a review
   useEffect(() => {
     //adds
-
     //changes
-
     //deletes
-    
-  }, [userReview])
+  }, [userReview]);
 
   //only gets most common platforms from given ones
   let showPlatforms = platforms?.filter((p) => {
@@ -234,34 +232,39 @@ const GameDetails: FC<Props> = ({}) => {
                   username="mpate154"
                   comment="I think this game was alright. The first two were better in terms of storyline, but the animation here was top tier."
                 ></Review> */}
-                {userReview ? 
-                (
-                  <Review 
-                  rating={userReview.rating} 
-                  profilePage={false} 
-                  usersReview={true}
-                  displayName={user?.displayName} 
-                  username={user?.username} 
-                  comment={userReview.text}/>
-                ) 
-                : 
-                (<AddReviewForm 
-                  // hope this doesnt error 
-                  gameId={id ?? ""}
-                  username={user?.username ?? "Unknown User"}
-                  displayName={user?.displayName ?? "Unknown User"}
-                  setUserReview={setUserReview}/>
+                {userReview ? (
+                  <Review
+                    rating={userReview.rating}
+                    profilePage={false}
+                    usersReview={true}
+                    displayName={user?.displayName}
+                    username={user?.username}
+                    comment={userReview.text}
+                  />
+                ) : (
+                  <AddReviewForm
+                    // hope this doesnt error
+                    gameId={id ?? ""}
+                    username={user?.username ?? "Unknown User"}
+                    displayName={user?.displayName ?? "Unknown User"}
+                    setUserReview={setUserReview}
+                  />
                 )}
 
-                {reviews ? (reviews.map((review) => (
-                  <Review
-                  rating = {review.rating}
-                  profilePage={false}
-                  usersReview={false}
-                  displayName={review.displayName}
-                  username={review.userId}
-                  comment={review.text}/>
-                ))) : (<Text>No reviews yet. Be the first to write one!</Text>)}
+                {reviews ? (
+                  reviews.map((review) => (
+                    <Review
+                      rating={review.rating}
+                      profilePage={false}
+                      usersReview={false}
+                      displayName={review.displayName}
+                      username={review.userId}
+                      comment={review.text}
+                    />
+                  ))
+                ) : (
+                  <Text>No reviews yet. Be the first to write one!</Text>
+                )}
               </ScrollArea.Content>
             </ScrollArea.Viewport>
             <ScrollArea.Scrollbar>
