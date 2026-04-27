@@ -5,10 +5,8 @@ import { validateSignup, validateLogin } from "../../shared/validation.ts";
 const router = express.Router();
 
 router.post("/signup", async (req, res) => {
-  let { email, password, username, displayName } = req.body;
-
   try {
-    validateSignup(email, password, username, displayName);
+    let { email, password, username, displayName } = validateSignup(req.body);
 
     const usersRef = db.collection("users");
     const snapshot = await usersRef.get();
@@ -49,7 +47,7 @@ router.post("/login", async (req, res) => {
   let { token, email, password } = req.body;
 
   try {
-    validateLogin(email, password);
+    validateLogin({ email, password });
 
     if (!token) {
       return res.status(400).json({ error: "No token provided" });

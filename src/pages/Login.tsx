@@ -22,9 +22,9 @@ function Login() {
     setLoading(true);
 
     try {
-      validateLogin(email, password);
+      const loginData = validateLogin({ email, password });
 
-      const { user, token } = await login(email, password);
+      const { user, token } = await login(loginData.email, loginData.password);
 
       const snap = await getDoc(doc(db, "users", user.uid));
       const username = snap.data()?.username;

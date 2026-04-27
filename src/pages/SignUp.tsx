@@ -22,19 +22,15 @@ function Signup() {
     setLoading(true);
 
     try {
-      validateSignup(email, password, username, displayName);
+      let body = { email, password, username, displayName };
+      body = validateSignup(body);
 
       const res = await fetch("/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          email,
-          password,
-          username,
-          displayName,
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
