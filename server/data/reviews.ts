@@ -225,13 +225,23 @@ export async function editReview(
     throw "You cannot edit this review.";
   }
 
+  let updatedAt = Date.now();
+
   await reviewsCollection.doc(reviewId).update({
     rating,
     text,
-    updatedAt: Date.now(),
+    updatedAt,
   });
 
-  return await getReviewById(reviewId);
+  return {
+    _id: reviewId,
+    gameId: review.gameId,
+    userId: review.userId,
+    rating,
+    text,
+    createdAt: review.createdAt,
+    updatedAt,
+  };
 }
 
 export async function getReviewByGameIdAndUserId(
