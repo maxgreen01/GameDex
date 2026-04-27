@@ -90,6 +90,7 @@ router.get("/search", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const { data } = await api.get(`/games/${req.params.id}`);
+    console.log("Returned data: ", data);
     res.json(formatGame(data));
   } catch (e) {
     console.error(e);

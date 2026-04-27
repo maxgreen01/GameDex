@@ -65,8 +65,6 @@ const AddReviewForm: FC<Props> = ({
     setLoading(true);
     //validation
 
-    setShowForm(false); //idt this is needed by once reivew is given it shud swtich to show the review and not form in game details
-
     //setUserReview(newReview);
 
     await axios.post(`http://localhost:3000/api/reviews`, {
@@ -87,6 +85,9 @@ const AddReviewForm: FC<Props> = ({
     } else {
       setUserReview(userReview);
     }
+
+    setShowForm(false); //idt this is needed by once reivew is given it shud swtich to show the review and not form in game details
+
     //send to database
     setLoading(false);
   }
@@ -102,12 +103,13 @@ const AddReviewForm: FC<Props> = ({
   } else {
     return (
       <>
-        <Box>
+        <Box p="4" borderWidth="1px" borderColor="border.disabled">
           <form onSubmit={onSubmit}>
             {/* rating */}
             <Field.Root invalid={rating === 0 && !!errorMessage}>
-              <Field.Label>Rating:</Field.Label>
+              <Field.Label p={2}>Rating:</Field.Label>
               <RatingGroup.Root
+                pl={2}
                 count={5}
                 value={rating}
                 onValueChange={({ value }) => setRating(value)}
@@ -120,10 +122,10 @@ const AddReviewForm: FC<Props> = ({
             </Field.Root>
             {/* comment */}
             <Field.Root invalid={!!errorMessage}>
-              <Field.Label>Your Review:</Field.Label>
+              <Field.Label p={2}>Your Review:</Field.Label>
               <Input value={comment} onChange={(e) => commentOnChange(e)} />
               <Field.ErrorText>
-                {"You haven't typed anything yet!"}
+                {"Must be 120 characters or less!"}
               </Field.ErrorText>
             </Field.Root>
             <Button type="submit">Submit</Button>

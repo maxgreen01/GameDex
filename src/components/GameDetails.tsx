@@ -81,7 +81,7 @@ const GameDetails: FC<Props> = ({}) => {
         // CALCULATE RATING
         setRating(4);
         setPlatforms(data.platforms);
-        setDescription("Description");
+        setDescription(data.description);
       } catch (e) {
         console.error(e);
       }
