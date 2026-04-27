@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../firebaseClient";
 import { doc, getDoc } from "firebase/firestore";
-import type { User } from "firebase/auth";
+import type { User } from "../../shared/types";
 
 //UI IMPORTS//////////////////////////////////////
 import Navbar from "@/components/Navbar";
@@ -25,15 +25,21 @@ import {
 } from "@chakra-ui/react";
 import { MdModeEdit } from "react-icons/md";
 
-interface Props {}
+const EMPTY_USER: User = {
+  username: "N/A",
+  email: "N/A",
+  displayName: "N/A",
+  description: "N/A",
+  friends: [],
+  pendingInvites: [],
+  reviews: [],
+  createdAt: -1
+}
 
-const Profile: FC<Props> = ({}) => {
+const Profile: FC<object> = () => {
   // Logout functionality
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
-  const [username, setUsername] = useState<string>("");
-  const [displayName, setDisplayName] = useState<string>("");
-  const [numFriends, setNumFriends] = useState<number>(0);
+  const [user, setUser] = useState<User>(EMPTY_USER);
 
   // IS THIS RIGHT
   useEffect(() => {
@@ -43,21 +49,12 @@ const Profile: FC<Props> = ({}) => {
         return;
       }
 
-      setUser(firebaseUser);
-
       const snap = await getDoc(doc(db, "users", firebaseUser.uid));
 
       if (snap.exists()) {
-        const data = snap.data();
+        const data = snap.data() as User;
         console.log("Data: ", data);
-        setUsername(data.username);
-        setDisplayName(data.displayName);
-        //calcuating # friends
-        setNumFriends(data.friends.length);
-      } else {
-        setUsername("User");
-        //ADD? what is this for ^
-        setDisplayName("N/A");
+        setUser(data);
       }
     });
 
@@ -66,7 +63,7 @@ const Profile: FC<Props> = ({}) => {
 
   return (
     <div>
-      <Navbar username={username} profilePage={true}></Navbar>
+      <Navbar username={user.username} profilePage={true}></Navbar>
       <Flex direction="column">
         {/* Profile Header */}
         <Box w="100%">
@@ -83,14 +80,14 @@ const Profile: FC<Props> = ({}) => {
               {/* icon */}
               <Flex>
                 <Avatar.Root size={"xl"} variant="outline">
-                  <Avatar.Fallback name={username} />
+                  <Avatar.Fallback name={user.username} />
                 </Avatar.Root>
               </Flex>
               <VStack gap={0} align={"flex-start"}>
                 <Text color={"white"} textStyle={"lg"}>
-                  {displayName}
+                  {user.displayName}
                 </Text>
-                <Text textStyle={"sm"}>{username}</Text>
+                <Text textStyle={"sm"}>{user.username}</Text>
               </VStack>
 
               <Flex>
@@ -103,7 +100,7 @@ const Profile: FC<Props> = ({}) => {
             <Flex>
               <VStack gap={0}>
                 <Text>Friends</Text>
-                <Text>{numFriends}</Text>
+                <Text>{user.friends.length}</Text>
               </VStack>
             </Flex>
           </Flex>
