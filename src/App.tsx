@@ -11,6 +11,7 @@ import Signup from "./pages/SignUp";
 import Home from "./pages/Home";
 import MainFeed from "./pages/MainFeed";
 import GameDetails from "./components/GameDetails";
+import SearchResults from "./pages/SearchResults";
 
 function App() {
   return (
@@ -23,8 +24,11 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/mainfeed/:username" element={<MainFeed />} />
           <Route path="/profile/:username" element={<Profile />} />
+
           <Route path="/games/:id" element={<GameDetails />} />
-        </Routes>
+
+          <Route path="/search" element={<SearchResults />} />
+          </Routes>
       </BrowserRouter>
     </>
   );

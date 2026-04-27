@@ -12,8 +12,22 @@ import type { CarouselCardData } from "../../types/types.ts";
 import Rating from "../Rating";
 import { allPlatforms } from "../../types/types.ts";
 import { Link } from "react-router-dom";
+import {
+  FaWindows,
+  FaPlaystation,
+  FaXbox,
+  FaApple,
+  FaLinux,
+} from "react-icons/fa";
+import { BsNintendoSwitch } from "react-icons/bs";
+import { IoLogoAndroid } from "react-icons/io";
+import { MdOutlinePhoneIphone } from "react-icons/md";
+import type { IconType } from "react-icons";
+import { MdOutlineVideogameAssetOff } from "react-icons/md";
+
 //UI IMPORTS//////////////////////////////////////
 import { Box, Card, Image, Flex, Skeleton } from "@chakra-ui/react";
+
 
 //API DATA NEEDED
 // componentVar = apiVar           : typeReturned
