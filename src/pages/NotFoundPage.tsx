@@ -3,11 +3,11 @@ import type { FC } from "react";
 import ErrorPage from "./ErrorPage";
 
 const NotFoundPage: FC = () => {
-    return (
-        <>
-            <ErrorPage error={{ errno: 404, errorMessage: "The requested page is invalid or does not exist!" }} />
-        </>
-    );
+  return (
+    <>
+      <ErrorPage error={{ errno: 404, errorMessage: "The requested page is invalid or does not exist!" }} />
+    </>
+  );
 };
 
 export default NotFoundPage;

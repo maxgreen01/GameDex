@@ -14,15 +14,7 @@ import type { ProfileData, User } from "../../shared/types";
 import Navbar from "@/components/Navbar";
 import ProfileEditButton from "@/components/Profile/ProfileEditButton.tsx";
 import Review from "@/components/Reviews/Review";
-import {
-  Flex,
-  Box,
-  Avatar,
-  VStack,
-  Text,
-  Separator,
-  Tabs,
-} from "@chakra-ui/react";
+import { Flex, Box, Avatar, VStack, Text, Separator, Tabs } from "@chakra-ui/react";
 
 const EMPTY_USER: User = {
   username: "N/A",
@@ -32,8 +24,8 @@ const EMPTY_USER: User = {
   friends: [],
   pendingInvites: [],
   reviews: [],
-  createdAt: -1
-}
+  createdAt: -1,
+};
 
 const Profile: FC<object> = () => {
   // Logout functionality
@@ -64,33 +56,59 @@ const Profile: FC<object> = () => {
 
   const updateUser = () => {
     // TODO: Update data on server side (once we write the corresponding API call)
-    setUser(user => ({...user, ...data}));
+    setUser((user) => ({ ...user, ...data }));
   };
 
   return (
     <div>
-      <Navbar username={user.username} profilePage={true}></Navbar>
+      <Navbar
+        username={user.username}
+        profilePage={true}
+      ></Navbar>
       <Flex direction="column">
         {/* Profile Header */}
         <Box w="100%">
-          <Flex m={8} mx={12} gap={4} direction="row" align="center" justify="space-between">
+          <Flex
+            m={8}
+            mx={12}
+            gap={4}
+            direction="row"
+            align="center"
+            justify="space-between"
+          >
             {/* Left hand side */}
-            <Flex gap={4} align="center">
+            <Flex
+              gap={4}
+              align="center"
+            >
               {/* icon */}
               <Flex>
-                <Avatar.Root size="xl" variant="outline">
+                <Avatar.Root
+                  size="xl"
+                  variant="outline"
+                >
                   <Avatar.Fallback name={user.username} />
                 </Avatar.Root>
               </Flex>
-              <VStack gap={0} align="flex-start">
-                <Text color="white" textStyle="lg">
+              <VStack
+                gap={0}
+                align="flex-start"
+              >
+                <Text
+                  color="white"
+                  textStyle="lg"
+                >
                   {user.displayName}
                 </Text>
                 <Text textStyle="sm">{user.username}</Text>
               </VStack>
 
               <Flex>
-                <ProfileEditButton data={data} setData={setData} action={updateUser} />
+                <ProfileEditButton
+                  data={data}
+                  setData={setData}
+                  action={updateUser}
+                />
               </Flex>
             </Flex>
 
@@ -108,14 +126,14 @@ const Profile: FC<object> = () => {
 
         <Separator variant="solid" />
 
-        <Tabs.Root defaultValue="reviews" fitted variant="subtle">
+        <Tabs.Root
+          defaultValue="reviews"
+          fitted
+          variant="subtle"
+        >
           <Tabs.List m={4}>
-            <Tabs.Trigger value="reviews">
-              Reviews
-            </Tabs.Trigger>
-            <Tabs.Trigger value="collections">
-              Collections
-            </Tabs.Trigger>
+            <Tabs.Trigger value="reviews">Reviews</Tabs.Trigger>
+            <Tabs.Trigger value="collections">Collections</Tabs.Trigger>
           </Tabs.List>
           <Tabs.Content value="reviews">
             <Text>
@@ -123,9 +141,7 @@ const Profile: FC<object> = () => {
               {/* <Review></Review> */}
             </Text>
           </Tabs.Content>
-          <Tabs.Content value="collections">
-            collections
-          </Tabs.Content>
+          <Tabs.Content value="collections">collections</Tabs.Content>
         </Tabs.Root>
       </Flex>
     </div>

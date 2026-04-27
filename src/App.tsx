@@ -19,13 +19,34 @@ function App() {
       <Toaster position="top-right" />
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/mainfeed/:username" element={<MainFeed />} />
-          <Route path="/profile/:username" element={<Profile />} />
-          <Route path="/search" element={<SearchResults />} />
-          <Route path="*" element={<NotFoundPage />} />
+          <Route
+            path="/login"
+            element={<Login />}
+          />
+          <Route
+            path="/signup"
+            element={<Signup />}
+          />
+          <Route
+            path="/"
+            element={<Home />}
+          />
+          <Route
+            path="/mainfeed/:username"
+            element={<MainFeed />}
+          />
+          <Route
+            path="/profile/:username"
+            element={<Profile />}
+          />
+          <Route
+            path="/search"
+            element={<SearchResults />}
+          />
+          <Route
+            path="*"
+            element={<NotFoundPage />}
+          />
         </Routes>
       </BrowserRouter>
     </>

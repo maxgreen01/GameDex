@@ -7,14 +7,7 @@ import { validateLogin } from "../../shared/validation";
 import { getDoc, doc } from "firebase/firestore";
 import { db } from "../firebaseClient";
 //UI IMPORTS//////////////////////////////////////
-import {
-  Button,
-  Box,
-  AbsoluteCenter,
-  Input,
-  Stack,
-  IconButton,
-} from "@chakra-ui/react";
+import { Button, Box, AbsoluteCenter, Input, Stack, IconButton } from "@chakra-ui/react";
 import { LuChevronLeft } from "react-icons/lu";
 
 function Login() {
@@ -78,7 +71,10 @@ function Login() {
             <h1>Login</h1>
 
             <form onSubmit={handleLogin}>
-              <Stack gap="4" maxW="lg">
+              <Stack
+                gap="4"
+                maxW="lg"
+              >
                 <Input
                   placeholder="Email"
                   value={email}
@@ -92,7 +88,10 @@ function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                 />
 
-                <Button type="submit" disabled={loading}>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                >
                   {loading ? "Logging in..." : "Submit"}
                 </Button>
               </Stack>

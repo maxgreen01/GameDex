@@ -16,7 +16,6 @@ import axios from "axios";
 import { Carousel, HStack, IconButton, Span, Spinner, Center } from "@chakra-ui/react";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 
-
 //-------------------------------------------------//
 
 interface Props {
@@ -154,7 +153,7 @@ const CarouselRow: FC<Props> = ({ category }) => {
           setTitle("Most Popular");
         } else if (category == "forYou") {
           //get cards recommmended for them
-          
+
           setTitle("Recommended For You");
           // CALCULATE RATING
         } else if (category == "newest") {
@@ -188,38 +187,52 @@ const CarouselRow: FC<Props> = ({ category }) => {
           <Spinner size="lg" />
         </Center>
       ) : (
-      <Carousel.Root mx="4" slideCount={cards.length} slidesPerPage={4} gap="4">
-        <HStack justify="space-between">
-          <Span fontWeight="medium">{title}</Span>
-          <HStack>
-            <Carousel.PrevTrigger asChild>
-              <IconButton size="lg" variant="subtle">
-                <LuChevronLeft />
-              </IconButton>
-            </Carousel.PrevTrigger>
-            <Carousel.NextTrigger asChild>
-              <IconButton size="lg" variant="subtle">
-                <LuChevronRight />
-              </IconButton>
-            </Carousel.NextTrigger>
+        <Carousel.Root
+          mx="4"
+          slideCount={cards.length}
+          slidesPerPage={4}
+          gap="4"
+        >
+          <HStack justify="space-between">
+            <Span fontWeight="medium">{title}</Span>
+            <HStack>
+              <Carousel.PrevTrigger asChild>
+                <IconButton
+                  size="lg"
+                  variant="subtle"
+                >
+                  <LuChevronLeft />
+                </IconButton>
+              </Carousel.PrevTrigger>
+              <Carousel.NextTrigger asChild>
+                <IconButton
+                  size="lg"
+                  variant="subtle"
+                >
+                  <LuChevronRight />
+                </IconButton>
+              </Carousel.NextTrigger>
+            </HStack>
           </HStack>
-        </HStack>
-        <Carousel.ItemGroup>
-          {cards.map((card, index) => (
-            <Carousel.Item key={card.id} index={index}>
-              {/* send what if theres no platforms? undefined or []; react ignores undefined props */}
-              <CarouselCard
-                id={card.id}
-                background_image={card.background_image}
-                name={card.name}
-                rating={card.rating}
-                platforms={card.platforms}
-                loading={loading}
-              />
-            </Carousel.Item>
-          ))}
-        </Carousel.ItemGroup>
-      </Carousel.Root>
+          <Carousel.ItemGroup>
+            {cards.map((card, index) => (
+              <Carousel.Item
+                key={card.id}
+                index={index}
+              >
+                {/* send what if theres no platforms? undefined or []; react ignores undefined props */}
+                <CarouselCard
+                  id={card.id}
+                  background_image={card.background_image}
+                  name={card.name}
+                  rating={card.rating}
+                  platforms={card.platforms}
+                  loading={loading}
+                />
+              </Carousel.Item>
+            ))}
+          </Carousel.ItemGroup>
+        </Carousel.Root>
       )}
     </div>
   );

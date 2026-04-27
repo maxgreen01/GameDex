@@ -5,19 +5,14 @@
 import type { FC } from "react";
 
 //UI IMPORTS//////////////////////////////////////
-import { Card, Heading, Stack } from "@chakra-ui/react"
+import { Card, Heading, Stack } from "@chakra-ui/react";
 
 //-------------------------------------------------//
 
-interface Props {
-    
-}
+interface Props {}
 
-const ReviewStack : FC<Props> = ({}) => {
-  return (
-    <></>
-
-  );
+const ReviewStack: FC<Props> = ({}) => {
+  return <></>;
 };
 
 export default ReviewStack;

@@ -24,40 +24,39 @@ interface Props {
 }
 
 const Review: FC<Props> = ({ title, comment, rating }) => {
-  const [readOnly, setReadonly] = useState<boolean>(true); 
+  const [readOnly, setReadonly] = useState<boolean>(true);
 
-  //edit button 
+  //edit button
 
-  function clickEditButton(){
-
-  }
+  function clickEditButton() {}
 
   return (
     <Card.Root size="md">
       <Card.Header>
-        <Flex w="100%" direction={"row"} justify={"space-between"}>
-          
+        <Flex
+          w="100%"
+          direction={"row"}
+          justify={"space-between"}
+        >
           <Flex direction={"column"}>
             <Heading size="md">{title ? title : "Game Title"} </Heading>
-            <Rating readOnly={readOnly} value={rating} />
+            <Rating
+              readOnly={readOnly}
+              value={rating}
+            />
           </Flex>
 
           <Flex>
-            <IconButton onClick={clickEditButton} variant="ghost">
+            <IconButton
+              onClick={clickEditButton}
+              variant="ghost"
+            >
               <MdModeEdit />
             </IconButton>
           </Flex>
-
         </Flex>
       </Card.Header>
-      <Card.Body color="fg.muted">
-        {readOnly ? (
-        <Text>{comment}</Text>
-      )
-         :(
-            <Input placeholder={comment}></Input>
-        )}
-      </Card.Body>
+      <Card.Body color="fg.muted">{readOnly ? <Text>{comment}</Text> : <Input placeholder={comment}></Input>}</Card.Body>
     </Card.Root>
   );
 };

@@ -13,16 +13,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "../firebaseClient";
 
 //UI IMPORTS//////////////////////////////////////
-import {
-  Box,
-  Button,
-  Flex,
-  Avatar,
-  Image,
-  Text,
-  Menu,
-  Portal,
-} from "@chakra-ui/react";
+import { Box, Button, Flex, Avatar, Image, Text, Menu, Portal } from "@chakra-ui/react";
 import toast from "react-hot-toast";
 //-------------------------------------------------//
 
@@ -57,12 +48,27 @@ const Navbar: FC<Props> = ({ username, profilePage }) => {
       backgroundColor={"#16171d"}
       zIndex="sticky"
     >
-      <Flex direction={"row"} justify="space-between" align="center">
+      <Flex
+        direction={"row"}
+        justify="space-between"
+        align="center"
+      >
         {/* logo */}
         <Link to={`/mainfeed/:${username}`}>
-          <Flex align="center" gap={2}>
-            <Image src={logo} alt="logo" boxSize="32px" />
-            <Text as="h2" m={0} lineHeight="1">
+          <Flex
+            align="center"
+            gap={2}
+          >
+            <Image
+              src={logo}
+              alt="logo"
+              boxSize="32px"
+            />
+            <Text
+              as="h2"
+              m={0}
+              lineHeight="1"
+            >
               GameDex
             </Text>
           </Flex>
@@ -70,12 +76,18 @@ const Navbar: FC<Props> = ({ username, profilePage }) => {
         {/* user icon */}
         <Flex>
           {profilePage ? (
-            <Button variant="ghost" onClick={handleLogout}>
+            <Button
+              variant="ghost"
+              onClick={handleLogout}
+            >
               Logout
             </Button>
           ) : (
             <Menu.Root positioning={{ placement: "bottom" }}>
-              <Menu.Trigger rounded="full" focusRing="outside">
+              <Menu.Trigger
+                rounded="full"
+                focusRing="outside"
+              >
                 <Avatar.Root variant="outline">
                   <Avatar.Fallback name={username} />
                 </Avatar.Root>

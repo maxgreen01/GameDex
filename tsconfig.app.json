@@ -24,8 +24,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    // for Chakra UI 
-    "paths": {           
+    // for Chakra UI
+    "paths": {
       "@/*": ["./src/*"]
     }
   },

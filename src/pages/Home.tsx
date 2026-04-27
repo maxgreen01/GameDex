@@ -2,13 +2,7 @@
 import { Link } from "react-router-dom";
 import logo from "../assets/logo.svg";
 //UI IMPORTS//////////////////////////////////////
-import {
-  Button,
-  ButtonGroup,
-  Box,
-  AbsoluteCenter,
-  Image
-} from "@chakra-ui/react";
+import { Button, ButtonGroup, Box, AbsoluteCenter, Image } from "@chakra-ui/react";
 
 function Home() {
   return (
@@ -16,7 +10,12 @@ function Home() {
       <Box>
         <AbsoluteCenter>
           <Box>
-            <Image src={logo} alt="Logo" height="16" mx="auto"></Image>
+            <Image
+              src={logo}
+              alt="Logo"
+              height="16"
+              mx="auto"
+            ></Image>
 
             <h1>Welcome to GameDex!</h1>
 

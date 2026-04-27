@@ -9,10 +9,9 @@ interface Props {
   action: () => void;
 }
 
-const ProfileEditButton: FC<Props> = ({data, setData, action}) => {
-
-  const onChange = (event: {target: {name: string, value: string}}) => {
-    setData(user => ({...user, [event.target.name]: event.target.value}));
+const ProfileEditButton: FC<Props> = ({ data, setData, action }) => {
+  const onChange = (event: { target: { name: string; value: string } }) => {
+    setData((user) => ({ ...user, [event.target.name]: event.target.value }));
   };
 
   return (
@@ -36,11 +35,19 @@ const ProfileEditButton: FC<Props> = ({data, setData, action}) => {
                 <Fieldset.Content>
                   <Field.Root>
                     <Field.Label>Display name</Field.Label>
-                    <Input name="displayName" value={data.displayName} onChange={onChange} />
+                    <Input
+                      name="displayName"
+                      value={data.displayName}
+                      onChange={onChange}
+                    />
                   </Field.Root>
                   <Field.Root>
                     <Field.Label>Description</Field.Label>
-                    <Textarea name="description" value={data.description} onChange={onChange} />
+                    <Textarea
+                      name="description"
+                      value={data.description}
+                      onChange={onChange}
+                    />
                   </Field.Root>
                 </Fieldset.Content>
                 <Dialog.Footer>

@@ -4,14 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { validateSignup } from "../../shared/validation";
 
 //UI IMPORTS//////////////////////////////////////
-import {
-  Button,
-  Box,
-  AbsoluteCenter,
-  Input,
-  Stack,
-  IconButton,
-} from "@chakra-ui/react";
+import { Button, Box, AbsoluteCenter, Input, Stack, IconButton } from "@chakra-ui/react";
 import { LuChevronLeft } from "react-icons/lu";
 import toast from "react-hot-toast";
 
@@ -81,28 +74,34 @@ function Signup() {
             <h1>Signup</h1>
 
             <form onSubmit={handleSignup}>
-              <Stack gap="4" maxW="lg">
-              <Input
-                placeholder="Email"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Input
-                placeholder="Password"
-                type="password"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <Input
-                placeholder="Username"
-                onChange={(e) => setUsername(e.target.value)}
-              />
-              <Input
-                placeholder="Display Name"
-                onChange={(e) => setDisplayName(e.target.value)}
-              />
+              <Stack
+                gap="4"
+                maxW="lg"
+              >
+                <Input
+                  placeholder="Email"
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <Input
+                  placeholder="Password"
+                  type="password"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <Input
+                  placeholder="Username"
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+                <Input
+                  placeholder="Display Name"
+                  onChange={(e) => setDisplayName(e.target.value)}
+                />
 
-              <Button type="submit" disabled={loading}>
-                {loading ? "Creating..." : "Submit"}
-              </Button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                >
+                  {loading ? "Creating..." : "Submit"}
+                </Button>
               </Stack>
             </form>
 

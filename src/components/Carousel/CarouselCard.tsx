@@ -10,13 +10,7 @@
 import type { FC } from "react";
 import type { CarouselCardData } from "../../types/games.ts";
 import Rating from "../Rating";
-import {
-  FaWindows,
-  FaPlaystation,
-  FaXbox,
-  FaApple,
-  FaLinux,
-} from "react-icons/fa";
+import { FaWindows, FaPlaystation, FaXbox, FaApple, FaLinux } from "react-icons/fa";
 import { BsNintendoSwitch } from "react-icons/bs";
 import { IoLogoAndroid } from "react-icons/io";
 import { MdOutlinePhoneIphone } from "react-icons/md";
@@ -25,7 +19,6 @@ import { MdOutlineVideogameAssetOff } from "react-icons/md";
 
 //UI IMPORTS//////////////////////////////////////
 import { Box, Card, Image, Flex, Skeleton } from "@chakra-ui/react";
-
 
 //API DATA NEEDED
 // componentVar = apiVar           : typeReturned
@@ -75,39 +68,35 @@ const allPlatforms: Record<string, IconType> = {
   linux: FaLinux,
 };
 
-const CarouselCard: FC<Props> = ({
-  id,
-  background_image,
-  name,
-  rating,
-  platforms,
-  loading = false,
-}) => {
-
+const CarouselCard: FC<Props> = ({ id, background_image, name, rating, platforms, loading = false }) => {
   //only gets most common platforms from given ones
   let showPlatforms = platforms?.filter((p) => {
-    return (
-      p?.platform?.slug && Object.keys(allPlatforms).includes(p.platform.slug)
-    );
+    return p?.platform?.slug && Object.keys(allPlatforms).includes(p.platform.slug);
   });
 
-  //prevents repeating icons 
-  const seenPlatformIcons = new Set(); 
+  //prevents repeating icons
+  const seenPlatformIcons = new Set();
 
   //matches given platforms with their icon
-  let compPlatforms = showPlatforms?.map((p) => {
-    return {
-      slug: p.platform.slug,
-      Icon: allPlatforms[p.platform.slug],
-    };
-  }).filter((slugIconPair) => {
-    if (seenPlatformIcons.has(slugIconPair.Icon)) return false;
-    seenPlatformIcons.add(slugIconPair.Icon);
-    return true; 
-  });
+  let compPlatforms = showPlatforms
+    ?.map((p) => {
+      return {
+        slug: p.platform.slug,
+        Icon: allPlatforms[p.platform.slug],
+      };
+    })
+    .filter((slugIconPair) => {
+      if (seenPlatformIcons.has(slugIconPair.Icon)) return false;
+      seenPlatformIcons.add(slugIconPair.Icon);
+      return true;
+    });
 
   return (
-    <Skeleton loading={loading} variant="shine" height="320px">
+    <Skeleton
+      loading={loading}
+      variant="shine"
+      height="320px"
+    >
       <div key={id}>
         <Card.Root
           size="sm"
@@ -119,7 +108,12 @@ const CarouselCard: FC<Props> = ({
           flexDirection="column"
         >
           {background_image ? (
-            <Box w="100%" h="180px" overflow="hidden" flexShrink={0}>
+            <Box
+              w="100%"
+              h="180px"
+              overflow="hidden"
+              flexShrink={0}
+            >
               <Image
                 src={background_image}
                 alt={`Game image for ${name}`}
@@ -129,26 +123,49 @@ const CarouselCard: FC<Props> = ({
               />
             </Box>
           ) : (
-            <Box w="100%" h="180px" bg="gray.700" flexShrink={0} display="flex" alignItems="center" justifyContent="center">
+            <Box
+              w="100%"
+              h="180px"
+              bg="gray.700"
+              flexShrink={0}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
               <MdOutlineVideogameAssetOff size={48} />
             </Box>
           )}
-          <Card.Body flex="1" gap="2">
+          <Card.Body
+            flex="1"
+            gap="2"
+          >
             {/*lineClamp={2} to card title to cut off long titles*/}
             {/*SHOULD I DO DYNAMIC SIZING -> CAROUSELS  MAY BE DIFF SIZES OR CUT OFFS  */}
-            <Card.Title lineClamp={2} minH="12">
+            <Card.Title
+              lineClamp={2}
+              minH="12"
+            >
               {name}
             </Card.Title>
           </Card.Body>
-          <Card.Footer mt="auto" gap="2">
-            <Flex justify="space-between" w="100%">
+          <Card.Footer
+            mt="auto"
+            gap="2"
+          >
+            <Flex
+              justify="space-between"
+              w="100%"
+            >
               <Rating
                 readOnly={true}
                 value={Math.round(Number(rating) * 2) / 2}
               />
               <Flex>
                 {compPlatforms?.map(({ slug, Icon }) => (
-                  <Icon key={slug} style={{ marginLeft: "4px" }} />
+                  <Icon
+                    key={slug}
+                    style={{ marginLeft: "4px" }}
+                  />
                 ))}
               </Flex>
             </Flex>
