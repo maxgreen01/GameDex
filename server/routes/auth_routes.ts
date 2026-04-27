@@ -1,6 +1,6 @@
 import express from "express";
 import { auth, db } from "../firebaseAdmin.ts";
-import { validateSignup, validateLogin } from "../../shared/validation.ts";
+import { validateSignup } from "../../shared/validation.ts";
 
 const router = express.Router();
 
@@ -44,11 +44,9 @@ router.post("/signup", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  let { token, email, password } = req.body;
+  let { token } = req.body;
 
   try {
-    validateLogin({ email, password });
-
     if (!token) {
       return res.status(400).json({ error: "No token provided" });
     }
