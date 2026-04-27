@@ -1,6 +1,8 @@
+import { FieldValue } from "firebase-admin/firestore"; // Good functionality (handles duplicates etc)
 import { db } from "../firebaseAdmin.ts";
 
 const reviewsCollection = db.collection("reviews");
+const usersCollection = db.collection("users");
 
 export async function getReviewById(reviewId: string) {
   if (!reviewId) {
@@ -62,6 +64,12 @@ export async function createReview(
   userId = userId.trim();
   text = text.trim();
 
+  let userDoc = await usersCollection.doc(userId).get();
+
+  if (!userDoc.exists) {
+    throw "User not found.";
+  }
+
   // checks if this user already reviewed this game
   let existingReview = await getReviewByGameIdAndUserId(gameId, userId);
 
@@ -79,6 +87,11 @@ export async function createReview(
   };
 
   let insertedReview = await reviewsCollection.add(newReview);
+
+  // stores the new review id inside the user's reviews array
+  await usersCollection.doc(userId).update({
+    reviews: FieldValue.arrayUnion(insertedReview.id), // does not add duplicates
+  });
 
   return {
     _id: insertedReview.id,
@@ -112,6 +125,11 @@ export async function deleteReview(reviewId: string, userId: string) {
   if (review.userId !== userId) {
     throw "You cannot delete this review.";
   }
+
+  // removes the review id from the user's reviews array
+  await usersCollection.doc(userId).update({
+    reviews: FieldValue.arrayRemove(reviewId),
+  });
 
   // deletes the review if the logged in user "owns" it
   await reviewsCollection.doc(reviewId).delete();
