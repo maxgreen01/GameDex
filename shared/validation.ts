@@ -206,7 +206,7 @@ export function isDateStringBeforeToday(data: unknown, label: string = "Date") {
 // Optionally, use `numElements` to ensure that the array has exactly the number of specified elements,
 // or set `numElements` to -1 to allow any number of elements (including zero).
 // If valid, run `map` on the array using the given function and return the result.
-export function validateArrayElements<T>(data: unknown, label: string = "Array", func: (item: unknown) => T, numElements: number = 0) {
+export function validateArrayElements<T>(data: unknown, func: (item: unknown) => T, label: string = "Array", numElements: number = 0) {
   if (!Array.isArray(data)) throw new ValidationError(`${label} is not an array`);
   const arr = data as unknown[];
   if (numElements !== -1 && arr.length === 0) throw new ValidationError(`${label} is empty`); // skip the empty check if `numElements == -1`
@@ -219,10 +219,14 @@ export function validateArrayElements<T>(data: unknown, label: string = "Array",
 // Return the original object if it only contains valid fields.
 export function validateObjectKeys(data: unknown, fieldData: unknown, label: string = "Object") {
   const obj = validateObject(data, label);
-  const allowedFields = validateArrayElements(fieldData, `${label}'s required fields`, (field) => {
-    if (typeof field !== "string") throw new ValidationError(`${label}'s required field names must be strings`);
-    return label as string;
-  });
+  const allowedFields = validateArrayElements(
+    fieldData,
+    (field) => {
+      if (typeof field !== "string") throw new ValidationError(`${label}'s required field names must be strings`);
+      return label as string;
+    },
+    `${label}'s required fields`
+  );
 
   // find and report disallowed fields
   const objKeys = Object.keys(obj);
