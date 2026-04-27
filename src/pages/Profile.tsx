@@ -67,31 +67,24 @@ const Profile: FC<object> = () => {
       <Flex direction="column">
         {/* Profile Header */}
         <Box w="100%">
-          <Flex
-            m="8"
-            mx="12"
-            gap={4}
-            direction={"row"}
-            align="center"
-            justify="space-between"
-          >
+          <Flex m={8} mx={12} gap={4} direction="row" align="center" justify="space-between">
             {/* Left hand side */}
             <Flex gap={4} align="center">
               {/* icon */}
               <Flex>
-                <Avatar.Root size={"xl"} variant="outline">
+                <Avatar.Root size="xl" variant="outline">
                   <Avatar.Fallback name={user.username} />
                 </Avatar.Root>
               </Flex>
-              <VStack gap={0} align={"flex-start"}>
-                <Text color={"white"} textStyle={"lg"}>
+              <VStack gap={0} align="flex-start">
+                <Text color="white" textStyle="lg">
                   {user.displayName}
                 </Text>
-                <Text textStyle={"sm"}>{user.username}</Text>
+                <Text textStyle="sm">{user.username}</Text>
               </VStack>
 
               <Flex>
-                <IconButton variant={"ghost"}>
+                <IconButton variant="ghost">
                   <MdModeEdit />
                 </IconButton>
               </Flex>
@@ -103,6 +96,9 @@ const Profile: FC<object> = () => {
                 <Text>{user.friends.length}</Text>
               </VStack>
             </Flex>
+          </Flex>
+          <Flex m={8}>
+            <Text>{user.description.length ? user.description : "(No description set.)"}</Text>
           </Flex>
         </Box>
 
