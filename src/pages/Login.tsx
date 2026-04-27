@@ -29,13 +29,14 @@ function Login() {
       const snap = await getDoc(doc(db, "users", user.uid));
       const username = snap.data()?.username;
 
-      await fetch("/auth/login", {
+      const response = await fetch("/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ token }),
       });
+      if (!response.ok) throw new Error("Failed to login");
 
       localStorage.setItem("token", token);
 
