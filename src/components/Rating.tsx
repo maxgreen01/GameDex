@@ -11,9 +11,10 @@ import { RatingGroup } from "@chakra-ui/react";
 interface Props {
   readOnly: boolean; //not editable rating
   value: Number; //# stars colored in
+  starSize?: "sm" | "lg"; //sm default, larger for gameDetails
 }
 
-const Rating: FC<Props> = ({ readOnly, value }) => {
+const Rating: FC<Props> = ({ readOnly, value, starSize }) => {
   return (
     <div>
       <RatingGroup.Root
@@ -21,7 +22,7 @@ const Rating: FC<Props> = ({ readOnly, value }) => {
         allowHalf
         count={5}
         defaultValue={Number(value)}
-        size="sm"
+        size={starSize ? starSize : "sm"}
       >
         <RatingGroup.HiddenInput />
         <RatingGroup.Control />

@@ -9,7 +9,7 @@ import type { User } from "firebase/auth";
 import toast from "react-hot-toast";
 import Carousel from "../components/Carousel/Carousel";
 import Navbar from "@/components/Navbar";
-import SearchBar from "../components/SearchBar"
+import SearchBar from "../components/SearchBar";
 
 function MainFeed() {
   const navigate = useNavigate();
@@ -39,8 +39,6 @@ function MainFeed() {
     return () => unsubscribe();
   }, [navigate]);
 
- 
-
   if (!user) return null;
 
   return (
@@ -49,8 +47,9 @@ function MainFeed() {
       {/* <h1>Welcome, {username}!</h1> */}
       {/* <button onClick={handleLogout}>Log Out</button> */}
       <SearchBar></SearchBar>
-      <Carousel category="popular"/>
-      <Carousel category="newest"/>
+      <Carousel category="popular" />
+      <Carousel category="newest" />
+      
     </div>
   );
 }

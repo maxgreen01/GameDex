@@ -7,7 +7,7 @@ import {
   ButtonGroup,
   Box,
   AbsoluteCenter,
-  Image
+  Image,
 } from "@chakra-ui/react";
 
 function Home() {
@@ -16,7 +16,13 @@ function Home() {
       <Box>
         <AbsoluteCenter>
           <Box>
-            <Image src={logo} alt="Logo" height="16" mx="auto"></Image>
+            <Image
+              src={logo}
+              alt="Logo"
+              height="16"
+              mx="auto"
+              className="logo-glow"
+            ></Image>
 
             <h1>Welcome to GameDex!</h1>
 

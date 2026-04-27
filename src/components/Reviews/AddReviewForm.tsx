@@ -1,0 +1,134 @@
+//NOTES//////////////////////////////////////////
+
+//IMPORTS/////////////////////////////////////////
+import type { FC } from "react";
+import { useState } from "react";
+import getUserDetails from "@/services/users";
+import type { ReviewType } from "@/types/types";
+import { getCurrentDateString } from "../../../shared/validation";
+import * as reviewFunctions from "../../../server/data/reviews";
+
+//UI IMPORTS//////////////////////////////////////
+import {
+  Input,
+  InputGroup,
+  Box,
+  Field,
+  Button,
+  RatingGroup,
+} from "@chakra-ui/react";
+import { LuSearch } from "react-icons/lu";
+import toast from "react-hot-toast";
+//-------------------------------------------------//
+
+interface Props {
+  gameId: string; //to know what game this review is for
+  //put bottom 2 from currently signed in user
+  username: string; // to know what user is commenting
+  displayName: string;
+  setUserReview: React.Dispatch<React.SetStateAction<ReviewType | null>>;
+}
+
+const AddReviewForm: FC<Props> = ({
+  gameId,
+  setUserReview,
+  username,
+  displayName
+}) => {
+  let [errorMessage, setErrorMessage] = useState<string | null>(null);
+  let [rating, setRating] = useState<number>(0);
+  let [comment, setComment] = useState("");
+  let [showForm, setShowForm] = useState(false);
+  let [loading, setLoading] = useState(false);
+
+  function commentOnChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = e.target.value;
+    setComment(value);
+
+    if (value.length > 120) {
+      setErrorMessage("Comment cannot exceed 120 characters.");
+    } else {
+      setErrorMessage(null);
+    }
+  }
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    if (comment.length === 0) {
+      setErrorMessage("You haven't typed anything yet!");
+      return;
+    }
+    if (rating === 0) if (errorMessage) return;
+
+    setLoading(true);
+    //validation
+
+    setShowForm(false); //idt this is needed by once reivew is given it shud swtich to show the review and not form in game details
+
+    //setUserReview(newReview);
+    let newReview = await reviewFunctions.createReview(
+      gameId,
+      username,
+      rating,
+      comment,
+      displayName
+    );
+    let userReview = await reviewFunctions.getReviewByGameIdAndUserId(
+      gameId,
+      username,
+    );
+    if (!userReview) {
+      console.log("Error: Review could not be added");
+      toast.error("Error: Review could not be added");
+    } else {
+      setUserReview(userReview);
+    }
+    //send to database
+    setLoading(false);
+  }
+
+  if (!showForm) {
+    return (
+      <>
+        <Box>
+          <Button onClick={() => setShowForm(true)}>Add A Review</Button>
+        </Box>
+      </>
+    );
+  } else {
+    return (
+      <>
+        <Box>
+          <form onSubmit={onSubmit}>
+            {/* rating */}
+            <Field.Root invalid={rating === 0 && !!errorMessage}>
+              <Field.Label>Rating:</Field.Label>
+              <RatingGroup.Root
+                count={5}
+                value={rating}
+                onValueChange={({ value }) => setRating(value)}
+                allowHalf
+              >
+                <RatingGroup.HiddenInput />
+                <RatingGroup.Control />
+              </RatingGroup.Root>
+              <Field.ErrorText>Please provide a rating!</Field.ErrorText>
+            </Field.Root>
+            {/* comment */}
+            <Field.Root invalid={!!errorMessage}>
+              <Field.Label>Your Review:</Field.Label>
+              <Input value={comment} onChange={(e) => commentOnChange(e)} />
+              <Field.ErrorText>
+                {"You haven't typed anything yet!"}
+              </Field.ErrorText>
+            </Field.Root>
+            <Button type="submit">Submit</Button>
+          </form>
+        </Box>
+      </>
+    );
+  }
+};
+
+export default AddReviewForm;

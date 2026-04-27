@@ -13,7 +13,7 @@ import {} from "@chakra-ui/react";
 //-------------------------------------------------//
 
 interface Props {
-  linkTo: String;
+  linkTo: string;
 }
 
 const SeeMoreCard: FC<Props> = ({linkTo}) => {
