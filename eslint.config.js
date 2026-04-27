@@ -5,6 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
+// https://eslint.org/docs/latest/use/configure/configuration-files
 export default defineConfig([
   globalIgnores(['dist']),
   {
@@ -18,6 +19,12 @@ export default defineConfig([
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+    },
+    rules: {
+      "no-unused-vars": "warn",
+      "no-undef": "error",
+      "no-redeclare": "warn",
+      "prefer-const": "warn",
     },
   },
 ])

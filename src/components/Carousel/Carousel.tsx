@@ -143,9 +143,7 @@ const CarouselRow: FC<Props> = ({ category }) => {
         if (category == "popular") {
           //get popular cards
           try {
-            let { data } = await axios.get(
-              "http://localhost:3000/api/games/popular",
-            );
+            let { data } = await axios.get("/api/games/popular");
             //console.log("results", data.results);
             setCards(data.results);
             // CALCULATE RATING
@@ -162,9 +160,7 @@ const CarouselRow: FC<Props> = ({ category }) => {
         } else if (category == "newest") {
           //get newest games
           try {
-            let { data } = await axios.get(
-              "http://localhost:3000/api/games/newest",
-            );
+            let { data } = await axios.get("/api/games/newest");
             //console.log("results", data.results);
             setCards(data.results);
             // CALCULATE RATING

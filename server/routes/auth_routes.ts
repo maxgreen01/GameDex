@@ -14,7 +14,7 @@ router.post("/signup", async (req, res) => {
     const snapshot = await usersRef.get();
     
     snapshot.forEach(doc => {
-      if (username === doc.data().username) throw new Error("Username is taken.");
+      if (username.toLowerCase() === doc.data().username.toLowerCase()) throw new Error("Username is taken.");
     });
 
     const userRecord = await auth.createUser({

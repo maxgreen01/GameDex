@@ -10,13 +10,7 @@ const api = axios.create({
 });
 
 function formatGame(game: any) {
-  let platforms = [];
-
-  if (game.platforms) {
-    for (let i = 0; i < game.platforms.length; i++) {
-      platforms.push(game.platforms[i].platform.name);
-    }
-  }
+  const platforms = game.platforms?.map((item: any) => item.platform.name) ?? [];
 
   return {
     id: game.id,
@@ -40,7 +34,7 @@ function formatGameResults(data: any) {
   };
 }
 
-async function fetchGames(params: any) {
+async function fetchGames(params: object) {
   const { data } = await api.get("/games", {
     params: {
       page: params.page || 1,

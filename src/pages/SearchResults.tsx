@@ -74,8 +74,7 @@ const SearchResults: FC<SearchResultsProps> = () => {
       setLoading(true);
       setError(null);
       try {
-        const { data } = await axios.get(
-          "http://localhost:3000/api/games/search",
+        const { data } = await axios.get("/api/games/search",
           {
             params: { search: searchQuery },
           },
