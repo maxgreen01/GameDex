@@ -17,6 +17,7 @@ import {
   Field,
   Button,
   RatingGroup,
+  Spinner,
 } from "@chakra-ui/react";
 import { LuSearch } from "react-icons/lu";
 import toast from "react-hot-toast";
@@ -92,7 +93,16 @@ const AddReviewForm: FC<Props> = ({
     setLoading(false);
   }
 
-  if (!showForm) {
+  if(loading){
+    return(
+    <>
+        <Box>
+          <Spinner size='lg' color={"white"}></Spinner>
+        </Box>
+      </>
+    )
+  }
+  else if (!showForm) {
     return (
       <>
         <Box>

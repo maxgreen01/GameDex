@@ -79,10 +79,10 @@ router.post("/", async (req, res) => {
     text = text.trim();
     displayName = displayName.trim();
 
-    let userDoc = await usersCollection.doc(userId).get();
+    const userDoc = await usersCollection.where("username", "==", userId).get();
 
-    if (!userDoc.exists) {
-      return res.status(404).json({ error: "User not found." });
+    if (userDoc.empty) {
+      return res.status(404).json({ error: `User not found.` });
     }
 
     // checks if this user already reviewed this game
@@ -113,7 +113,9 @@ router.post("/", async (req, res) => {
     let insertedReview = await reviewsCollection.add(newReview);
 
     // stores the new review id inside the user's reviews array
-    await usersCollection.doc(userId).update({
+    const userDocId = userDoc.docs[0].id;
+
+    await usersCollection.doc(userDocId).update({
       reviews: FieldValue.arrayUnion(insertedReview.id),
     });
 
@@ -166,7 +168,12 @@ router.delete("/:reviewId", async (req, res) => {
     }
 
     // removes the review id from the user's reviews array
-    await usersCollection.doc(userId).update({
+    const userSnapshot = await usersCollection
+      .where("username", "==", userId)
+      .get();
+    const userDocId = userSnapshot.docs[0].id;
+
+    await usersCollection.doc(userDocId).update({
       reviews: FieldValue.arrayRemove(reviewId),
     });
 
@@ -394,9 +401,8 @@ router.get("/game/:gameId/excluding/:userId", async (req, res) => {
     let reviews: any[] = [];
 
     for (const userDoc of usersSnapshot.docs) {
-      if (userDoc.id === userId) continue;
-
       let userData = userDoc.data();
+      if (userData.username === userId) continue;
       let reviewIds: string[] = userData.reviews || [];
 
       for (const reviewId of reviewIds) {

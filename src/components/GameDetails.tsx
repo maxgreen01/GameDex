@@ -102,12 +102,14 @@ const GameDetails: FC<Props> = ({}) => {
         );
         setReviews(gameReviewsExceptCurrUser);
 
+        //console.log("All game reviews except current: ", reviews);
         let { data: currentUserReview } = await axios.get(
           `http://localhost:3000/api/reviews/game/${id}/user/${userExists.username}`,
         );
         if (currentUserReview) {
           setUserReview(currentUserReview);
         }
+        console.log("Current user review: ", currentUserReview);
 
         setLoading(false);
       } catch (e) {
@@ -234,12 +236,14 @@ const GameDetails: FC<Props> = ({}) => {
                 ></Review> */}
                 {userReview ? (
                   <Review
+                    reviewId={userReview._id ?? ""}
                     rating={userReview.rating}
                     profilePage={false}
                     usersReview={true}
                     displayName={user?.displayName}
                     username={user?.username}
                     comment={userReview.text}
+                    setUserReview={setUserReview}
                   />
                 ) : (
                   <AddReviewForm
@@ -254,6 +258,7 @@ const GameDetails: FC<Props> = ({}) => {
                 {reviews ? (
                   reviews.map((review) => (
                     <Review
+                      reviewId={review._id ?? ""}
                       rating={review.rating}
                       profilePage={false}
                       usersReview={false}

@@ -52,7 +52,7 @@ export interface userDetails {
 }
 
 export interface ReviewType {
-  // _id?: reviewDoc.id;
+  _id?: string,
   gameId: string,
   userId: string,
   displayName: string,
