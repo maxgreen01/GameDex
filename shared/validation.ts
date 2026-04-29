@@ -19,7 +19,7 @@ export class ValidationError extends Error {
 // Throw an error if a variable is undefined, not a string, or has length outside the specified bounds.
 // If `minLen` is `undefined`, throw an error if the string is empty. To allow empty strings, use `minLen = 0`.
 // Return the trimmed string if it is valid.
-export const checkString = (data: unknown, label: string, minLen?: number, maxLen?: number) => {
+export function validateString(data: unknown, label: string, minLen?: number, maxLen?: number) {
   if (typeof data == "undefined") throw new ValidationError(`${label} was not supplied`);
   if (typeof data !== "string") throw new ValidationError(`${label} must be a string`);
   const str = (data as string).trim();
@@ -27,12 +27,12 @@ export const checkString = (data: unknown, label: string, minLen?: number, maxLe
   if (typeof minLen !== "undefined" && str.length < minLen) throw new ValidationError(`${label} is shorter than ${minLen} character(s)`);
   if (typeof maxLen !== "undefined" && str.length > maxLen) throw new ValidationError(`${label} is longer than ${maxLen} character(s)`);
   return str;
-};
+}
 
 // Throw an error if the trimmed string does not match the given regex, or has length outside the specified bounds.
 // Return the trimmed string if it is valid.
 export function validateStrUsingRegex(data: unknown, regex: RegExp, label = "String", minLen?: number, maxLen?: number, errorMsg: string = "disallowed") {
-  const str = checkString(data, label, minLen, maxLen);
+  const str = validateString(data, label, minLen, maxLen);
   if (!str.match(regex)) throw new ValidationError(`${label} contains ${errorMsg} characters`);
   return str;
 }
@@ -42,7 +42,7 @@ export function validateStrUsingRegex(data: unknown, regex: RegExp, label = "Str
 // in `options.ignoreChars` (e.g. `options.ignoreChars = " -"` to allow spaces and hyphens).
 // Return the trimmed string if it is valid.
 export function validateAlphabetical(data: unknown, label: string = "String", options?: { allowNumbers?: boolean; ignoreChars?: string }, minLen?: number, maxLen?: number) {
-  const str = checkString(data, label, minLen, maxLen);
+  const str = validateString(data, label, minLen, maxLen);
   const ignoreChars = options?.ignoreChars ?? "" + (options?.allowNumbers ? "0123456789" : "");
   if (!validator.isAlpha(str, "en-US", { ignore: ignoreChars })) {
     throw new ValidationError(`${label} must be ${options?.allowNumbers ? "alphanumeric" : "alphabetical"}${options?.ignoreChars ? `or contain the following characters: '${options.ignoreChars}'` : ""}`);
@@ -53,7 +53,7 @@ export function validateAlphabetical(data: unknown, label: string = "String", op
 // Throw an error if a trimmed string matches one of the provided options.
 // Return the trimmed string if it is valid.
 export function validateOptions(data: unknown, options: string[], label: string = "String", caseInsensitive: boolean = false) {
-  let str = checkString(data, label);
+  let str = validateString(data, label);
   if (caseInsensitive) {
     str = str.toLowerCase();
     options = options.map((s) => s.toLowerCase());
@@ -68,7 +68,7 @@ export function validateOptions(data: unknown, options: string[], label: string 
 
 // Throw an error if the input is not a Number, is NaN, or is outside the given bounds (which are inclusive).
 // Return the given number if it is valid.
-export function checkNumber(data: unknown, label: string = "Number", min?: number, max?: number) {
+export function validateNumber(data: unknown, label: string = "Number", min?: number, max?: number) {
   if (typeof data !== "number" || Number.isNaN(data)) throw new ValidationError(`${label} must be a number`);
   const num = data as number;
   if ((min !== undefined && num < min) || (max !== undefined && num > max)) throw new ValidationError(`${label} is out of range ${min} to ${max}`);
@@ -79,7 +79,7 @@ export function checkNumber(data: unknown, label: string = "Number", min?: numbe
 // Also throw an error if the number is not an integer.
 // Return the given integer if it is valid.
 export function validateInteger(data: unknown, label: string = "Number", min?: number, max?: number) {
-  const int = checkNumber(data, label, min, max);
+  const int = validateNumber(data, label, min, max);
   if (!Number.isInteger(int)) throw new ValidationError(`${label} is not an integer`);
   return int;
 }
@@ -89,7 +89,7 @@ export function validateInteger(data: unknown, label: string = "Number", min?: n
 // Return the converted integer if it is valid.
 export function convertStrToInt(str: string, label: string = "Integer", min?: number, max?: number) {
   if (!validator.isInt(str)) throw new ValidationError(`${label} must represent an integer`);
-  return checkNumber(Number.parseInt(str), label, min, max);
+  return validateNumber(Number.parseInt(str), label, min, max);
 }
 
 // Convert a string to a float, and throw an error if the string doesn't represent a float
@@ -97,7 +97,7 @@ export function convertStrToInt(str: string, label: string = "Integer", min?: nu
 // Return the converted float if it is valid.
 export function convertStrToFloat(str: string, label: string = "Float", min?: number, max?: number) {
   if (!validator.isFloat(str)) throw new ValidationError(`${label} must represent a float`);
-  return checkNumber(Number.parseFloat(str), label, min, max);
+  return validateNumber(Number.parseFloat(str), label, min, max);
 }
 
 //
@@ -106,14 +106,14 @@ export function convertStrToFloat(str: string, label: string = "Float", min?: nu
 
 // Throw an error if the input is not an object or is null.
 // Return the input object if it is valid.
-export const validateObject = (data: unknown, label: string = "Object") => {
+export function validateObject(data: unknown, label: string = "Object") {
   if (typeof data !== "object" || data === null) throw new ValidationError(`${label} must be an object`);
   return data as Record<string, unknown>;
-};
+}
 
 // Validate all the required signup fields, and throw an error if any of them are invalid.
 // Return the signup data object if all fields are valid.
-export const validateSignup = (data: unknown) => {
+export function validateSignup(data: unknown) {
   const obj = validateObject(data, "Signup Data");
   return {
     email: validateEmail(obj.email),
@@ -121,17 +121,17 @@ export const validateSignup = (data: unknown) => {
     displayName: validateDisplayName(obj.displayName),
     password: validatePassword(obj.password),
   } as SignupData;
-};
+}
 
 // Validate all the required login fields, and throw an error if any of them are invalid.
 // Return the login data object if all fields are valid.
-export const validateLogin = (data: unknown) => {
+export function validateLogin(data: unknown) {
   const obj = validateObject(data, "Login Data");
   return {
     email: validateEmail(obj.email),
     password: validatePassword(obj.password),
   } as LoginData;
-};
+}
 
 // Throw an error if a string is not a valid `username`.
 // A `username` is considered valid if it is alphanumeric and contains between 5 and 20 characters.
@@ -169,7 +169,7 @@ export function validatePassword(data: unknown) {
 // Throw an error if a string is not a valid email address.
 // Return the trimmed email in all lowercase if it is valid.
 export function validateEmail(data: unknown, label: string = "Email") {
-  const email = checkString(data, label);
+  const email = validateString(data, label);
   if (!validator.isEmail(email)) throw new ValidationError(`${label} is not valid`);
   return email.toLowerCase();
 }
@@ -181,7 +181,7 @@ export function validateEmail(data: unknown, label: string = "Email") {
 // Throw an error if a string does not represent a valid date with the format `MM/DD/YYYY` after the year 1900.
 // Return an object containing the trimmed string and the Date object corresponding to the input date.
 export function validateDateStr(data: unknown, label: string = "Date") {
-  const dateStr = checkString(data, label, 10, 10);
+  const dateStr = validateString(data, label, 10, 10);
   const parsedDate = parse(dateStr, "MM/dd/yyyy", new Date());
   if (!isValid(parsedDate)) throw new ValidationError(`${label} "${dateStr}" does not have format "MM/DD/YYYY"`);
   if (parsedDate.getFullYear() < 1900) throw new ValidationError(`${label} "${dateStr}" cannot be before the year 1900`);
