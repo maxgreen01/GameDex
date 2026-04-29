@@ -15,6 +15,7 @@ function Home() {
               alt="Logo"
               height="16"
               mx="auto"
+              className="logo-glow"
             ></Image>
 
             <h1>Welcome to GameDex!</h1>

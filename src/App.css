@@ -180,3 +180,19 @@
     border-right-color: var(--border);
   }
 }
+
+@keyframes slowGlow {
+  0% {
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4)) brightness(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.7)) brightness(1.3);
+  }
+  100% {
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4)) brightness(1);
+  }
+}
+
+.logo-glow {
+  animation: slowGlow 4s ease-in-out infinite;
+}

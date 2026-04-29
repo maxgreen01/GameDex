@@ -6,7 +6,7 @@ import type { FC } from "react";
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import type { CarouselCardData } from "@/types/games";
+import type { CarouselCardData } from "../types/types.ts";
 import CarouselCard from "@/components/Carousel/CarouselCard";
 import { Box, Heading, SimpleGrid, Spinner, Center, Text } from "@chakra-ui/react";
 import Navbar from "@/components/Navbar";

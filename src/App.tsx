@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/SignUp";
 import Home from "./pages/Home";
 import MainFeed from "./pages/MainFeed";
+import GameDetails from "./components/GameDetails";
 import SearchResults from "./pages/SearchResults";
 
 function App() {
@@ -38,6 +39,10 @@ function App() {
           <Route
             path="/profile/:username"
             element={<Profile />}
+          />
+          <Route
+            path="/games/:id"
+            element={<GameDetails />}
           />
           <Route
             path="/search"

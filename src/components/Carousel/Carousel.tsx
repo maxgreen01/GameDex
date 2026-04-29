@@ -7,7 +7,7 @@
 //IMPORTS/////////////////////////////////////////
 
 import type { FC } from "react";
-import type { CarouselCardData } from "@/types/games.ts";
+import type { CarouselCardData } from "@/types/types.ts";
 import { useState, useEffect } from "react";
 import CarouselCard from "./CarouselCard.tsx";
 import axios from "axios";
@@ -145,6 +145,7 @@ const CarouselRow: FC<Props> = ({ category }) => {
             let { data } = await axios.get("/api/games/popular");
             //console.log("results", data.results);
             setCards(data.results);
+            console.log("Popular games: ", data.results);
             // CALCULATE RATING
           } catch (e) {
             console.error(e);
