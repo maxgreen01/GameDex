@@ -168,9 +168,7 @@ router.delete("/:reviewId", async (req, res) => {
     }
 
     // removes the review id from the user's reviews array
-    const userSnapshot = await usersCollection
-      .where("username", "==", userId)
-      .get();
+    const userSnapshot = await usersCollection.where("username", "==", userId).get();
     const userDocId = userSnapshot.docs[0].id;
 
     await usersCollection.doc(userDocId).update({

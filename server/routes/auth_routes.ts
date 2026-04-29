@@ -1,5 +1,5 @@
 import express from "express";
-import { auth, db} from "../firebaseAdmin.ts";
+import { auth, db } from "../firebaseAdmin.ts";
 import { validateSignup, validateLogin } from "../../shared/validation.ts";
 
 const router = express.Router();
@@ -10,10 +10,10 @@ router.post("/signup", async (req, res) => {
   try {
     validateSignup(email, password, username, displayName);
 
-    const usersRef = db.collection('users');
+    const usersRef = db.collection("users");
     const snapshot = await usersRef.get();
-    
-    snapshot.forEach(doc => {
+
+    snapshot.forEach((doc) => {
       if (username === doc.data().username) throw new Error("Username is taken.");
     });
 
@@ -32,7 +32,7 @@ router.post("/signup", async (req, res) => {
       username,
       displayName,
       email,
-      friends, 
+      friends,
       pendingInvites,
       reviews,
       collections,
@@ -48,7 +48,7 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   let { token, email, password } = req.body;
 
-  try {      
+  try {
     validateLogin(email, password);
 
     if (!token) {
@@ -61,7 +61,6 @@ router.post("/login", async (req, res) => {
       uid: decodedToken.uid,
       email: decodedToken.email,
     });
-    
   } catch (e: any) {
     return res.status(401).json({ error: "Invalid token" });
   }

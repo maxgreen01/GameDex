@@ -12,13 +12,7 @@ import type { CarouselCardData } from "../../types/types.ts";
 import Rating from "../Rating";
 import { allPlatforms } from "../../types/types.ts";
 import { Link } from "react-router-dom";
-import {
-  FaWindows,
-  FaPlaystation,
-  FaXbox,
-  FaApple,
-  FaLinux,
-} from "react-icons/fa";
+import { FaWindows, FaPlaystation, FaXbox, FaApple, FaLinux } from "react-icons/fa";
 import { BsNintendoSwitch } from "react-icons/bs";
 import { IoLogoAndroid } from "react-icons/io";
 import { MdOutlinePhoneIphone } from "react-icons/md";
@@ -27,7 +21,6 @@ import { MdOutlineVideogameAssetOff } from "react-icons/md";
 
 //UI IMPORTS//////////////////////////////////////
 import { Box, Card, Image, Flex, Skeleton } from "@chakra-ui/react";
-
 
 //API DATA NEEDED
 // componentVar = apiVar           : typeReturned
@@ -63,19 +56,10 @@ interface Props extends CarouselCardData {
   loading?: boolean;
 }
 
-const CarouselCard: FC<Props> = ({
-  id,
-  background_image,
-  name,
-  rating,
-  platforms,
-  loading = false,
-}) => {
+const CarouselCard: FC<Props> = ({ id, background_image, name, rating, platforms, loading = false }) => {
   //only gets most common platforms from given ones
   let showPlatforms = platforms?.filter((p) => {
-    return (
-      p?.platform?.slug && Object.keys(allPlatforms).includes(p.platform.slug)
-    );
+    return p?.platform?.slug && Object.keys(allPlatforms).includes(p.platform.slug);
   });
 
   //prevents repeating icons
@@ -96,7 +80,11 @@ const CarouselCard: FC<Props> = ({
     });
 
   return (
-    <Skeleton loading={loading} variant="shine" height="320px">
+    <Skeleton
+      loading={loading}
+      variant="shine"
+      height="320px"
+    >
       <Link to={`/games/${id}`}>
         <div key={id}>
           <Card.Root
@@ -109,7 +97,12 @@ const CarouselCard: FC<Props> = ({
             flexDirection="column"
           >
             {background_image ? (
-              <Box w="100%" h="180px" overflow="hidden" flexShrink={0}>
+              <Box
+                w="100%"
+                h="180px"
+                overflow="hidden"
+                flexShrink={0}
+              >
                 <Image
                   src={background_image}
                   alt={`Game image for ${name}`}
@@ -119,24 +112,44 @@ const CarouselCard: FC<Props> = ({
                 />
               </Box>
             ) : (
-              <Box w="100%" h="180px" bg="gray.700" flexShrink={0} />
+              <Box
+                w="100%"
+                h="180px"
+                bg="gray.700"
+                flexShrink={0}
+              />
             )}
-            <Card.Body flex="1" gap="2">
+            <Card.Body
+              flex="1"
+              gap="2"
+            >
               {/*lineClamp={2} to card title to cut off long titles*/}
               {/*SHOULD I DO DYNAMIC SIZING -> CAROUSELS  MAY BE DIFF SIZES OR CUT OFFS  */}
-              <Card.Title lineClamp={2} minH="12">
+              <Card.Title
+                lineClamp={2}
+                minH="12"
+              >
                 {name}
               </Card.Title>
             </Card.Body>
-            <Card.Footer mt="auto" gap="2">
-              <Flex justify="space-between" w="100%">
+            <Card.Footer
+              mt="auto"
+              gap="2"
+            >
+              <Flex
+                justify="space-between"
+                w="100%"
+              >
                 <Rating
                   readOnly={true}
                   value={Math.round(Number(rating) * 2) / 2}
                 />
                 <Flex>
                   {compPlatforms?.map(({ slug, Icon }) => (
-                    <Icon key={slug} style={{ marginLeft: "4px" }} />
+                    <Icon
+                      key={slug}
+                      style={{ marginLeft: "4px" }}
+                    />
                   ))}
                 </Flex>
               </Flex>

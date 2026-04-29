@@ -33,15 +33,7 @@ import type { Platform, userDetails } from "../types/types.ts";
 import getUserDetails from "@/services/users.ts";
 import { useNavigate } from "react-router-dom";
 //UI IMPORTS//////////////////////////////////////
-import {
-  Box,
-  Flex,
-  Image,
-  ScrollArea,
-  Card,
-  Heading,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Flex, Image, ScrollArea, Card, Heading, Text } from "@chakra-ui/react";
 import Rating from "./Rating.tsx";
 import Review from "./Reviews/Review.tsx";
 import AddReviewForm from "./Reviews/AddReviewForm.tsx";
@@ -97,15 +89,11 @@ const GameDetails: FC<Props> = ({}) => {
 
         setUser(userExists);
 
-        let { data: gameReviewsExceptCurrUser } = await axios.get(
-          `http://localhost:3000/api/reviews/game/${id}/excluding/${userExists.username}`,
-        );
+        let { data: gameReviewsExceptCurrUser } = await axios.get(`http://localhost:3000/api/reviews/game/${id}/excluding/${userExists.username}`);
         setReviews(gameReviewsExceptCurrUser);
 
         //console.log("All game reviews except current: ", reviews);
-        let { data: currentUserReview } = await axios.get(
-          `http://localhost:3000/api/reviews/game/${id}/user/${userExists.username}`,
-        );
+        let { data: currentUserReview } = await axios.get(`http://localhost:3000/api/reviews/game/${id}/user/${userExists.username}`);
         if (currentUserReview) {
           setUserReview(currentUserReview);
         }
@@ -130,9 +118,7 @@ const GameDetails: FC<Props> = ({}) => {
 
   //only gets most common platforms from given ones
   let showPlatforms = platforms?.filter((p) => {
-    return (
-      p?.platform?.slug && Object.keys(allPlatforms).includes(p.platform.slug)
-    );
+    return p?.platform?.slug && Object.keys(allPlatforms).includes(p.platform.slug);
   });
 
   //prevents repeating icons
@@ -157,10 +143,19 @@ const GameDetails: FC<Props> = ({}) => {
     <div>
       <Flex h="100vh">
         {/* game details */}
-        <Box w="50%" overflowY={"auto"}>
-          <ScrollArea.Root height="100%" maxW="lg">
+        <Box
+          w="50%"
+          overflowY={"auto"}
+        >
+          <ScrollArea.Root
+            height="100%"
+            maxW="lg"
+          >
             <ScrollArea.Viewport>
-              <ScrollArea.Content spaceY="4" textStyle="sm">
+              <ScrollArea.Content
+                spaceY="4"
+                textStyle="sm"
+              >
                 {/* <Image
                   src={props.background_image}
                   alt={`Game image for ${props.name}`}
@@ -180,7 +175,12 @@ const GameDetails: FC<Props> = ({}) => {
                   p={6}
                 >
                   {backgroundImage ? (
-                    <Box w="100%" h="50%" overflow="hidden" flexShrink={0}>
+                    <Box
+                      w="100%"
+                      h="50%"
+                      overflow="hidden"
+                      flexShrink={0}
+                    >
                       <Image
                         src={backgroundImage}
                         alt={`Game image for ${name}`}
@@ -190,9 +190,18 @@ const GameDetails: FC<Props> = ({}) => {
                       />
                     </Box>
                   ) : (
-                    <Box w="100%" h="180px" bg="gray.700" flexShrink={0} />
+                    <Box
+                      w="100%"
+                      h="180px"
+                      bg="gray.700"
+                      flexShrink={0}
+                    />
                   )}
-                  <Card.Body flex="1" gap="2" w="100%">
+                  <Card.Body
+                    flex="1"
+                    gap="2"
+                    w="100%"
+                  >
                     {/*lineClamp={2} to card title to cut off long titles*/}
                     {/*SHOULD I DO DYNAMIC SIZING -> CAROUSELS  MAY BE DIFF SIZES OR CUT OFFS  */}
                     <Heading>{name}</Heading>
@@ -211,7 +220,10 @@ const GameDetails: FC<Props> = ({}) => {
                     </Flex>
                     <Card.Description>{description}</Card.Description>
                   </Card.Body>
-                  <Card.Footer mt="auto" gap="2"></Card.Footer>
+                  <Card.Footer
+                    mt="auto"
+                    gap="2"
+                  ></Card.Footer>
                 </Card.Root>
               </ScrollArea.Content>
             </ScrollArea.Viewport>
@@ -222,8 +234,14 @@ const GameDetails: FC<Props> = ({}) => {
           </ScrollArea.Root>
         </Box>
         {/* reviews */}
-        <Box w="50%" overflowY={"auto"}>
-          <ScrollArea.Root height="100%" maxW="lg">
+        <Box
+          w="50%"
+          overflowY={"auto"}
+        >
+          <ScrollArea.Root
+            height="100%"
+            maxW="lg"
+          >
             <ScrollArea.Viewport>
               <ScrollArea.Content textStyle="sm">
                 {/* <Review

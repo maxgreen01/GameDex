@@ -1,12 +1,6 @@
 // holds all the types needed for typescript
 // types/game.ts
-import {
-  FaWindows,
-  FaPlaystation,
-  FaXbox,
-  FaApple,
-  FaLinux,
-} from "react-icons/fa";
+import { FaWindows, FaPlaystation, FaXbox, FaApple, FaLinux } from "react-icons/fa";
 import { BsNintendoSwitch } from "react-icons/bs";
 import { IoLogoAndroid } from "react-icons/io";
 import { MdOutlinePhoneIphone } from "react-icons/md";
@@ -52,13 +46,12 @@ export interface userDetails {
 }
 
 export interface ReviewType {
-  _id?: string,
-  gameId: string,
-  userId: string,
-  displayName: string,
-  rating: number,
-  text: string,
-  createdAt: /*?*/string,
-  updatedAt:  /*?*/string,
-
+  _id?: string;
+  gameId: string;
+  userId: string;
+  displayName: string;
+  rating: number;
+  text: string;
+  createdAt: /*?*/ string;
+  updatedAt: /*?*/ string;
 }

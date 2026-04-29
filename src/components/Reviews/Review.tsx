@@ -13,18 +13,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import type { ReviewType } from "@/types/types";
 //UI IMPORTS//////////////////////////////////////
-import {
-  Card,
-  Heading,
-  VStack,
-  Flex,
-  IconButton,
-  Input,
-  Text,
-  Avatar,
-  Button,
-  Spinner,
-} from "@chakra-ui/react";
+import { Card, Heading, VStack, Flex, IconButton, Input, Text, Avatar, Button, Spinner } from "@chakra-ui/react";
 import Rating from "../Rating";
 import { MdModeEdit, MdDelete } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
@@ -51,18 +40,7 @@ interface Props {
   setUserReview?: React.Dispatch<React.SetStateAction<ReviewType | null>>;
 }
 
-const Review: FC<Props> = ({
-  reviewId,
-  profilePage,
-  gameTitle,
-  gameId,
-  username,
-  displayName,
-  usersReview,
-  comment,
-  rating,
-  setUserReview,
-}) => {
+const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username, displayName, usersReview, comment, rating, setUserReview }) => {
   let [editReview, setEditReview] = useState(false);
   // if editLoading is true, send it to parent to make page load?
   let [editLoading, setEditLoading] = useState(false);
@@ -95,10 +73,7 @@ const Review: FC<Props> = ({
     setLoading(true);
     console.log("Review id: ", reviewId);
     try {
-      let { data: deletedComment } = await axios.delete(
-        `http://localhost:3000/api/reviews/${reviewId}`,
-        { data: { userId: username } },
-      );
+      let { data: deletedComment } = await axios.delete(`http://localhost:3000/api/reviews/${reviewId}`, { data: { userId: username } });
 
       if (deletedComment.success) {
         toast.success(`Comment Deleted`);
@@ -115,7 +90,10 @@ const Review: FC<Props> = ({
 
   if (loading) {
     return (
-      <Card.Root size="md" variant={usersReview ? "subtle" : "outline"}>
+      <Card.Root
+        size="md"
+        variant={usersReview ? "subtle" : "outline"}
+      >
         <Card.Body color="fg.muted">
           <Spinner size="lg"></Spinner>
         </Card.Body>
@@ -123,9 +101,16 @@ const Review: FC<Props> = ({
     );
   } else {
     return (
-      <Card.Root size="md" variant={usersReview ? "subtle" : "outline"}>
+      <Card.Root
+        size="md"
+        variant={usersReview ? "subtle" : "outline"}
+      >
         <Card.Header>
-          <Flex w="100%" direction={"row"} justify={"space-between"}>
+          <Flex
+            w="100%"
+            direction={"row"}
+            justify={"space-between"}
+          >
             {profilePage ? (
               <Link to={`/games/${gameId}`}>
                 <Flex direction={"column"}>
@@ -133,22 +118,40 @@ const Review: FC<Props> = ({
                     {gameTitle ? gameTitle : "Game Title"}
                     {""}
                   </Heading>
-                  <Rating readOnly={true} value={rating} />
+                  <Rating
+                    readOnly={true}
+                    value={rating}
+                  />
                 </Flex>
               </Link>
             ) : (
               <Link to={`/profile/:${username}`}>
-                <Flex gap={4} align="center">
+                <Flex
+                  gap={4}
+                  align="center"
+                >
                   <Flex>
-                    <Avatar.Root size={"xl"} variant="outline">
+                    <Avatar.Root
+                      size={"xl"}
+                      variant="outline"
+                    >
                       <Avatar.Fallback name={username} />
                     </Avatar.Root>
                   </Flex>
-                  <VStack gap={0} align={"flex-start"}>
-                    <Text color={"white"} textStyle={"lg"}>
+                  <VStack
+                    gap={0}
+                    align={"flex-start"}
+                  >
+                    <Text
+                      color={"white"}
+                      textStyle={"lg"}
+                    >
                       {displayName ? displayName : "display"}
                     </Text>
-                    <Text textStyle={"sm"} color="gray">
+                    <Text
+                      textStyle={"sm"}
+                      color="gray"
+                    >
                       {username ? username : "unknownUser"}
                     </Text>
                   </VStack>
@@ -159,23 +162,35 @@ const Review: FC<Props> = ({
             <Flex>
               {usersReview && !editReview && (
                 <>
-                  <IconButton onClick={clickEditButton} variant="ghost">
+                  <IconButton
+                    onClick={clickEditButton}
+                    variant="ghost"
+                  >
                     <MdModeEdit />
                   </IconButton>
-                  <IconButton onClick={clickDeleteButton} variant="ghost">
+                  <IconButton
+                    onClick={clickDeleteButton}
+                    variant="ghost"
+                  >
                     <MdDelete />
                   </IconButton>
                 </>
               )}
               {usersReview && editReview && (
-                <IconButton variant="ghost" onClick={onSubmitEdit}>
+                <IconButton
+                  variant="ghost"
+                  onClick={onSubmitEdit}
+                >
                   <FaCheck />
                 </IconButton>
               )}
             </Flex>
           </Flex>
           <Flex pt={2}>
-            <Rating readOnly={true} value={rating} />
+            <Rating
+              readOnly={true}
+              value={rating}
+            />
           </Flex>
         </Card.Header>
         <Card.Body color="fg.muted">

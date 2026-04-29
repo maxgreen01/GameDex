@@ -1,7 +1,6 @@
 //NOTES//////////////////////////////////////////
 //FINISH addd actual search stuff
 
-
 //IMPORTS/////////////////////////////////////////
 import type { FC } from "react";
 import { useState } from "react";
@@ -28,7 +27,10 @@ const SearchBar: FC<Props> = ({}) => {
   };
 
   return (
-    <InputGroup flex="1" startElement={<LuSearch />}>
+    <InputGroup
+      flex="1"
+      startElement={<LuSearch />}
+    >
       <Input
         placeholder="Search games"
         value={searchInput}

@@ -10,15 +10,7 @@ import axios from "axios";
 //import * as reviewFunctions from "../../../server/data/reviews";
 
 //UI IMPORTS//////////////////////////////////////
-import {
-  Input,
-  InputGroup,
-  Box,
-  Field,
-  Button,
-  RatingGroup,
-  Spinner,
-} from "@chakra-ui/react";
+import { Input, InputGroup, Box, Field, Button, RatingGroup, Spinner } from "@chakra-ui/react";
 import { LuSearch } from "react-icons/lu";
 import toast from "react-hot-toast";
 //-------------------------------------------------//
@@ -31,12 +23,7 @@ interface Props {
   setUserReview: React.Dispatch<React.SetStateAction<ReviewType | null>>;
 }
 
-const AddReviewForm: FC<Props> = ({
-  gameId,
-  setUserReview,
-  username,
-  displayName,
-}) => {
+const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName }) => {
   let [errorMessage, setErrorMessage] = useState<string | null>(null);
   let [rating, setRating] = useState<number>(0);
   let [comment, setComment] = useState("");
@@ -76,9 +63,7 @@ const AddReviewForm: FC<Props> = ({
       displayName,
     });
 
-    let { data: userReview } = await axios.get(
-      `http://localhost:3000/api/reviews/game/${gameId}/user/${username}`,
-    );
+    let { data: userReview } = await axios.get(`http://localhost:3000/api/reviews/game/${gameId}/user/${username}`);
 
     if (!userReview) {
       console.log("Error: Review could not be added");
@@ -93,16 +78,18 @@ const AddReviewForm: FC<Props> = ({
     setLoading(false);
   }
 
-  if(loading){
-    return(
-    <>
+  if (loading) {
+    return (
+      <>
         <Box>
-          <Spinner size='lg' color={"white"}></Spinner>
+          <Spinner
+            size="lg"
+            color={"white"}
+          ></Spinner>
         </Box>
       </>
-    )
-  }
-  else if (!showForm) {
+    );
+  } else if (!showForm) {
     return (
       <>
         <Box>
@@ -113,7 +100,11 @@ const AddReviewForm: FC<Props> = ({
   } else {
     return (
       <>
-        <Box p="4" borderWidth="1px" borderColor="border.disabled">
+        <Box
+          p="4"
+          borderWidth="1px"
+          borderColor="border.disabled"
+        >
           <form onSubmit={onSubmit}>
             {/* rating */}
             <Field.Root invalid={rating === 0 && !!errorMessage}>
@@ -133,10 +124,11 @@ const AddReviewForm: FC<Props> = ({
             {/* comment */}
             <Field.Root invalid={!!errorMessage}>
               <Field.Label p={2}>Your Review:</Field.Label>
-              <Input value={comment} onChange={(e) => commentOnChange(e)} />
-              <Field.ErrorText>
-                {"Must be 120 characters or less!"}
-              </Field.ErrorText>
+              <Input
+                value={comment}
+                onChange={(e) => commentOnChange(e)}
+              />
+              <Field.ErrorText>{"Must be 120 characters or less!"}</Field.ErrorText>
             </Field.Root>
             <Button type="submit">Submit</Button>
           </form>

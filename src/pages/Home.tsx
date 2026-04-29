@@ -2,13 +2,7 @@
 import { Link } from "react-router-dom";
 import logo from "../assets/logo.svg";
 //UI IMPORTS//////////////////////////////////////
-import {
-  Button,
-  ButtonGroup,
-  Box,
-  AbsoluteCenter,
-  Image,
-} from "@chakra-ui/react";
+import { Button, ButtonGroup, Box, AbsoluteCenter, Image } from "@chakra-ui/react";
 
 function Home() {
   return (

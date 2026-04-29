@@ -1,6 +1,6 @@
 //NOTES//////////////////////////////////////////
 //FINISH EDIT BUTTON FEATURE
-// CACHE REVIEWS AND COLLECTIONS in case they click back and forth 
+// CACHE REVIEWS AND COLLECTIONS in case they click back and forth
 
 //IMPORTS////////////////////////////////////////
 import type { FC } from "react";
@@ -14,17 +14,7 @@ import type { User } from "firebase/auth";
 //UI IMPORTS//////////////////////////////////////
 import Navbar from "@/components/Navbar";
 import Review from "@/components/Reviews/Review";
-import {
-  Flex,
-  Box,
-  Avatar,
-  VStack,
-  HStack,
-  Text,
-  IconButton,
-  Button,
-  Separator,
-} from "@chakra-ui/react";
+import { Flex, Box, Avatar, VStack, HStack, Text, IconButton, Button, Separator } from "@chakra-ui/react";
 import { MdModeEdit } from "react-icons/md";
 
 interface Props {}
@@ -74,17 +64,20 @@ const Profile: FC<Props> = ({}) => {
   // Reviews and Collections Section
   function clickReviews() {
     setActiveButton(false);
-    setShowReviewsNotCollections(true); 
+    setShowReviewsNotCollections(true);
   }
 
   function clickCollections() {
     setActiveButton(true);
-    setShowReviewsNotCollections(false); 
+    setShowReviewsNotCollections(false);
   }
 
   return (
     <div>
-      <Navbar username={username} profilePage={true}></Navbar>
+      <Navbar
+        username={username}
+        profilePage={true}
+      ></Navbar>
       <Flex direction="column">
         {/* Profile Header */}
         <Box w="100%">
@@ -97,15 +90,27 @@ const Profile: FC<Props> = ({}) => {
             justify="space-between"
           >
             {/* Left hand side */}
-            <Flex gap={4} align="center">
+            <Flex
+              gap={4}
+              align="center"
+            >
               {/* icon */}
               <Flex>
-                <Avatar.Root size={"xl"} variant="outline">
+                <Avatar.Root
+                  size={"xl"}
+                  variant="outline"
+                >
                   <Avatar.Fallback name={username} />
                 </Avatar.Root>
               </Flex>
-              <VStack gap={0} align={"flex-start"}>
-                <Text color={"white"} textStyle={"lg"}>
+              <VStack
+                gap={0}
+                align={"flex-start"}
+              >
+                <Text
+                  color={"white"}
+                  textStyle={"lg"}
+                >
                   {displayName}
                 </Text>
                 <Text textStyle={"sm"}>{username}</Text>
@@ -150,14 +155,14 @@ const Profile: FC<Props> = ({}) => {
         </Box>
 
         <Box>
-          {showReviewsNotCollections ? 
-          (<Text>
-            {/* WHERE REVIEW STACK WILL GO */}
-            {/* <Review></Review> */}
-          </Text>) : (<Text>
-            collections
-          </Text>)
-        }
+          {showReviewsNotCollections ? (
+            <Text>
+              {/* WHERE REVIEW STACK WILL GO */}
+              {/* <Review></Review> */}
+            </Text>
+          ) : (
+            <Text>collections</Text>
+          )}
         </Box>
       </Flex>
     </div>

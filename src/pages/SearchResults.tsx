@@ -8,14 +8,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import type { CarouselCardData } from "../types/types.ts";
 import CarouselCard from "@/components/Carousel/CarouselCard";
-import {
-  Box,
-  Heading,
-  SimpleGrid,
-  Spinner,
-  Center,
-  Text,
-} from "@chakra-ui/react";
+import { Box, Heading, SimpleGrid, Spinner, Center, Text } from "@chakra-ui/react";
 import Navbar from "@/components/Navbar";
 import { onAuthStateChanged, type User } from "@firebase/auth";
 import { auth, db } from "../firebaseClient";
@@ -72,12 +65,9 @@ const SearchResults: FC<SearchResultsProps> = () => {
       setLoading(true);
       setError(null);
       try {
-        const { data } = await axios.get(
-          "http://localhost:3000/api/games/search",
-          {
-            params: { search: searchQuery },
-          },
-        );
+        const { data } = await axios.get("http://localhost:3000/api/games/search", {
+          params: { search: searchQuery },
+        });
         setResults(data.results || []);
       } catch (e) {
         console.error(e);
@@ -93,9 +83,15 @@ const SearchResults: FC<SearchResultsProps> = () => {
   //The HTML that is rendered, including navbar, searchbar, and results. Spinner is included if loading is true.
   return (
     <>
-      <Navbar username={username} profilePage={false} />
+      <Navbar
+        username={username}
+        profilePage={false}
+      />
       <Box p="8">
-        <Heading mb="8" size="lg">
+        <Heading
+          mb="8"
+          size="lg"
+        >
           Search Results for "{searchQuery}"
         </Heading>
 
@@ -113,12 +109,18 @@ const SearchResults: FC<SearchResultsProps> = () => {
           </Center>
         ) : results.length === 0 ? (
           <Center minH="400px">
-            <Text fontSize="lg" color="gray.500">
+            <Text
+              fontSize="lg"
+              color="gray.500"
+            >
               No games found. Try a different search.
             </Text>
           </Center>
         ) : (
-          <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} gap="6">
+          <SimpleGrid
+            columns={{ base: 1, sm: 2, md: 3, lg: 4 }}
+            gap="6"
+          >
             {" "}
             {/*Grid structure to display results, using CarouselCard*/}
             {results.map((game) => (

@@ -19,16 +19,37 @@ function App() {
       <Toaster position="top-right" />
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/mainfeed/:username" element={<MainFeed />} />
-          <Route path="/profile/:username" element={<Profile />} />
+          <Route
+            path="/login"
+            element={<Login />}
+          />
+          <Route
+            path="/signup"
+            element={<Signup />}
+          />
+          <Route
+            path="/"
+            element={<Home />}
+          />
+          <Route
+            path="/mainfeed/:username"
+            element={<MainFeed />}
+          />
+          <Route
+            path="/profile/:username"
+            element={<Profile />}
+          />
 
-          <Route path="/games/:id" element={<GameDetails />} />
+          <Route
+            path="/games/:id"
+            element={<GameDetails />}
+          />
 
-          <Route path="/search" element={<SearchResults />} />
-          </Routes>
+          <Route
+            path="/search"
+            element={<SearchResults />}
+          />
+        </Routes>
       </BrowserRouter>
     </>
   );

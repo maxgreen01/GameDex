@@ -13,7 +13,6 @@ app.use("/auth", authRoutes);
 app.use("/api/games", rawgRoutes);
 app.use("/api/reviews", reviewRoutes);
 
-
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

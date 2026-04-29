@@ -16,10 +16,12 @@ interface Props {
   linkTo: string;
 }
 
-const SeeMoreCard: FC<Props> = ({linkTo}) => {
-  return <div> 
-    <Link to={`${linkTo}`}> </Link>
-  </div>;
+const SeeMoreCard: FC<Props> = ({ linkTo }) => {
+  return (
+    <div>
+      <Link to={`${linkTo}`}> </Link>
+    </div>
+  );
 };
 
 export default SeeMoreCard;
