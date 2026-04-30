@@ -1,16 +1,9 @@
 // Collection of validation functions used by the client and server
 
 import validator from "validator";
-import { parse, format, isValid, compareAsc } from "date-fns";
+import { parse, isValid, compareAsc } from "date-fns";
+import { BadRequestError } from "./errors.ts";
 import type { LoginData, SignupData } from "./types.ts";
-
-// custom error class to identify validation errors (i.e. HTTP 400 errors) as opposed to server errors
-export class ValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = this.constructor.name;
-  }
-}
 
 //
 // ============ String Validation ============
@@ -20,12 +13,12 @@ export class ValidationError extends Error {
 // If `minLen` is `undefined`, throw an error if the string is empty. To allow empty strings, use `minLen = 0`.
 // Return the trimmed string if it is valid.
 export function validateString(data: unknown, label: string, minLen?: number, maxLen?: number) {
-  if (typeof data == "undefined") throw new ValidationError(`${label} was not supplied`);
-  if (typeof data !== "string") throw new ValidationError(`${label} must be a string`);
+  if (typeof data == "undefined") throw new BadRequestError(`${label} was not supplied`);
+  if (typeof data !== "string") throw new BadRequestError(`${label} must be a string`);
   const str = (data as string).trim();
-  if (typeof minLen === "undefined" && str.length === 0) throw new ValidationError(`${label} cannot be empty or contain only spaces`);
-  if (typeof minLen !== "undefined" && str.length < minLen) throw new ValidationError(`${label} is shorter than ${minLen} character(s)`);
-  if (typeof maxLen !== "undefined" && str.length > maxLen) throw new ValidationError(`${label} is longer than ${maxLen} character(s)`);
+  if (typeof minLen === "undefined" && str.length === 0) throw new BadRequestError(`${label} cannot be empty or contain only spaces`);
+  if (typeof minLen !== "undefined" && str.length < minLen) throw new BadRequestError(`${label} is shorter than ${minLen} character(s)`);
+  if (typeof maxLen !== "undefined" && str.length > maxLen) throw new BadRequestError(`${label} is longer than ${maxLen} character(s)`);
   return str;
 }
 
@@ -33,7 +26,7 @@ export function validateString(data: unknown, label: string, minLen?: number, ma
 // Return the trimmed string if it is valid.
 export function validateStrUsingRegex(data: unknown, regex: RegExp, label = "String", minLen?: number, maxLen?: number, errorMsg: string = "disallowed") {
   const str = validateString(data, label, minLen, maxLen);
-  if (!str.match(regex)) throw new ValidationError(`${label} contains ${errorMsg} characters`);
+  if (!str.match(regex)) throw new BadRequestError(`${label} contains ${errorMsg} characters`);
   return str;
 }
 
@@ -45,7 +38,7 @@ export function validateAlphabetical(data: unknown, label: string = "String", op
   const str = validateString(data, label, minLen, maxLen);
   const ignoreChars = options?.ignoreChars ?? "" + (options?.allowNumbers ? "0123456789" : "");
   if (!validator.isAlpha(str, "en-US", { ignore: ignoreChars })) {
-    throw new ValidationError(`${label} must be ${options?.allowNumbers ? "alphanumeric" : "alphabetical"}${options?.ignoreChars ? `or contain the following characters: '${options.ignoreChars}'` : ""}`);
+    throw new BadRequestError(`${label} must be ${options?.allowNumbers ? "alphanumeric" : "alphabetical"}${options?.ignoreChars ? `or contain the following characters: '${options.ignoreChars}'` : ""}`);
   }
   return str;
 }
@@ -58,7 +51,7 @@ export function validateOptions(data: unknown, options: string[], label: string 
     str = str.toLowerCase();
     options = options.map((s) => s.toLowerCase());
   }
-  if (!options.includes(str)) throw new ValidationError(`${label} does not match one of the allowed options`);
+  if (!options.includes(str)) throw new BadRequestError(`${label} does not match one of the allowed options`);
   return str;
 }
 
@@ -69,9 +62,9 @@ export function validateOptions(data: unknown, options: string[], label: string 
 // Throw an error if the input is not a Number, is NaN, or is outside the given bounds (which are inclusive).
 // Return the given number if it is valid.
 export function validateNumber(data: unknown, label: string = "Number", min?: number, max?: number) {
-  if (typeof data !== "number" || Number.isNaN(data)) throw new ValidationError(`${label} must be a number`);
+  if (typeof data !== "number" || Number.isNaN(data)) throw new BadRequestError(`${label} must be a number`);
   const num = data as number;
-  if ((min !== undefined && num < min) || (max !== undefined && num > max)) throw new ValidationError(`${label} is out of range ${min} to ${max}`);
+  if ((min !== undefined && num < min) || (max !== undefined && num > max)) throw new BadRequestError(`${label} is out of range ${min} to ${max}`);
   return num;
 }
 
@@ -80,7 +73,7 @@ export function validateNumber(data: unknown, label: string = "Number", min?: nu
 // Return the given integer if it is valid.
 export function validateInteger(data: unknown, label: string = "Number", min?: number, max?: number) {
   const int = validateNumber(data, label, min, max);
-  if (!Number.isInteger(int)) throw new ValidationError(`${label} is not an integer`);
+  if (!Number.isInteger(int)) throw new BadRequestError(`${label} is not an integer`);
   return int;
 }
 
@@ -88,7 +81,7 @@ export function validateInteger(data: unknown, label: string = "Number", min?: n
 // or the integer is outside the given bounds (which are inclusive).
 // Return the converted integer if it is valid.
 export function convertStrToInt(str: string, label: string = "Integer", min?: number, max?: number) {
-  if (!validator.isInt(str)) throw new ValidationError(`${label} must represent an integer`);
+  if (!validator.isInt(str)) throw new BadRequestError(`${label} must represent an integer`);
   return validateNumber(Number.parseInt(str), label, min, max);
 }
 
@@ -96,7 +89,7 @@ export function convertStrToInt(str: string, label: string = "Integer", min?: nu
 // or the float is outside the given bounds (which are inclusive).
 // Return the converted float if it is valid.
 export function convertStrToFloat(str: string, label: string = "Float", min?: number, max?: number) {
-  if (!validator.isFloat(str)) throw new ValidationError(`${label} must represent a float`);
+  if (!validator.isFloat(str)) throw new BadRequestError(`${label} must represent a float`);
   return validateNumber(Number.parseFloat(str), label, min, max);
 }
 
@@ -107,7 +100,7 @@ export function convertStrToFloat(str: string, label: string = "Float", min?: nu
 // Throw an error if the input is not an object or is null.
 // Return the input object if it is valid.
 export function validateObject(data: unknown, label: string = "Object") {
-  if (typeof data !== "object" || data === null) throw new ValidationError(`${label} must be an object`);
+  if (typeof data !== "object" || data === null) throw new BadRequestError(`${label} must be an object`);
   return data as Record<string, unknown>;
 }
 
@@ -150,7 +143,7 @@ export function validateDisplayName(data: unknown) {
 // Passwords must be non-empty, have at least 8 characters, and have no spaces, at least one uppercase character, one number, and one symbol.
 // Throw an error if a password is not valid, or return the trimmed string if it's valid.
 export function validatePassword(data: unknown) {
-  if (typeof data !== "string" || (data as string).length < 8) throw new ValidationError(`Password is invalid or shorter than 8 characters`); // don't trim passwords
+  if (typeof data !== "string" || (data as string).length < 8) throw new BadRequestError(`Password is invalid or shorter than 8 characters`); // don't trim passwords
   const password = data as string;
   const hasSpace = /\s/.test(password);
   const isStrong = validator.isStrongPassword(password, {
@@ -162,7 +155,7 @@ export function validatePassword(data: unknown) {
   if (isStrong && !hasSpace) {
     return password;
   } else {
-    throw new ValidationError("Password must contain at least one lowercase character, uppercase character, number, and symbol, and cannot contain spaces");
+    throw new BadRequestError("Password must contain at least one lowercase character, uppercase character, number, and symbol, and cannot contain spaces");
   }
 }
 
@@ -170,7 +163,7 @@ export function validatePassword(data: unknown) {
 // Return the trimmed email in all lowercase if it is valid.
 export function validateEmail(data: unknown, label: string = "Email") {
   const email = validateString(data, label);
-  if (!validator.isEmail(email)) throw new ValidationError(`${label} is not valid`);
+  if (!validator.isEmail(email)) throw new BadRequestError(`${label} is not valid`);
   return email.toLowerCase();
 }
 
@@ -183,8 +176,8 @@ export function validateEmail(data: unknown, label: string = "Email") {
 export function validateDateStr(data: unknown, label: string = "Date") {
   const dateStr = validateString(data, label, 10, 10);
   const parsedDate = parse(dateStr, "MM/dd/yyyy", new Date());
-  if (!isValid(parsedDate)) throw new ValidationError(`${label} "${dateStr}" does not have format "MM/DD/YYYY"`);
-  if (parsedDate.getFullYear() < 1900) throw new ValidationError(`${label} "${dateStr}" cannot be before the year 1900`);
+  if (!isValid(parsedDate)) throw new BadRequestError(`${label} "${dateStr}" does not have format "MM/DD/YYYY"`);
+  if (parsedDate.getFullYear() < 1900) throw new BadRequestError(`${label} "${dateStr}" cannot be before the year 1900`);
   return { dateStr, parsedDate };
 }
 
@@ -207,10 +200,10 @@ export function isDateStringBeforeToday(data: unknown, label: string = "Date") {
 // or set `numElements` to -1 to allow any number of elements (including zero).
 // If valid, run `map` on the array using the given function and return the result.
 export function validateArrayElements<T>(data: unknown, func: (item: unknown) => T, label: string = "Array", numElements: number = 0) {
-  if (!Array.isArray(data)) throw new ValidationError(`${label} is not an array`);
+  if (!Array.isArray(data)) throw new BadRequestError(`${label} is not an array`);
   const arr = data as unknown[];
-  if (numElements !== -1 && arr.length === 0) throw new ValidationError(`${label} is empty`); // skip the empty check if `numElements == -1`
-  if (numElements > 0 && arr.length !== numElements) throw new ValidationError(`${label} does not have ${numElements} elements`);
+  if (numElements !== -1 && arr.length === 0) throw new BadRequestError(`${label} is empty`); // skip the empty check if `numElements == -1`
+  if (numElements > 0 && arr.length !== numElements) throw new BadRequestError(`${label} does not have ${numElements} elements`);
   return arr.map(func);
 }
 
@@ -222,7 +215,7 @@ export function validateObjectKeys(data: unknown, fieldData: unknown, label: str
   const allowedFields = validateArrayElements(
     fieldData,
     (field) => {
-      if (typeof field !== "string") throw new ValidationError(`${label}'s required field names must be strings`);
+      if (typeof field !== "string") throw new BadRequestError(`${label}'s required field names must be strings`);
       return label as string;
     },
     `${label}'s required fields`
@@ -232,7 +225,7 @@ export function validateObjectKeys(data: unknown, fieldData: unknown, label: str
   const objKeys = Object.keys(obj);
   const invalidFields = objKeys.filter((key) => !allowedFields.includes(key));
   if (invalidFields.length > 0) {
-    throw new ValidationError(`${label} contains invalid fields: ${JSON.stringify(invalidFields)}`);
+    throw new BadRequestError(`${label} contains invalid fields: ${JSON.stringify(invalidFields)}`);
   }
   return obj;
 }
