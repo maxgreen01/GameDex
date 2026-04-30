@@ -3,6 +3,7 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes.ts";
 import rawgRoutes from "./routes/rawgRoutes.ts";
 import reviewRoutes from "./routes/reviews.ts";
+import userRoutes from "./routes/users.ts";
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 app.use("/auth", authRoutes);
 app.use("/api/games", rawgRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/users", userRoutes);
 
 const PORT = 3000;
 app.listen(PORT, () => {

@@ -18,6 +18,13 @@ export class BadRequestError extends StatusError {
   }
 }
 
+// An error class thrown when a desired resource cannot be found.
+export class NotFoundError extends StatusError {
+  constructor(message: string) {
+    super(404, message);
+  }
+}
+
 // Returns the message and status code of an error to be displayed to a client.
 export function getErrorInfo(err: unknown): [number, string] {
   if (err instanceof StatusError) {

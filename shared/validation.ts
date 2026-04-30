@@ -3,7 +3,7 @@
 import validator from "validator";
 import { parse, isValid, compareAsc } from "date-fns";
 import { BadRequestError } from "./errors.ts";
-import type { LoginData, SignupData } from "./types.ts";
+import type { LoginData, ProfileData, SignupData } from "./types.ts";
 
 //
 // ============ String Validation ============
@@ -165,6 +165,15 @@ export function validateEmail(data: unknown, label: string = "Email") {
   const email = validateString(data, label);
   if (!validator.isEmail(email)) throw new BadRequestError(`${label} is not valid`);
   return email.toLowerCase();
+}
+
+// Throw an error if a profile data object is invalid; return it if it is.
+export function validateProfileData(data: unknown, label: string = "Profile Data") {
+  const obj = validateObject(data, label);
+  return {
+    displayName: validateDisplayName(obj.displayName),
+    description: validateString(obj.description, "Description", 0),
+  } as ProfileData;
 }
 
 //
