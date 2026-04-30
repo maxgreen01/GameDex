@@ -13,10 +13,12 @@ import Home from "./pages/Home";
 import MainFeed from "./pages/MainFeed";
 import GameDetails from "./components/GameDetails";
 import SearchResults from "./pages/SearchResults";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 function App() {
   return (
-    <>
+    <QueryClientProvider client={new QueryClient()}>
       <Toaster position="top-right" />
       <BrowserRouter>
         <Routes>
@@ -54,7 +56,8 @@ function App() {
           />
         </Routes>
       </BrowserRouter>
-    </>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
 
