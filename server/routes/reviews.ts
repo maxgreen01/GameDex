@@ -420,6 +420,7 @@ router.get("/game/:gameId/excluding/:userId", async (req, res) => {
           text: review.text,
           createdAt: review.createdAt,
           updatedAt: review.updatedAt,
+          displayName: review.displayName,
         });
       }
     }

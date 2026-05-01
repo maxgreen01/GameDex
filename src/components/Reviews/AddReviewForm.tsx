@@ -3,14 +3,12 @@
 //IMPORTS/////////////////////////////////////////
 import type { FC } from "react";
 import { useState } from "react";
-import getUserDetails from "@/services/users";
 import type { ReviewType } from "@/types/types";
 import axios from "axios";
 //import * as reviewFunctions from "../../../server/data/reviews";
 
 //UI IMPORTS//////////////////////////////////////
-import { Input, InputGroup, Box, Field, Button, RatingGroup, Spinner } from "@chakra-ui/react";
-import { LuSearch } from "react-icons/lu";
+import { Input, Box, Field, Button, RatingGroup, Spinner } from "@chakra-ui/react";
 import toast from "react-hot-toast";
 //-------------------------------------------------//
 
@@ -51,7 +49,6 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
 
     setLoading(true);
     //validation
-
     //setUserReview(newReview);
 
     await axios.post(`http://localhost:3000/api/reviews`, {
@@ -73,7 +70,6 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
 
     setShowForm(false); //idt this is needed by once reivew is given it shud swtich to show the review and not form in game details
 
-    //send to database
     setLoading(false);
   }
 

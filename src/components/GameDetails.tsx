@@ -92,12 +92,10 @@ const GameDetails: FC<Props> = ({}) => {
         let { data: gameReviewsExceptCurrUser } = await axios.get(`http://localhost:3000/api/reviews/game/${id}/excluding/${userExists.username}`);
         setReviews(gameReviewsExceptCurrUser);
 
-        //console.log("All game reviews except current: ", reviews);
         let { data: currentUserReview } = await axios.get(`http://localhost:3000/api/reviews/game/${id}/user/${userExists.username}`);
         if (currentUserReview) {
           setUserReview(currentUserReview);
         }
-        console.log("Current user review: ", currentUserReview);
 
         setLoading(false);
       } catch (e) {
@@ -244,14 +242,6 @@ const GameDetails: FC<Props> = ({}) => {
           >
             <ScrollArea.Viewport>
               <ScrollArea.Content textStyle="sm">
-                {/* <Review
-                  rating={3.5}
-                  profilePage={false}
-                  usersReview={true}
-                  displayName="mayayaya"
-                  username="mpate154"
-                  comment="I think this game was alright. The first two were better in terms of storyline, but the animation here was top tier."
-                ></Review> */}
                 {userReview ? (
                   <Review
                     reviewId={userReview._id ?? ""}

@@ -1,7 +1,7 @@
 // Collection of validation functions used by the client and server
 
 import validator from "validator";
-import { parse, format, isValid, compareAsc } from "date-fns";
+import { parse, isValid, compareAsc } from "date-fns";
 import type { LoginData, SignupData } from "./types.ts";
 
 // custom error class to identify validation errors (i.e. HTTP 400 errors) as opposed to server errors
