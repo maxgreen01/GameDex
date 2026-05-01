@@ -35,7 +35,7 @@ function App() {
             element={<Home />}
           />
           <Route
-            path="/mainfeed/:username"
+            path="/mainfeed"
             element={<MainFeed />}
           />
           <Route
