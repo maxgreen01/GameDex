@@ -7,14 +7,7 @@ import { validateLogin } from "../../shared/validation";
 import { getDoc, doc } from "firebase/firestore";
 import { db } from "../firebaseClient";
 //UI IMPORTS//////////////////////////////////////
-import {
-  Button,
-  Box,
-  AbsoluteCenter,
-  Input,
-  Stack,
-  IconButton,
-} from "@chakra-ui/react";
+import { Button, Box, AbsoluteCenter, Input, Stack, IconButton } from "@chakra-ui/react";
 import { LuChevronLeft } from "react-icons/lu";
 
 function Login() {
@@ -29,20 +22,21 @@ function Login() {
     setLoading(true);
 
     try {
-      validateLogin(email, password);
+      const loginData = validateLogin({ email, password });
 
-      const { user, token } = await login(email, password);
+      const { user, token } = await login(loginData.email, loginData.password);
 
       const snap = await getDoc(doc(db, "users", user.uid));
       const username = snap.data()?.username;
 
-      await fetch("http://localhost:3000/auth/login", {
+      const response = await fetch("/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ token }),
       });
+      if (!response.ok) throw new Error("Failed to login");
 
       localStorage.setItem("token", token);
 
@@ -78,7 +72,10 @@ function Login() {
             <h1>Login</h1>
 
             <form onSubmit={handleLogin}>
-              <Stack gap="4" maxW="lg">
+              <Stack
+                gap="4"
+                maxW="lg"
+              >
                 <Input
                   placeholder="Email"
                   value={email}
@@ -92,7 +89,10 @@ function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                 />
 
-                <Button type="submit" disabled={loading}>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                >
                   {loading ? "Logging in..." : "Submit"}
                 </Button>
               </Stack>

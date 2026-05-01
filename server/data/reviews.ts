@@ -34,12 +34,7 @@ export async function getReviewById(reviewId: string) {
   };
 }
 
-export async function createReview(
-  gameId: string,
-  userId: string,
-  rating: number,
-  text: string,
-) {
+export async function createReview(gameId: string, userId: string, rating: number, text: string) {
   if (!gameId || !userId || rating === undefined || !text) {
     throw "Missing args";
   }
@@ -207,12 +202,7 @@ export async function getReviewsByUserId(userId: string) {
   return reviews;
 }
 
-export async function editReview(
-  reviewId: string,
-  userId: string,
-  rating: number,
-  text: string,
-) {
+export async function editReview(reviewId: string, userId: string, rating: number, text: string) {
   if (!reviewId || !userId || rating === undefined || !text) {
     throw "Missing args";
   }
@@ -262,10 +252,7 @@ export async function editReview(
   };
 }
 
-export async function getReviewByGameIdAndUserId(
-  gameId: string,
-  userId: string,
-) {
+export async function getReviewByGameIdAndUserId(gameId: string, userId: string) {
   if (!gameId || !userId) {
     throw "Missing args";
   }

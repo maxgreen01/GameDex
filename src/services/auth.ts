@@ -1,8 +1,8 @@
-import {signInWithEmailAndPassword, signOut,} from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import type { User } from "firebase/auth";
 import { auth } from "../firebaseClient";
 
-export const login = async (email: string,password: string): Promise<{ user: User; token: string }> => {
+export const login = async (email: string, password: string): Promise<{ user: User; token: string }> => {
   try {
     const userCred = await signInWithEmailAndPassword(auth, email, password);
 

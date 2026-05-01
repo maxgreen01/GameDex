@@ -13,13 +13,15 @@ import {} from "@chakra-ui/react";
 //-------------------------------------------------//
 
 interface Props {
-  linkTo: String;
+  linkTo: string;
 }
 
-const SeeMoreCard: FC<Props> = ({linkTo}) => {
-  return <div> 
-    <Link to={`${linkTo}`}> </Link>
-  </div>;
+const SeeMoreCard: FC<Props> = ({ linkTo }) => {
+  return (
+    <div>
+      <Link to={`${linkTo}`}> </Link>
+    </div>
+  );
 };
 
 export default SeeMoreCard;

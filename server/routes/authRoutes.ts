@@ -1,20 +1,18 @@
 import express from "express";
-import { auth, db} from "../firebaseAdmin.ts";
-import { validateSignup, validateLogin } from "../../shared/validation.ts";
+import { auth, db } from "../firebaseAdmin.ts";
+import { validateSignup } from "../../shared/validation.ts";
 
 const router = express.Router();
 
 router.post("/signup", async (req, res) => {
-  let { email, password, username, displayName } = req.body;
-
   try {
-    validateSignup(email, password, username, displayName);
+    let { email, password, username, displayName } = validateSignup(req.body);
 
-    const usersRef = db.collection('users');
+    const usersRef = db.collection("users");
     const snapshot = await usersRef.get();
-    
-    snapshot.forEach(doc => {
-      if (username === doc.data().username) throw new Error("Username is taken.");
+
+    snapshot.forEach((doc) => {
+      if (username.toLowerCase() === doc.data().username.toLowerCase()) throw new Error("Username is taken.");
     });
 
     const userRecord = await auth.createUser({
@@ -32,7 +30,7 @@ router.post("/signup", async (req, res) => {
       username,
       displayName,
       email,
-      friends, 
+      friends,
       pendingInvites,
       reviews,
       collections,
@@ -46,11 +44,9 @@ router.post("/signup", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  let { token, email, password } = req.body;
+  let { token } = req.body;
 
-  try {      
-    validateLogin(email, password);
-
+  try {
     if (!token) {
       return res.status(400).json({ error: "No token provided" });
     }
@@ -61,7 +57,6 @@ router.post("/login", async (req, res) => {
       uid: decodedToken.uid,
       email: decodedToken.email,
     });
-    
   } catch (e: any) {
     return res.status(401).json({ error: "Invalid token" });
   }

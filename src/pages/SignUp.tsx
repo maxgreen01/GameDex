@@ -4,14 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { validateSignup } from "../../shared/validation";
 
 //UI IMPORTS//////////////////////////////////////
-import {
-  Button,
-  Box,
-  AbsoluteCenter,
-  Input,
-  Stack,
-  IconButton,
-} from "@chakra-ui/react";
+import { Button, Box, AbsoluteCenter, Input, Stack, IconButton } from "@chakra-ui/react";
 import { LuChevronLeft } from "react-icons/lu";
 import toast from "react-hot-toast";
 
@@ -29,19 +22,15 @@ function Signup() {
     setLoading(true);
 
     try {
-      validateSignup(email, password, username, displayName);
+      let body = { email, password, username, displayName };
+      body = validateSignup(body);
 
-      const res = await fetch("http://localhost:3000/auth/signup", {
+      const res = await fetch("/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          email,
-          password,
-          username,
-          displayName,
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -81,28 +70,34 @@ function Signup() {
             <h1>Signup</h1>
 
             <form onSubmit={handleSignup}>
-              <Stack gap="4" maxW="lg">
-              <Input
-                placeholder="Email"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Input
-                placeholder="Password"
-                type="password"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <Input
-                placeholder="Username"
-                onChange={(e) => setUsername(e.target.value)}
-              />
-              <Input
-                placeholder="Display Name"
-                onChange={(e) => setDisplayName(e.target.value)}
-              />
+              <Stack
+                gap="4"
+                maxW="lg"
+              >
+                <Input
+                  placeholder="Email"
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <Input
+                  placeholder="Password"
+                  type="password"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <Input
+                  placeholder="Username"
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+                <Input
+                  placeholder="Display Name"
+                  onChange={(e) => setDisplayName(e.target.value)}
+                />
 
-              <Button type="submit" disabled={loading}>
-                {loading ? "Creating..." : "Submit"}
-              </Button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                >
+                  {loading ? "Creating..." : "Submit"}
+                </Button>
               </Stack>
             </form>
 

@@ -24,10 +24,10 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    // for Chakra UI 
-    "paths": {           
+    // for Chakra UI
+    "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "server", "shared/validation.ts"]
+  "include": ["src", "server", "shared"]
 }
