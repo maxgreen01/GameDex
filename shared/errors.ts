@@ -18,6 +18,14 @@ export class BadRequestError extends StatusError {
   }
 }
 
+// An error class thrown when a user is denied access to a resource due to being unauthenticated.
+export class UnauthorizedError extends StatusError {
+  constructor(message: string) {
+    super(401, message);
+    this.name = this.constructor.name;
+  }
+}
+
 // An error class thrown when a desired resource cannot be found.
 export class NotFoundError extends StatusError {
   constructor(message: string) {

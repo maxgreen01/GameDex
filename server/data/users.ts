@@ -4,6 +4,12 @@ import type { ProfileData, User } from "../../shared/types.ts";
 
 const users = db.collection("users");
 
+export async function getUserById(id: string) {
+  const doc = await users.doc(id).get();
+  if (!doc.exists) throw new NotFoundError("User not found");
+  return doc.data() as User;
+}
+
 async function queryUserByUsername(username: string) {
   const query = await users.where("username", "==", username).get();
   if (query.empty) throw new NotFoundError("User not found");

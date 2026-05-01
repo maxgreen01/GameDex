@@ -167,6 +167,18 @@ export function validateEmail(data: unknown, label: string = "Email") {
   return email.toLowerCase();
 }
 
+// Throw an error if a string is provided but does not match the format of "Bearer <token>".
+// Return the string if it is valid; returns null if no string is provided.
+export function validateAuthHeader(data: unknown, label: string = "Authorization Header") {
+  if (data === undefined) return undefined;
+  const authHeader = validateString(data, label);
+  if (!authHeader.startsWith("Bearer ")) {
+    throw new BadRequestError(`${label} does not follow the required format`);
+  } else {
+    return authHeader.split("Bearer ")[1];
+  }
+}
+
 // Throw an error if a profile data object is invalid; return it if it is.
 export function validateProfileData(data: unknown, label: string = "Profile Data") {
   const obj = validateObject(data, label);
