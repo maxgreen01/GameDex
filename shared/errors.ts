@@ -26,6 +26,14 @@ export class UnauthorizedError extends StatusError {
   }
 }
 
+// An error class thrown when an user is denied access to a resource (even when authenticated).
+export class ForbiddenError extends StatusError {
+  constructor(message: string) {
+    super(403, message);
+    this.name = this.constructor.name;
+  }
+}
+
 // An error class thrown when a desired resource cannot be found.
 export class NotFoundError extends StatusError {
   constructor(message: string) {

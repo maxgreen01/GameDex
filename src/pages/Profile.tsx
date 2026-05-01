@@ -116,12 +116,14 @@ const Profile: FC<object> = () => {
                   <Text textStyle="sm">{user.username}</Text>
                 </VStack>
 
-                <Flex>
-                  <ProfileEditButton
-                    initialData={user}
-                    onAction={userMutation.mutate}
-                  />
-                </Flex>
+                {user.username === currentUser.username && (
+                  <Flex>
+                    <ProfileEditButton
+                      initialData={user}
+                      onAction={userMutation.mutate}
+                    />
+                  </Flex>
+                )}
               </Flex>
 
               <Flex>
