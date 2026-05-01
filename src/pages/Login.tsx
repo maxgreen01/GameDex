@@ -4,8 +4,6 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { login } from "../services/auth";
 import { validateLogin } from "../../shared/validation";
-import { getDoc, doc } from "firebase/firestore";
-import { db } from "../firebaseClient";
 //UI IMPORTS//////////////////////////////////////
 import { Button, Box, AbsoluteCenter, Input, Stack, IconButton } from "@chakra-ui/react";
 import { LuChevronLeft } from "react-icons/lu";
@@ -26,9 +24,6 @@ function Login() {
 
       const { user, token } = await login(loginData.email, loginData.password);
 
-      const snap = await getDoc(doc(db, "users", user.uid));
-      const username = snap.data()?.username;
-
       const response = await fetch("/auth/login", {
         method: "POST",
         headers: {
@@ -41,7 +36,7 @@ function Login() {
       localStorage.setItem("token", token);
 
       toast.success(`Welcome back ${user.email}`);
-      navigate(`/mainfeed/${username}`);
+      navigate("/mainfeed");
     } catch (err: any) {
       toast.error(err.message);
     } finally {

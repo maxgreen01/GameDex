@@ -54,7 +54,7 @@ const Navbar: FC<Props> = ({ username, profilePage }) => {
         align="center"
       >
         {/* logo */}
-        <Link to={`/mainfeed/:${username}`}>
+        <Link to={`/mainfeed`}>
           <Flex
             align="center"
             gap={2}
