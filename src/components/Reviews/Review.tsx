@@ -58,11 +58,11 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
     setEditLoading(true);
     //validation
     //should be 500 characters or less.
-    editedComment = validateString(editedComment, "Review", 0, 500);
 
-    //send editedComment state to database to edit
-    console.log(editedComment);
+    setEditLoading(true);
+
     try {
+      editedComment = validateString(editedComment, "Review", 0, 500);
       let { data: updatedReview } = await axios.put(`http://localhost:3000/api/reviews/${reviewId}`, {
         userId: username,
         rating: editedRating,
@@ -71,16 +71,15 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
 
       if (updatedReview._id) {
         toast.success("Review updated!");
-        if (setUserReview) {
-          setUserReview(updatedReview);
-        }
+        if (setUserReview) setUserReview(updatedReview);
+        setEditReview(false);
       }
     } catch (e: any) {
       console.log(e);
       toast.error(e.message);
+      setEditedComment(comment);
     }
 
-    setEditReview(false);
     setEditLoading(false);
   }
 
@@ -132,14 +131,13 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
             {profilePage ? (
               <Link to={`/games/${gameId}`}>
                 <Flex direction={"column"}>
-                  <Heading size="md">
-                    {gameTitle ? gameTitle : "Game Title"}
-                    {""}
-                  </Heading>
-                  <Rating
-                    readOnly={true}
-                    value={rating}
-                  />
+                  <Heading size="md">{gameTitle ? gameTitle : "Game Title"}</Heading>
+                  {!editReview && (
+                    <Rating
+                      readOnly={true}
+                      value={editedRating}
+                    />
+                  )}
                 </Flex>
               </Link>
             ) : (
@@ -205,11 +203,21 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
             </Flex>
           </Flex>
           <Flex pt={2}>
-            <Rating
-              readOnly={!editReview}
-              value={editedRating}
-              onValueChange={(newValue) => setEditedRating(newValue)}
-            />
+            {!profilePage ? (
+              // game details page
+              <Rating
+                readOnly={!editReview}
+                value={editedRating}
+                onValueChange={(newValue) => setEditedRating(newValue)}
+              />
+            ) : editReview ? (
+              // profile page, editing
+              <Rating
+                readOnly={false}
+                value={editedRating}
+                onValueChange={(newValue) => setEditedRating(newValue)}
+              />
+            ) : null}
           </Flex>
         </Card.Header>
         <Card.Body color="fg.muted">

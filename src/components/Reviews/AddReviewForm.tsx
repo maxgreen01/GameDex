@@ -133,7 +133,7 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
                 value={comment}
                 onChange={(e) => commentOnChange(e)}
               />
-              <Field.ErrorText>{"Must be 120 characters or less!"}</Field.ErrorText>
+              <Field.ErrorText>{"Must be 500 characters or less!"}</Field.ErrorText>
             </Field.Root>
             <Button type="submit">Submit</Button>
           </form>

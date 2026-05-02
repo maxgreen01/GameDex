@@ -59,7 +59,7 @@ const GameDetails: FC<Props> = ({}) => {
   const { id } = useParams();
   let navigate = useNavigate();
 
-  //calculates the ratings according to the review
+  //calculates the ratings according to the reviews. TODO: NEEDS TO BE REFLECTED IN THE MAIN DASHBOARD AND GAME DETAILS
   useEffect(() => {
     if (reviews.length === 0) return;
     let avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
@@ -262,7 +262,9 @@ const GameDetails: FC<Props> = ({}) => {
                   />
                 )}
 
-                {reviews.length > 0 ? (
+                {reviews.length === 0 && !userReview ? (
+                  <Text>No reviews yet. Be the first to write one!</Text>
+                ) : (
                   reviews.map((review) => (
                     <Review
                       key={review._id}
@@ -275,8 +277,6 @@ const GameDetails: FC<Props> = ({}) => {
                       comment={review.text}
                     />
                   ))
-                ) : (
-                  <Text>No reviews yet. Be the first to write one!</Text>
                 )}
               </ScrollArea.Content>
             </ScrollArea.Viewport>

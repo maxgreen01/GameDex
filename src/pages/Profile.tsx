@@ -9,12 +9,15 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../firebaseClient";
 import { doc, getDoc } from "firebase/firestore";
 import type { ProfileData, User } from "../../shared/types";
+import type { ReviewType } from "@/types/types";
+import axios from "axios";
 
 //UI IMPORTS//////////////////////////////////////
 import Navbar from "@/components/Navbar";
 import ProfileEditButton from "@/components/Profile/ProfileEditButton.tsx";
 import Review from "@/components/Reviews/Review";
-import { Flex, Box, Avatar, VStack, Text, Separator, Tabs } from "@chakra-ui/react";
+import { Flex, Box, Avatar, VStack, Text, Separator, Tabs, Spinner } from "@chakra-ui/react";
+import toast from "react-hot-toast";
 
 const EMPTY_USER: User = {
   username: "N/A",
@@ -32,8 +35,9 @@ const Profile: FC<object> = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User>(EMPTY_USER);
   const [data, setData] = useState<ProfileData>(EMPTY_USER);
+  const [userReviews, setUserReviews] = useState<ReviewType[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
 
-  // IS THIS RIGHT
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
@@ -45,18 +49,38 @@ const Profile: FC<object> = () => {
 
       if (snap.exists()) {
         const data = snap.data() as User;
-        console.log("Data: ", data);
         setUser(data);
         setData(data);
+
+        let { data: reviews } = await axios.get(`http://localhost:3000/api/reviews/user/${data.username}`);
+        if (reviews) {
+          let reviewsWithTitles = await Promise.all(
+            reviews.map(async (review: ReviewType) => {
+              let { data: game } = await axios.get(`http://localhost:3000/api/games/${review.gameId}`);
+              return { ...review, gameTitle: game?.name ?? review.gameId };
+            })
+          );
+          setUserReviews(reviewsWithTitles);
+          setReviewsLoading(false);
+        }
       }
     });
 
     return () => unsubscribe();
   }, [navigate]);
 
-  const updateUser = () => {
-    // TODO: Update data on server side (once we write the corresponding API call)
-    setUser((user) => ({ ...user, ...data }));
+  const updateUser = async () => {
+    try {
+      await axios.put(`http://localhost:3000/api/users/${user.username}`, {
+        //Profile update route
+        displayName: data.displayName,
+        description: data.description,
+      });
+      setUser((user) => ({ ...user, ...data }));
+      toast.success("Profile updated!");
+    } catch (e) {
+      toast.error("Failed to update profile.");
+    }
   };
 
   return (
@@ -136,10 +160,37 @@ const Profile: FC<object> = () => {
             <Tabs.Trigger value="collections">Collections</Tabs.Trigger>
           </Tabs.List>
           <Tabs.Content value="reviews">
-            <Text>
-              {/* WHERE REVIEW STACK WILL GO */}
-              {/* <Review></Review> */}
-            </Text>
+            {reviewsLoading ? (
+              <Flex
+                justify="center"
+                p={8}
+              >
+                <Spinner
+                  size="lg"
+                  color="white"
+                />
+              </Flex>
+            ) : userReviews.length > 0 ? (
+              userReviews.map((review) => (
+                <Review
+                  key={review._id}
+                  reviewId={review._id ?? ""}
+                  rating={review.rating}
+                  profilePage={true}
+                  usersReview={true}
+                  gameId={review.gameId}
+                  gameTitle={review.gameTitle}
+                  username={user.username}
+                  displayName={user.displayName}
+                  comment={review.text}
+                  setUserReview={(val) => {
+                    if (!val) setUserReviews((prev) => prev.filter((r) => r._id !== review._id));
+                  }}
+                />
+              ))
+            ) : (
+              <Text>No reviews yet.</Text>
+            )}
           </Tabs.Content>
           <Tabs.Content value="collections">collections</Tabs.Content>
         </Tabs.Root>
