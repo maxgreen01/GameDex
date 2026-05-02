@@ -1,8 +1,8 @@
 import { Router } from "express";
+import { getUserByUsername, updateUserProfile } from "../data/users.ts";
 import { type AuthenticatedRequest, requireAuth } from "../middleware/requireAuth.ts";
 import { ForbiddenError, respondWithError } from "../../shared/errors.ts";
 import { validateProfileData, validateString } from "../../shared/validation.ts";
-import { getUserByUsername, updateUserProfile } from "../data/users.ts";
 
 const router = Router();
 
@@ -23,7 +23,7 @@ router.put("/:username", requireAuth, async (req, res) => {
     if (username !== user.username) throw new ForbiddenError("A user can only update their own profile");
     const profileData = validateProfileData(req.body);
     await updateUserProfile(username, profileData);
-    return res.status(200).send();
+    return res.status(201).send();
   } catch (e) {
     return respondWithError(res, e);
   }
