@@ -10,7 +10,7 @@ export async function getUserById(id: string) {
   return doc.data() as User;
 }
 
-async function queryUserByUsername(username: string) {
+export async function queryUserByUsername(username: string) {
   const query = await users.where("username", "==", username).get();
   if (query.empty) throw new NotFoundError("User not found");
   return query;

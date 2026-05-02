@@ -1,3 +1,5 @@
+export type WithId<T> = T & { _id: string };
+
 export type User = {
   username: string;
   email: string;
@@ -6,7 +8,7 @@ export type User = {
   friends: string[];
   pendingInvites: string[];
   reviews: string[];
-  createdAt: number; // TODO: Replace with Date?
+  createdAt: number;
 };
 
 export type SignupData = {
@@ -24,4 +26,22 @@ export type LoginData = {
 export type ProfileData = {
   displayName: string;
   description: string;
+};
+
+export type Collection = {
+  name: string;
+  userId: string;
+  gameIds: string[];
+  createdAt: number;
+  updatedAt?: number;
+};
+
+export type CollectionCreationData = {
+  name: string;
+};
+
+export type CollectionUpdateData = {
+  name?: string;
+  gameIdsToAdd?: string[];
+  gameIdsToRemove?: string[];
 };
