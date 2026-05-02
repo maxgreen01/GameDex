@@ -21,10 +21,7 @@ function MainFeed() {
 
   return (
     <div>
-      <Navbar
-        profilePage={false}
-        username={user?.username ?? "N/A"}
-      ></Navbar>
+      <Navbar />
       {/* <h1>Welcome, {username}!</h1> */}
       {/* <button onClick={handleLogout}>Log Out</button> */}
       <SearchBar></SearchBar>

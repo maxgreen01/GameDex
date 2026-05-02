@@ -19,11 +19,10 @@ import AuthContext from "./Auth/AuthContext";
 //-------------------------------------------------//
 
 interface Props {
-  username: string;
-  profilePage: boolean;
+  profilePage?: boolean;
 }
 
-const Navbar: FC<Props> = ({ username, profilePage }) => {
+const Navbar: FC<Props> = ({ profilePage = false }) => {
   const [user, setUser] = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -39,6 +38,7 @@ const Navbar: FC<Props> = ({ username, profilePage }) => {
     }
   };
 
+  const username = user?.username ?? "N/A";
   return (
     <Box
       w="100%"

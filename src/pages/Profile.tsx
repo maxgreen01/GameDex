@@ -51,10 +51,7 @@ const Profile: FC<object> = () => {
     const user = userQuery.data as User;
     return (
       <div>
-        <Navbar
-          username={currentUser?.username ?? "N/A"}
-          profilePage={true}
-        ></Navbar>
+        <Navbar profilePage />
         <Flex direction="column">
           {/* Profile Header */}
           <Box w="100%">

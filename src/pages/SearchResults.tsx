@@ -23,7 +23,6 @@ const SearchResults: FC<SearchResultsProps> = () => {
   const [error, setError] = useState<string | null>(null); //error state
 
   const navigate = useNavigate();
-  const [user] = useContext(AuthContext);
 
   //Fires whenever the searchQuery term changes. Grabs data from /search route, and sets results.
   useEffect(() => {
@@ -54,10 +53,7 @@ const SearchResults: FC<SearchResultsProps> = () => {
   //The HTML that is rendered, including navbar, searchbar, and results. Spinner is included if loading is true.
   return (
     <>
-      <Navbar
-        username={user?.username ?? "N/A"}
-        profilePage={false}
-      />
+      <Navbar />
       <Box p="8">
         <Heading
           mb="8"
