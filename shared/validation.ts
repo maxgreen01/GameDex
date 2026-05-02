@@ -1,6 +1,7 @@
 // Collection of validation functions used by the client and server
 
 import validator from "validator";
+import { BadRequestError } from "./errors.ts";
 import { parse, isValid, compareAsc } from "date-fns";
 import type { LoginData, SignupData } from "./types.ts";
 
@@ -11,9 +12,6 @@ export class ValidationError extends Error {
     this.name = this.constructor.name;
   }
 }
-import { BadRequestError } from "./errors.ts";
-import type { LoginData, ProfileData, SignupData } from "./types.ts";
-
 //
 // ============ String Validation ============
 //
