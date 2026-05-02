@@ -51,8 +51,10 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
       return;
     }
 
-    if (rating === 0) if (errorMessage) return;
-
+    if (rating === 0) {
+      setErrorMessage("Please provide a rating!");
+      return;
+    }
     setLoading(true);
     //setUserReview(newReview);
 
@@ -113,7 +115,10 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
                 pl={2}
                 count={5}
                 value={rating}
-                onValueChange={({ value }) => setRating(value)}
+                onValueChange={({ value }) => {
+                  console.log(value, typeof value);
+                  setRating(value);
+                }}
                 allowHalf
               >
                 <RatingGroup.HiddenInput />

@@ -66,7 +66,7 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "Invalid displayName" });
     }
 
-    if (typeof rating !== "number" || rating < 1 || rating > 5) {
+    if (typeof rating !== "number" || rating > 5) {
       return res.status(400).json({ error: "Invalid rating" });
     }
 
@@ -284,7 +284,7 @@ router.put("/:reviewId", async (req, res) => {
       return res.status(400).json({ error: "Invalid user id" });
     }
 
-    if (typeof rating !== "number" || rating < 1 || rating > 5) {
+    if (typeof rating !== "number" || rating > 5) {
       return res.status(400).json({ error: "Invalid rating" });
     }
 

@@ -205,7 +205,7 @@ const GameDetails: FC<Props> = ({}) => {
                     <Heading>{name}</Heading>
                     <Rating
                       readOnly={true}
-                      value={Math.round(Number(rating) * 2) / 2}
+                      value={Math.max(0.5, Math.round(Number(rating) * 2) / 2)}
                       starSize="lg"
                     />
                     <Flex>
