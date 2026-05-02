@@ -3,7 +3,6 @@
 //IMPORTS/////////////////////////////////////////
 import type { FC } from "react";
 import { useState } from "react";
-import getUserDetails from "@/services/users";
 import type { ReviewType } from "@/types/types";
 import axios from "axios";
 //import * as reviewFunctions from "../../../server/data/reviews";

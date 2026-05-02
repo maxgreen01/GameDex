@@ -1,50 +1,29 @@
 //IMPORTS////////////////////////////////////////
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../firebaseClient";
-import type { User } from "firebase/auth";
+import { useContext } from "react";
+import { Navigate } from "react-router-dom";
 //UI IMPORTS/////////////////////////////////////
+import AuthContext from "../components/Auth/AuthContext";
 import Carousel from "../components/Carousel/Carousel";
 import Navbar from "@/components/Navbar";
 import SearchBar from "../components/SearchBar";
 
 function MainFeed() {
-  const navigate = useNavigate();
+  const [user] = useContext(AuthContext);
 
-  const [user, setUser] = useState<User | null>(null);
-  const [username, setUsername] = useState<string>("");
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) {
-        navigate("/login");
-        return;
-      }
-
-      setUser(firebaseUser);
-
-      const snap = await getDoc(doc(db, "users", firebaseUser.uid));
-
-      if (snap.exists()) {
-        const data = snap.data();
-        setUsername(data.username);
-      } else {
-        setUsername("User");
-      }
-    });
-
-    return () => unsubscribe();
-  }, [navigate]);
-
-  if (!user) return null;
+  if (user === null) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
+  }
 
   return (
     <div>
       <Navbar
         profilePage={false}
-        username={username}
+        username={user?.username ?? "N/A"}
       ></Navbar>
       {/* <h1>Welcome, {username}!</h1> */}
       {/* <button onClick={handleLogout}>Log Out</button> */}

@@ -3,11 +3,8 @@
 
 //IMPORTS////////////////////////////////////////
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type FC, useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "../firebaseClient";
-import { doc, getDoc } from "firebase/firestore";
+import { type FC, useContext } from "react";
+import { useParams } from "react-router-dom";
 import type { ProfileData, User } from "../../shared/types";
 import { getUserByUsername, updateUserProfile } from "../data/users.ts";
 
@@ -17,6 +14,7 @@ import ProfileEditButton from "@/components/Profile/ProfileEditButton.tsx";
 import Review from "@/components/Reviews/Review";
 import { Flex, Box, Avatar, VStack, Text, Separator, Tabs } from "@chakra-ui/react";
 import NotFoundPage from "@/pages/NotFoundPage.tsx";
+import AuthContext from "../components/Auth/AuthContext.tsx";
 
 const EMPTY_USER: User = {
   username: "N/A",
@@ -33,28 +31,7 @@ const Profile: FC<object> = () => {
   const { username } = useParams();
   if (username === undefined) return <NotFoundPage />;
 
-  const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState<User>(EMPTY_USER);
-
-  // IS THIS RIGHT
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) {
-        navigate("/login");
-        return;
-      }
-
-      const snap = await getDoc(doc(db, "users", firebaseUser.uid));
-
-      if (snap.exists()) {
-        const data = snap.data() as User;
-        console.log("Data: ", data);
-        setCurrentUser(data);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [navigate]);
+  const [currentUser] = useContext(AuthContext);
 
   const queryClient = useQueryClient();
   const userQuery = useQuery({
@@ -75,7 +52,7 @@ const Profile: FC<object> = () => {
     return (
       <div>
         <Navbar
-          username={currentUser.username}
+          username={currentUser?.username ?? "N/A"}
           profilePage={true}
         ></Navbar>
         <Flex direction="column">
@@ -116,7 +93,7 @@ const Profile: FC<object> = () => {
                   <Text textStyle="sm">{user.username}</Text>
                 </VStack>
 
-                {user.username === currentUser.username && (
+                {currentUser && user.username === currentUser.username && (
                   <Flex>
                     <ProfileEditButton
                       initialData={user}

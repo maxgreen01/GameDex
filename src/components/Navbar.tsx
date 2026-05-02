@@ -6,7 +6,7 @@
 //if user has pending friend requests we could put a border around the icon in a color>
 
 //IMPORTS/////////////////////////////////////////
-import type { FC } from "react";
+import { type FC, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/logo.svg";
 import { signOut } from "firebase/auth";
@@ -15,6 +15,7 @@ import { auth } from "../firebaseClient";
 //UI IMPORTS//////////////////////////////////////
 import { Box, Button, Flex, Avatar, Image, Text, Menu, Portal } from "@chakra-ui/react";
 import toast from "react-hot-toast";
+import AuthContext from "./Auth/AuthContext";
 //-------------------------------------------------//
 
 interface Props {
@@ -23,14 +24,17 @@ interface Props {
 }
 
 const Navbar: FC<Props> = ({ username, profilePage }) => {
+  const [user, setUser] = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      setUser(undefined); // Mark client-side auth state as not yet determined
       toast.success("Logout successful!");
       navigate("/login");
     } catch (e: any) {
+      setUser(user); // Revert client-side auth state change
       toast.error(e.message || "Logout failed.");
     }
   };
