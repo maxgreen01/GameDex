@@ -12,6 +12,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import type { ReviewType } from "@/types/types";
+import { validateString } from "../../../shared/validation";
 //UI IMPORTS//////////////////////////////////////
 import { Card, Heading, VStack, Flex, IconButton, Input, Text, Avatar, Button, Spinner } from "@chakra-ui/react";
 import Rating from "../Rating";
@@ -45,6 +46,7 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
   // if editLoading is true, send it to parent to make page load?
   let [editLoading, setEditLoading] = useState(false);
   let [editedComment, setEditedComment] = useState(comment);
+  let [editedRating, setEditedRating] = useState(rating);
   let [loading, setLoading] = useState(false);
 
   //edit review button
@@ -52,16 +54,32 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
     setEditReview(true);
   }
 
-  function onSubmitEdit() {
+  async function onSubmitEdit() {
     setEditLoading(true);
     //validation
     //should be 500 characters or less.
-    //sql injection? xxs?
+    editedComment = validateString(editedComment, "Review", 0, 500);
 
     //send editedComment state to database to edit
     console.log(editedComment);
-    //USEEFFECT SO EDITEDCOMMENT IS DISPLAYED wait the state does that alr but we wanna make sure we are pulling from the database.
-    //give haptic to let them know it was successul
+    try {
+      let { data: updatedReview } = await axios.put(`http://localhost:3000/api/reviews/${reviewId}`, {
+        userId: username,
+        rating: editedRating,
+        text: editedComment,
+      });
+
+      if (updatedReview._id) {
+        toast.success("Review updated!");
+        if (setUserReview) {
+          setUserReview(updatedReview);
+        }
+      }
+    } catch (e: any) {
+      console.log(e);
+      toast.error(e.message);
+    }
+
     setEditReview(false);
     setEditLoading(false);
   }
@@ -188,19 +206,24 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
           </Flex>
           <Flex pt={2}>
             <Rating
-              readOnly={true}
-              value={rating}
+              readOnly={!editReview}
+              value={editedRating}
+              onValueChange={(newValue) => setEditedRating(newValue)}
             />
           </Flex>
         </Card.Header>
         <Card.Body color="fg.muted">
           {editReview ? (
-            <Input
-              value={editedComment}
-              onChange={(e) => setEditedComment(e.target.value)}
-            ></Input>
+            <div>
+              <Input
+                value={editedComment}
+                onChange={(e) => setEditedComment(e.target.value)}
+              ></Input>
+            </div>
           ) : (
-            <Text>{editedComment}</Text>
+            <div>
+              <Text>{editedComment}</Text>
+            </div>
           )}
         </Card.Body>
       </Card.Root>

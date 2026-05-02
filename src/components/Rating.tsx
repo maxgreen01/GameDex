@@ -12,16 +12,18 @@ interface Props {
   readOnly: boolean; //not editable rating
   value: Number; //# stars colored in
   starSize?: "sm" | "lg"; //sm default, larger for gameDetails
+  onValueChange?: (value: number) => void; // optional so readOnly usage doesn't need it
 }
 
-const Rating: FC<Props> = ({ readOnly, value, starSize }) => {
+const Rating: FC<Props> = ({ readOnly, value, starSize, onValueChange }) => {
   return (
     <div>
       <RatingGroup.Root
         {...(readOnly && { readOnly: true })}
         allowHalf
         count={5}
-        defaultValue={Number(value)}
+        value={Number(value)}
+        onValueChange={({ value }) => onValueChange?.(value)}
         size={starSize ? starSize : "sm"}
       >
         <RatingGroup.HiddenInput />

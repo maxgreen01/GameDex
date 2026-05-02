@@ -33,7 +33,7 @@ import type { Platform, userDetails } from "../types/types.ts";
 import getUserDetails from "@/services/users.ts";
 import { useNavigate } from "react-router-dom";
 //UI IMPORTS//////////////////////////////////////
-import { Box, Flex, Image, ScrollArea, Card, Heading, Text } from "@chakra-ui/react";
+import { Box, Flex, Image, ScrollArea, Card, Heading, Text, Spinner } from "@chakra-ui/react";
 import Rating from "./Rating.tsx";
 import Review from "./Reviews/Review.tsx";
 import AddReviewForm from "./Reviews/AddReviewForm.tsx";
@@ -59,6 +59,13 @@ const GameDetails: FC<Props> = ({}) => {
   const { id } = useParams();
   let navigate = useNavigate();
 
+  //calculates the ratings according to the review
+  useEffect(() => {
+    if (reviews.length === 0) return;
+    let avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+    setRating(Math.round(avg * 2) / 2);
+  }, [reviews]);
+
   //fetchingGame
   useEffect(() => {
     setLoading(true);
@@ -66,12 +73,9 @@ const GameDetails: FC<Props> = ({}) => {
     async function loadGame() {
       try {
         let { data } = await axios.get(`http://localhost:3000/api/games/${id}`);
-        console.log("Data: ", data);
 
         setBackgroundImage(data.background_image);
         setName(data.name);
-        // CALCULATE RATING
-        setRating(4);
         setPlatforms(data.platforms);
         setDescription(data.description);
       } catch (e) {
@@ -107,13 +111,6 @@ const GameDetails: FC<Props> = ({}) => {
     getReviews();
   }, [id]);
 
-  //if user changes, deletes or adds a review
-  useEffect(() => {
-    //adds
-    //changes
-    //deletes
-  }, [userReview]);
-
   //only gets most common platforms from given ones
   let showPlatforms = platforms?.filter((p) => {
     return p?.platform?.slug && Object.keys(allPlatforms).includes(p.platform.slug);
@@ -136,7 +133,20 @@ const GameDetails: FC<Props> = ({}) => {
       return true;
     });
 
-  //add loading and if user
+  if (loading) {
+    return (
+      <Flex
+        h="100vh"
+        align="center"
+        justify="center"
+      >
+        <Spinner
+          size="xl"
+          color="white"
+        />
+      </Flex>
+    );
+  }
   return (
     <div>
       <Flex h="100vh">
@@ -154,16 +164,7 @@ const GameDetails: FC<Props> = ({}) => {
                 spaceY="4"
                 textStyle="sm"
               >
-                {/* <Image
-                  src={props.background_image}
-                  alt={`Game image for ${props.name}`}
-                  w="100%"
-                  h="100%"
-                  objectFit="cover"
-                ></Image> */}
-
                 <Card.Root
-                  //   size="sm"
                   h="100vh"
                   maxW="100%"
                   overflowY={"auto"}
@@ -201,7 +202,6 @@ const GameDetails: FC<Props> = ({}) => {
                     w="100%"
                   >
                     {/*lineClamp={2} to card title to cut off long titles*/}
-                    {/*SHOULD I DO DYNAMIC SIZING -> CAROUSELS  MAY BE DIFF SIZES OR CUT OFFS  */}
                     <Heading>{name}</Heading>
                     <Rating
                       readOnly={true}
@@ -255,7 +255,6 @@ const GameDetails: FC<Props> = ({}) => {
                   />
                 ) : (
                   <AddReviewForm
-                    // hope this doesnt error
                     gameId={id ?? ""}
                     username={user?.username ?? "Unknown User"}
                     displayName={user?.displayName ?? "Unknown User"}
@@ -263,9 +262,10 @@ const GameDetails: FC<Props> = ({}) => {
                   />
                 )}
 
-                {reviews ? (
+                {reviews.length > 0 ? (
                   reviews.map((review) => (
                     <Review
+                      key={review._id}
                       reviewId={review._id ?? ""}
                       rating={review.rating}
                       profilePage={false}

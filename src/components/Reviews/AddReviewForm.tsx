@@ -45,10 +45,15 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
       setErrorMessage("You haven't typed anything yet!");
       return;
     }
+
+    if (comment.length > 500) {
+      setErrorMessage("Comment cannot exceed 500 characters!");
+      return;
+    }
+
     if (rating === 0) if (errorMessage) return;
 
     setLoading(true);
-    //validation
     //setUserReview(newReview);
 
     await axios.post(`http://localhost:3000/api/reviews`, {
