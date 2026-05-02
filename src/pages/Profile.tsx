@@ -2,22 +2,23 @@
 //FINISH EDIT BUTTON FEATURE
 
 //IMPORTS////////////////////////////////////////
-import type { FC } from "react";
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { type FC, useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../firebaseClient";
 import { doc, getDoc } from "firebase/firestore";
 import type { ProfileData, User } from "../../shared/types";
 import type { ReviewType } from "@/types/types";
 import axios from "axios";
+import { getUserByUsername, updateUserProfile } from "../data/users.ts";
 
 //UI IMPORTS//////////////////////////////////////
 import Navbar from "@/components/Navbar";
 import ProfileEditButton from "@/components/Profile/ProfileEditButton.tsx";
 import Review from "@/components/Reviews/Review";
 import { Flex, Box, Avatar, VStack, Text, Separator, Tabs, Spinner } from "@chakra-ui/react";
-import toast from "react-hot-toast";
+import NotFoundPage from "@/pages/NotFoundPage.tsx";
 
 const EMPTY_USER: User = {
   username: "N/A",
@@ -31,12 +32,28 @@ const EMPTY_USER: User = {
 };
 
 const Profile: FC<object> = () => {
-  // Logout functionality
+  const { username } = useParams();
+
+  if (username === undefined) return <NotFoundPage />;
+
   const navigate = useNavigate();
-  const [user, setUser] = useState<User>(EMPTY_USER);
-  const [data, setData] = useState<ProfileData>(EMPTY_USER);
+  const queryClient = useQueryClient();
+
+  const [currentUser, setCurrentUser] = useState<User>(EMPTY_USER);
   const [userReviews, setUserReviews] = useState<ReviewType[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
+
+  const userQuery = useQuery({
+    queryKey: ["getUser", username],
+    queryFn: () => getUserByUsername(username),
+    placeholderData: EMPTY_USER,
+    retry: false,
+  });
+
+  const userMutation = useMutation<void, void, ProfileData>({
+    mutationFn: (profileData) => updateUserProfile(username, profileData),
+    onSuccess: () => queryClient.invalidateQueries(),
+  });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -49,46 +66,61 @@ const Profile: FC<object> = () => {
 
       if (snap.exists()) {
         const data = snap.data() as User;
-        setUser(data);
-        setData(data);
-
-        let { data: reviews } = await axios.get(`http://localhost:3000/api/reviews/user/${data.username}`);
-        if (reviews) {
-          let reviewsWithTitles = await Promise.all(
-            reviews.map(async (review: ReviewType) => {
-              let { data: game } = await axios.get(`http://localhost:3000/api/games/${review.gameId}`);
-              return { ...review, gameTitle: game?.name ?? review.gameId };
-            })
-          );
-          setUserReviews(reviewsWithTitles);
-          setReviewsLoading(false);
-        }
+        setCurrentUser(data);
       }
     });
 
     return () => unsubscribe();
   }, [navigate]);
 
-  const updateUser = async () => {
-    try {
-      await axios.put(`http://localhost:3000/api/users/${user.username}`, {
-        //Profile update route
-        displayName: data.displayName,
-        description: data.description,
-      });
-      setUser((user) => ({ ...user, ...data }));
-      toast.success("Profile updated!");
-    } catch (e) {
-      toast.error("Failed to update profile.");
+  useEffect(() => {
+    if (!userQuery.data || userQuery.data.username === "N/A") return;
+
+    async function getUserReviews() {
+      try {
+        setReviewsLoading(true);
+
+        let { data: reviews } = await axios.get(
+          `http://localhost:3000/api/reviews/user/${userQuery.data.username}`
+        );
+
+        let reviewsWithTitles = await Promise.all(
+          reviews.map(async (review: ReviewType) => {
+            let { data: game } = await axios.get(
+              `http://localhost:3000/api/games/${review.gameId}`
+            );
+
+            return {
+              ...review,
+              gameTitle: game?.name ?? review.gameId,
+            };
+          })
+        );
+
+        setUserReviews(reviewsWithTitles);
+      } catch {
+        setUserReviews([]);
+      } finally {
+        setReviewsLoading(false);
+      }
     }
-  };
+
+    getUserReviews();
+  }, [userQuery.data]);
+
+  if (userQuery.isError) {
+    return <NotFoundPage />;
+  }
+
+  const user = userQuery.data as User;
 
   return (
     <div>
       <Navbar
-        username={user.username}
+        username={currentUser.username}
         profilePage={true}
       ></Navbar>
+
       <Flex direction="column">
         {/* Profile Header */}
         <Box w="100%">
@@ -114,6 +146,7 @@ const Profile: FC<object> = () => {
                   <Avatar.Fallback name={user.username} />
                 </Avatar.Root>
               </Flex>
+
               <VStack
                 gap={0}
                 align="flex-start"
@@ -127,13 +160,14 @@ const Profile: FC<object> = () => {
                 <Text textStyle="sm">{user.username}</Text>
               </VStack>
 
-              <Flex>
-                <ProfileEditButton
-                  data={data}
-                  setData={setData}
-                  action={updateUser}
-                />
-              </Flex>
+              {user.username === currentUser.username && (
+                <Flex>
+                  <ProfileEditButton
+                    initialData={user}
+                    onAction={userMutation.mutate}
+                  />
+                </Flex>
+              )}
             </Flex>
 
             <Flex>
@@ -143,6 +177,7 @@ const Profile: FC<object> = () => {
               </VStack>
             </Flex>
           </Flex>
+
           <Flex m={8}>
             <Text>{user.description.length ? user.description : "(No description set.)"}</Text>
           </Flex>
@@ -159,6 +194,7 @@ const Profile: FC<object> = () => {
             <Tabs.Trigger value="reviews">Reviews</Tabs.Trigger>
             <Tabs.Trigger value="collections">Collections</Tabs.Trigger>
           </Tabs.List>
+
           <Tabs.Content value="reviews">
             {reviewsLoading ? (
               <Flex
@@ -184,7 +220,9 @@ const Profile: FC<object> = () => {
                   displayName={user.displayName}
                   comment={review.text}
                   setUserReview={(val) => {
-                    if (!val) setUserReviews((prev) => prev.filter((r) => r._id !== review._id));
+                    if (!val) {
+                      setUserReviews((prev) => prev.filter((r) => r._id !== review._id));
+                    }
                   }}
                 />
               ))
@@ -192,6 +230,7 @@ const Profile: FC<object> = () => {
               <Text>No reviews yet.</Text>
             )}
           </Tabs.Content>
+
           <Tabs.Content value="collections">collections</Tabs.Content>
         </Tabs.Root>
       </Flex>

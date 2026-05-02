@@ -1,17 +1,26 @@
 import { Button, CloseButton, Dialog, Field, Fieldset, IconButton, Input, Textarea } from "@chakra-ui/react";
-import type { Dispatch, FC, SetStateAction } from "react";
+import { type FC, useEffect, useState } from "react";
 import { MdModeEdit } from "react-icons/md";
 import type { ProfileData } from "../../../shared/types.ts";
 
 interface Props {
-  data: ProfileData;
-  setData: Dispatch<SetStateAction<ProfileData>>;
-  action: () => void;
+  initialData: ProfileData;
+  onAction: (data: ProfileData) => void;
 }
 
-const ProfileEditButton: FC<Props> = ({ data, setData, action }) => {
+const ProfileEditButton: FC<Props> = ({ initialData, onAction }) => {
+  const [data, setData] = useState<ProfileData>(initialData);
+
+  useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
+
   const onChange = (event: { target: { name: string; value: string } }) => {
     setData((user) => ({ ...user, [event.target.name]: event.target.value }));
+  };
+  const action = (_: FormData) => {
+    // TODO: Error checking (display name must not be blank)
+    onAction(data);
   };
 
   return (

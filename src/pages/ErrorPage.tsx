@@ -2,13 +2,12 @@
 import { Button } from "@chakra-ui/react";
 import type { FC } from "react";
 import { Link } from "react-router-dom";
-import { ValidationError } from "../../shared/validation";
+import { getErrorInfo } from "../../shared/errors.ts";
 
 //-------------------------------------------------//
 
 interface Props {
   error?:
-    | ValidationError
     | Error
     | {
         errno?: number; // optional error code, e.g. 404, 500, etc.
@@ -21,12 +20,8 @@ const ErrorPage: FC<Props> = ({ error }) => {
   let errorMessage: string | undefined;
 
   // Determine the error code and message based on the type of error
-  if (error instanceof ValidationError) {
-    errno = 400;
-    errorMessage = error.message;
-  } else if (error instanceof Error) {
-    errno = 500;
-    errorMessage = "Internal server error"; // Don't expose internal errors to the client
+  if (error instanceof Error) {
+    [errno, errorMessage] = getErrorInfo(error);
   } else {
     errno = error?.errno;
     errorMessage = error?.errorMessage;
