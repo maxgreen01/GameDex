@@ -141,7 +141,7 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
                 </Flex>
               </Link>
             ) : (
-              <Link to={`/profile/:${username}`}>
+              <Link to={`/profile/${username}`}>
                 <Flex
                   gap={4}
                   align="center"

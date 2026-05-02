@@ -145,7 +145,7 @@ const CarouselRow: FC<Props> = ({ category }) => {
             let { data } = await axios.get("/api/games/popular");
             //console.log("results", data.results);
             setCards(data.results);
-            console.log("Popular games: ", data.results);
+            // console.log("Popular games: ", data.results);
             // CALCULATE RATING
           } catch (e) {
             console.error(e);
