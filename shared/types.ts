@@ -25,6 +25,7 @@ export type LoginData = {
 
 export type ProfileData = {
   displayName: string;
+  username: string;
   description: string;
 };
 

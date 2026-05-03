@@ -48,6 +48,7 @@ export interface userDetails {
 export interface ReviewType {
   _id?: string;
   gameId: string;
+  gameTitle: string;
   userId: string;
   displayName: string;
   rating: number;

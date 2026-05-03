@@ -9,12 +9,21 @@ import type { User } from "firebase/auth";
 import Carousel from "../components/Carousel/Carousel";
 import Navbar from "@/components/Navbar";
 import SearchBar from "../components/SearchBar";
+import { Center, Spinner } from "@chakra-ui/react";
 
 function MainFeed() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState<User | null>(null);
   const [username, setUsername] = useState<string>("");
+  const [loadedCarousels, setLoadedCarousels] = useState<string[]>([]);
+
+  function handleCarouselLoaded(category: string) {
+    setLoadedCarousels((prev) => {
+      if (prev.includes(category)) return prev;
+      return [...prev, category];
+    });
+  }
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -40,6 +49,9 @@ function MainFeed() {
 
   if (!user) return null;
 
+  let expectedCarousels = username ? 4 : 2;
+  let allCarouselsLoaded = loadedCarousels.length >= expectedCarousels;
+
   return (
     <div>
       <Navbar
@@ -49,8 +61,42 @@ function MainFeed() {
       {/* <h1>Welcome, {username}!</h1> */}
       {/* <button onClick={handleLogout}>Log Out</button> */}
       <SearchBar></SearchBar>
-      <Carousel category="popular" />
-      <Carousel category="newest" />
+
+      {/* SPINNER */}
+      {!allCarouselsLoaded && (
+        <Center minH="400px">
+          <Spinner size="xl" />
+        </Center>
+      )}
+
+      {/* Hides everything or show everything. ALL OR NOTHING */}
+      <div style={{ display: allCarouselsLoaded ? "block" : "none" }}>
+        <Carousel
+          category="popular"
+          onLoaded={handleCarouselLoaded}
+        />
+        <Carousel
+          category="newest"
+          onLoaded={handleCarouselLoaded}
+        />
+
+        {/*  Only render once username is loaded to avoid making 
+      an API call with an empty/undefined username */}
+        {username && (
+          <Carousel
+            category="recommended"
+            username={username}
+            onLoaded={handleCarouselLoaded}
+          />
+        )}
+        {username && (
+          <Carousel
+            category="outside"
+            username={username}
+            onLoaded={handleCarouselLoaded}
+          />
+        )}
+      </div>
     </div>
   );
 }
