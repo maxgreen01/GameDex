@@ -23,9 +23,10 @@ interface Props {
   //cards will be made in the carousel
   // cards: React.ReactNode[]; // array of carousel cards
   username?: string; //optional prop as only the recommended algorithms need the username
+  onLoaded?: (category: string) => void;
 }
 
-const CarouselRow: FC<Props> = ({ category, username }) => {
+const CarouselRow: FC<Props> = ({ category, username, onLoaded }) => {
   const [cards, setCards] = useState<CarouselCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
@@ -160,7 +161,9 @@ const CarouselRow: FC<Props> = ({ category, username }) => {
           }
 
           try {
-            let { data } = await axios.get(`/api/games/recommended/${username}`);
+            let { data } = await axios.get(`/api/games/recommended/${username}`, {
+              params: { t: Date.now() }, // fuck cache
+            });
             setCards(data.results);
           } catch (e) {
             console.log(e);
@@ -174,7 +177,9 @@ const CarouselRow: FC<Props> = ({ category, username }) => {
           }
 
           try {
-            let { data } = await axios.get(`/api/games/outside/${username}`);
+            let { data } = await axios.get(`/api/games/outside/${username}`, {
+              params: { t: Date.now() },
+            });
             setCards(data.results);
           } catch (e) {
             console.log(e);
@@ -199,10 +204,12 @@ const CarouselRow: FC<Props> = ({ category, username }) => {
           // CALCULATE RATING
         }
       }
+
+      setLoading(false);
+      onLoaded?.(category);
     }
 
     loadGames();
-    setLoading(false);
   }, [category, username]);
 
   return (

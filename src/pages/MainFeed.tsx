@@ -16,15 +16,14 @@ function MainFeed() {
 
   const [user, setUser] = useState<User | null>(null);
   const [username, setUsername] = useState<string>("");
-  const [loadedCarousels, setLoadedCarousels] = useState(0);
+  const [loadedCarousels, setLoadedCarousels] = useState<string[]>([]);
 
-  const totalCarousels = username ? 3 : 2;
-
-  function handleCarouselLoaded() {
-    setLoadedCarousels((prev) => prev + 1);
+  function handleCarouselLoaded(category: string) {
+    setLoadedCarousels((prev) => {
+      if (prev.includes(category)) return prev;
+      return [...prev, category];
+    });
   }
-
-  const allCarouselsLoaded = loadedCarousels >= totalCarousels;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -50,6 +49,9 @@ function MainFeed() {
 
   if (!user) return null;
 
+  let expectedCarousels = username ? 4 : 2;
+  let allCarouselsLoaded = loadedCarousels.length >= expectedCarousels;
+
   return (
     <div>
       <Navbar
@@ -59,23 +61,42 @@ function MainFeed() {
       {/* <h1>Welcome, {username}!</h1> */}
       {/* <button onClick={handleLogout}>Log Out</button> */}
       <SearchBar></SearchBar>
-      <Carousel category="popular" />
-      <Carousel category="newest" />
 
-      {/*  Only render once username is loaded to avoid making 
+      {/* SPINNER */}
+      {!allCarouselsLoaded && (
+        <Center minH="400px">
+          <Spinner size="xl" />
+        </Center>
+      )}
+
+      {/* Hides everything or show everything. ALL OR NOTHING */}
+      <div style={{ display: allCarouselsLoaded ? "block" : "none" }}>
+        <Carousel
+          category="popular"
+          onLoaded={handleCarouselLoaded}
+        />
+        <Carousel
+          category="newest"
+          onLoaded={handleCarouselLoaded}
+        />
+
+        {/*  Only render once username is loaded to avoid making 
       an API call with an empty/undefined username */}
-      {username && (
-        <Carousel
-          category="recommended"
-          username={username}
-        />
-      )}
-      {username && (
-        <Carousel
-          category="outside"
-          username={username}
-        />
-      )}
+        {username && (
+          <Carousel
+            category="recommended"
+            username={username}
+            onLoaded={handleCarouselLoaded}
+          />
+        )}
+        {username && (
+          <Carousel
+            category="outside"
+            username={username}
+            onLoaded={handleCarouselLoaded}
+          />
+        )}
+      </div>
     </div>
   );
 }
