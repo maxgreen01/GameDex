@@ -9,12 +9,14 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../firebaseClient";
 import { doc, getDoc } from "firebase/firestore";
 import type { ProfileData, User } from "../../shared/types";
-import type { ReviewType } from "@/types/types";
+import type { CollectionSummary as TCollectionSummary, ReviewType } from "@/types/types";
 import axios from "axios";
+import { getCollectionSummariesByUserId } from "../data/collections.ts";
 import { getUserByUsername, updateUserProfile } from "../data/users.ts";
 
 //UI IMPORTS//////////////////////////////////////
 import Navbar from "@/components/Navbar";
+import CollectionSummary from "@/components/Profile/CollectionSummary.tsx";
 import ProfileEditButton from "@/components/Profile/ProfileEditButton.tsx";
 import Review from "@/components/Reviews/Review";
 import { Flex, Box, Avatar, VStack, Text, Separator, Tabs, Spinner } from "@chakra-ui/react";
@@ -47,6 +49,12 @@ const Profile: FC<object> = () => {
     queryKey: ["getUser", username],
     queryFn: () => getUserByUsername(username),
     placeholderData: EMPTY_USER,
+    retry: false,
+  });
+
+  const collectionsQuery = useQuery({
+    queryKey: ["getCollectionsByUserId", username],
+    queryFn: () => getCollectionSummariesByUserId(username),
     retry: false,
   });
 
@@ -109,6 +117,7 @@ const Profile: FC<object> = () => {
   }
 
   const user = userQuery.data as User;
+  const collections = collectionsQuery.data as TCollectionSummary[] | undefined;
 
   return (
     <div>
@@ -227,7 +236,28 @@ const Profile: FC<object> = () => {
             )}
           </Tabs.Content>
 
-          <Tabs.Content value="collections">collections</Tabs.Content>
+          <Tabs.Content value="collections">
+            {collectionsQuery.isLoading ? (
+              <Flex
+                justify="center"
+                p={8}
+              >
+                <Spinner
+                  size="lg"
+                  color="white"
+                />
+              </Flex>
+            ) : collections && collections.length > 0 ? (
+              collections.map((collection) => (
+                <CollectionSummary
+                  key={collection._id}
+                  summary={collection}
+                />
+              ))
+            ) : (
+              <Text>No collections yet.</Text>
+            )}
+          </Tabs.Content>
         </Tabs.Root>
       </Flex>
     </div>

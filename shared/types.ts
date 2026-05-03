@@ -29,6 +29,25 @@ export type ProfileData = {
   description: string;
 };
 
+export type Platform = {
+  platform: {
+    id: number;
+    name: string;
+    slug: string;
+  };
+};
+
+export type Game = {
+  id: number;
+  slug: string;
+  name: string;
+  background_image: string;
+  platforms: Platform[];
+  rating: number;
+  description: string;
+  genres: string[];
+};
+
 export type Collection = {
   name: string;
   userId: string;
