@@ -39,6 +39,7 @@ export const allPlatforms: Record<string, IconType> = {
 export interface ReviewType {
   _id?: string;
   gameId: string;
+  gameTitle: string;
   userId: string;
   displayName: string;
   rating: number;

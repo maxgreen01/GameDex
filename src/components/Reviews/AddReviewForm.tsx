@@ -8,8 +8,7 @@ import axios from "axios";
 //import * as reviewFunctions from "../../../server/data/reviews";
 
 //UI IMPORTS//////////////////////////////////////
-import { Input, InputGroup, Box, Field, Button, RatingGroup, Spinner } from "@chakra-ui/react";
-import { LuSearch } from "react-icons/lu";
+import { Input, Box, Field, Button, RatingGroup, Spinner } from "@chakra-ui/react";
 import toast from "react-hot-toast";
 //-------------------------------------------------//
 
@@ -46,11 +45,17 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
       setErrorMessage("You haven't typed anything yet!");
       return;
     }
-    if (rating === 0) if (errorMessage) return;
 
+    if (comment.length > 500) {
+      setErrorMessage("Comment cannot exceed 500 characters!");
+      return;
+    }
+
+    if (rating === 0) {
+      setErrorMessage("Please provide a rating!");
+      return;
+    }
     setLoading(true);
-    //validation
-
     //setUserReview(newReview);
 
     await axios.post(`http://localhost:3000/api/reviews`, {
@@ -72,7 +77,6 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
 
     setShowForm(false); //idt this is needed by once reivew is given it shud swtich to show the review and not form in game details
 
-    //send to database
     setLoading(false);
   }
 
@@ -111,7 +115,10 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
                 pl={2}
                 count={5}
                 value={rating}
-                onValueChange={({ value }) => setRating(value)}
+                onValueChange={({ value }) => {
+                  console.log(value, typeof value);
+                  setRating(value);
+                }}
                 allowHalf
               >
                 <RatingGroup.HiddenInput />
@@ -126,7 +133,7 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
                 value={comment}
                 onChange={(e) => commentOnChange(e)}
               />
-              <Field.ErrorText>{"Must be 120 characters or less!"}</Field.ErrorText>
+              <Field.ErrorText>{"Must be 500 characters or less!"}</Field.ErrorText>
             </Field.Root>
             <Button type="submit">Submit</Button>
           </form>

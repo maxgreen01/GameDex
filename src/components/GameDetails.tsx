@@ -28,7 +28,7 @@ import { type FC, useContext, useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { type Platform, type ReviewType, allPlatforms } from "../types/types.ts";
 //UI IMPORTS//////////////////////////////////////
-import { Box, Flex, Image, ScrollArea, Card, Heading, Text } from "@chakra-ui/react";
+import { Box, Flex, Image, ScrollArea, Card, Heading, Text, Spinner } from "@chakra-ui/react";
 import Rating from "./Rating.tsx";
 import AuthContext from "./Auth/AuthContext.tsx";
 import Review from "./Reviews/Review.tsx";
@@ -54,6 +54,13 @@ const GameDetails: FC<Props> = ({}) => {
   const { id } = useParams();
   const [user] = useContext(AuthContext);
 
+  //calculates the ratings according to the reviews. TODO: NEEDS TO BE REFLECTED IN THE MAIN DASHBOARD AND GAME DETAILS
+  useEffect(() => {
+    if (reviews.length === 0) return;
+    let avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+    setRating(Math.round(avg * 2) / 2);
+  }, [reviews]);
+
   //fetchingGame
   useEffect(() => {
     setLoading(true);
@@ -61,12 +68,9 @@ const GameDetails: FC<Props> = ({}) => {
     async function loadGame() {
       try {
         let { data } = await axios.get(`http://localhost:3000/api/games/${id}`);
-        console.log("Data: ", data);
 
         setBackgroundImage(data.background_image);
         setName(data.name);
-        // CALCULATE RATING
-        setRating(4);
         setPlatforms(data.platforms);
         setDescription(data.description);
       } catch (e) {
@@ -81,12 +85,10 @@ const GameDetails: FC<Props> = ({}) => {
         let { data: gameReviewsExceptCurrUser } = await axios.get(`http://localhost:3000/api/reviews/game/${id}/excluding/${user.username}`);
         setReviews(gameReviewsExceptCurrUser);
 
-        //console.log("All game reviews except current: ", reviews);
         let { data: currentUserReview } = await axios.get(`http://localhost:3000/api/reviews/game/${id}/user/${user.username}`);
         if (currentUserReview) {
           setUserReview(currentUserReview);
         }
-        console.log("Current user review: ", currentUserReview);
 
         setLoading(false);
       } catch (e) {
@@ -97,13 +99,6 @@ const GameDetails: FC<Props> = ({}) => {
     loadGame();
     getReviews();
   }, [id, user]);
-
-  //if user changes, deletes or adds a review
-  useEffect(() => {
-    //adds
-    //changes
-    //deletes
-  }, [userReview]);
 
   //only gets most common platforms from given ones
   let showPlatforms = platforms?.filter((p) => {
@@ -132,6 +127,20 @@ const GameDetails: FC<Props> = ({}) => {
   }
 
   //add loading and if user
+  if (loading) {
+    return (
+      <Flex
+        h="100vh"
+        align="center"
+        justify="center"
+      >
+        <Spinner
+          size="xl"
+          color="white"
+        />
+      </Flex>
+    );
+  }
   return (
     <div>
       <Flex h="100vh">
@@ -149,16 +158,7 @@ const GameDetails: FC<Props> = ({}) => {
                 spaceY="4"
                 textStyle="sm"
               >
-                {/* <Image
-                  src={props.background_image}
-                  alt={`Game image for ${props.name}`}
-                  w="100%"
-                  h="100%"
-                  objectFit="cover"
-                ></Image> */}
-
                 <Card.Root
-                  //   size="sm"
                   h="100vh"
                   maxW="100%"
                   overflowY={"auto"}
@@ -196,11 +196,10 @@ const GameDetails: FC<Props> = ({}) => {
                     w="100%"
                   >
                     {/*lineClamp={2} to card title to cut off long titles*/}
-                    {/*SHOULD I DO DYNAMIC SIZING -> CAROUSELS  MAY BE DIFF SIZES OR CUT OFFS  */}
                     <Heading>{name}</Heading>
                     <Rating
                       readOnly={true}
-                      value={Math.round(Number(rating) * 2) / 2}
+                      value={Math.max(0.5, Math.round(Number(rating) * 2) / 2)}
                       starSize="lg"
                     />
                     <Flex>
@@ -237,14 +236,6 @@ const GameDetails: FC<Props> = ({}) => {
           >
             <ScrollArea.Viewport>
               <ScrollArea.Content textStyle="sm">
-                {/* <Review
-                  rating={3.5}
-                  profilePage={false}
-                  usersReview={true}
-                  displayName="mayayaya"
-                  username="mpate154"
-                  comment="I think this game was alright. The first two were better in terms of storyline, but the animation here was top tier."
-                ></Review> */}
                 {userReview ? (
                   <Review
                     reviewId={userReview._id ?? ""}
@@ -258,7 +249,6 @@ const GameDetails: FC<Props> = ({}) => {
                   />
                 ) : (
                   <AddReviewForm
-                    // hope this doesnt error
                     gameId={id ?? ""}
                     username={user?.username ?? "Unknown User"}
                     displayName={user?.displayName ?? "Unknown User"}
@@ -266,9 +256,12 @@ const GameDetails: FC<Props> = ({}) => {
                   />
                 )}
 
-                {reviews ? (
+                {reviews.length === 0 && !userReview ? (
+                  <Text>No reviews yet. Be the first to write one!</Text>
+                ) : (
                   reviews.map((review) => (
                     <Review
+                      key={review._id}
                       reviewId={review._id ?? ""}
                       rating={review.rating}
                       profilePage={false}
@@ -278,8 +271,6 @@ const GameDetails: FC<Props> = ({}) => {
                       comment={review.text}
                     />
                   ))
-                ) : (
-                  <Text>No reviews yet. Be the first to write one!</Text>
                 )}
               </ScrollArea.Content>
             </ScrollArea.Viewport>

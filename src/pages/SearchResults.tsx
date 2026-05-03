@@ -2,7 +2,7 @@
 NOTES: THE CARDS IN THIS PAGE STILL NEED TO BECOME CLICKABLE. THIS CAN BE DONE AFTER WE ADD A CARD DETAIL PAGE.
 */
 
-import { type FC, useContext, useEffect, useState } from "react";
+import { type FC, useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import type { CarouselCardData } from "../types/types.ts";
@@ -10,7 +10,6 @@ import CarouselCard from "@/components/Carousel/CarouselCard";
 import { Box, Heading, SimpleGrid, Spinner, Center, Text } from "@chakra-ui/react";
 import Navbar from "@/components/Navbar";
 import SearchBar from "@/components/SearchBar";
-import AuthContext from "@/components/Auth/AuthContext.tsx";
 
 interface SearchResultsProps {}
 

@@ -1,10 +1,17 @@
 // Collection of validation functions used by the client and server
 
 import validator from "validator";
-import { parse, isValid, compareAsc } from "date-fns";
 import { BadRequestError } from "./errors.ts";
-import type { LoginData, ProfileData, SignupData } from "./types.ts";
+import { parse, isValid, compareAsc } from "date-fns";
+import type { LoginData, SignupData } from "./types.ts";
 
+// custom error class to identify validation errors (i.e. HTTP 400 errors) as opposed to server errors
+export class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = this.constructor.name;
+  }
+}
 //
 // ============ String Validation ============
 //
