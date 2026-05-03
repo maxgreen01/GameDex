@@ -20,24 +20,43 @@ const api = axios.create({
   },
 });
 
-function formatGame(game: any) {
+const reviewsCollection = db.collection("reviews");
+
+async function getAverageRating(gameId: string) {
+  let snapshot = await reviewsCollection.where("gameId", "==", gameId).get();
+
+  if (snapshot.empty) {
+    return 0;
+  }
+
+  let total = 0;
+
+  snapshot.docs.forEach((doc) => {
+    let review = doc.data();
+    total += review.rating;
+  });
+
+  return total / snapshot.docs.length;
+}
+
+async function formatGame(game: any) {
   return {
     id: game.id,
     slug: game.slug,
     name: game.name,
     background_image: game.background_image,
     platforms: game.platforms || [],
-    rating: game.rating || 0,
+    rating: await getAverageRating(String(game.id)),
     description: game.description_raw || game.description || "",
     genres: game.genres || [],
   };
 }
 
-function formatGameResults(data: any) {
+async function formatGameResults(data: any) {
   let results = [];
 
   for (let i = 0; i < data.results.length; i++) {
-    results.push(formatGame(data.results[i]));
+    results.push(await formatGame(data.results[i]));
   }
 
   return {
@@ -55,7 +74,7 @@ async function fetchGames(params: any) {
     },
   });
 
-  return formatGameResults(data);
+  return await formatGameResults(data);
 }
 
 router.get("/popular", async (req, res) => {
@@ -135,7 +154,7 @@ router.get("/recommended/:userId", async (req, res) => {
       .slice(0, 3)
       .map(([slug]) => slug); //turning the slug from an array into a regular value.
 
-    console.log("Top 3 genres:", top3Slugs);
+    // console.log("Top 3 genres:", top3Slugs);
 
     const data = await fetchGames({
       genres: top3Slugs.join(","),
@@ -228,7 +247,7 @@ router.get("/:id", async (req, res) => {
   try {
     const { data } = await api.get(`/games/${req.params.id}`);
     // console.log("Returned data: ", data);
-    res.json(formatGame(data));
+    res.json(await formatGame(data));
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: "Failed to fetch game" });
