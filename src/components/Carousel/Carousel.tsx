@@ -22,9 +22,10 @@ interface Props {
   category: string; // most popular, picks for you, newest releases, outside the box; calls appropriate data functions based on this
   //cards will be made in the carousel
   // cards: React.ReactNode[]; // array of carousel cards
+  username?: string; //optional prop as only the recommended algorithms need the username
 }
 
-const CarouselRow: FC<Props> = ({ category }) => {
+const CarouselRow: FC<Props> = ({ category, username }) => {
   const [cards, setCards] = useState<CarouselCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
@@ -152,11 +153,34 @@ const CarouselRow: FC<Props> = ({ category }) => {
           }
 
           setTitle("Most Popular");
-        } else if (category == "forYou") {
-          //get cards recommmended for them
+        } else if (category == "recommended") {
+          if (!username) {
+            console.log("No username found for recommended carousel");
+            return;
+          }
 
-          setTitle("Recommended For You");
-          // CALCULATE RATING
+          try {
+            let { data } = await axios.get(`/api/games/recommended/${username}`);
+            setCards(data.results);
+          } catch (e) {
+            console.log(e);
+          }
+
+          setTitle("Recommended");
+        } else if (category == "outside") {
+          if (!username) {
+            console.log("No username found for outside carousel");
+            return;
+          }
+
+          try {
+            let { data } = await axios.get(`/api/games/outside/${username}`);
+            setCards(data.results);
+          } catch (e) {
+            console.log(e);
+          }
+
+          setTitle("Outside");
         } else if (category == "newest") {
           //get newest games
           try {
@@ -179,7 +203,7 @@ const CarouselRow: FC<Props> = ({ category }) => {
 
     loadGames();
     setLoading(false);
-  }, [category]);
+  }, [category, username]);
 
   return (
     <div>

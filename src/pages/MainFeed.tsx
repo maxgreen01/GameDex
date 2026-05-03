@@ -9,12 +9,22 @@ import type { User } from "firebase/auth";
 import Carousel from "../components/Carousel/Carousel";
 import Navbar from "@/components/Navbar";
 import SearchBar from "../components/SearchBar";
+import { Center, Spinner } from "@chakra-ui/react";
 
 function MainFeed() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState<User | null>(null);
   const [username, setUsername] = useState<string>("");
+  const [loadedCarousels, setLoadedCarousels] = useState(0);
+
+  const totalCarousels = username ? 3 : 2;
+
+  function handleCarouselLoaded() {
+    setLoadedCarousels((prev) => prev + 1);
+  }
+
+  const allCarouselsLoaded = loadedCarousels >= totalCarousels;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -51,6 +61,21 @@ function MainFeed() {
       <SearchBar></SearchBar>
       <Carousel category="popular" />
       <Carousel category="newest" />
+
+      {/*  Only render once username is loaded to avoid making 
+      an API call with an empty/undefined username */}
+      {username && (
+        <Carousel
+          category="recommended"
+          username={username}
+        />
+      )}
+      {username && (
+        <Carousel
+          category="outside"
+          username={username}
+        />
+      )}
     </div>
   );
 }

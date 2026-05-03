@@ -135,7 +135,7 @@ router.get("/recommended/:userId", async (req, res) => {
       .slice(0, 3)
       .map(([slug]) => slug); //turning the slug from an array into a regular value.
 
-    console.log("Top 3 genres:", top3Slugs);
+    // console.log("Top 3 genres:", top3Slugs);
 
     const data = await fetchGames({
       genres: top3Slugs.join(","),
