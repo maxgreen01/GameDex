@@ -1,17 +1,10 @@
 // Collection of validation functions used by the client and server
 
 import validator from "validator";
-import { BadRequestError } from "./errors.ts";
 import { parse, isValid, compareAsc } from "date-fns";
-import type { LoginData, SignupData } from "./types.ts";
+import { BadRequestError } from "./errors.ts";
+import type { CollectionCreationData, CollectionUpdateData, LoginData, ProfileData, SignupData } from "./types.ts";
 
-// custom error class to identify validation errors (i.e. HTTP 400 errors) as opposed to server errors
-export class ValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = this.constructor.name;
-  }
-}
 //
 // ============ String Validation ============
 //
@@ -193,6 +186,24 @@ export function validateProfileData(data: unknown, label: string = "Profile Data
     displayName: validateDisplayName(obj.displayName),
     description: validateString(obj.description, "Description", 0),
   } as ProfileData;
+}
+
+// Throw an error if a collection creation data object is invalid; return it if not.
+export function validateCollectionCreationData(data: unknown, label: string = "Collection Creation Data") {
+  const obj = validateObject(data, label);
+  return {
+    name: validateString(obj.name, "Collection Name"),
+  } as CollectionCreationData;
+}
+
+// Throw an error if a collection update data object is invalid; return it if not.
+export function validateCollectionUpdateData(data: unknown, label: string = "Collection Update Data") {
+  const obj = validateObject(data, label);
+  return {
+    name: obj.name ? validateString(obj.name, "Collection Name") : undefined,
+    gameIdsToAdd: obj.gameIdsToAdd ? validateArrayElements(obj.gameIdsToAdd, (item) => validateString(item, "Game ID"), "Game IDs To Add") : undefined,
+    gameIdsToRemove: obj.gameIdsToRemove ? validateArrayElements(obj.gameIdsToRemove, (item) => validateString(item, "Game ID"), "Game IDs To Remove") : undefined,
+  } as CollectionUpdateData;
 }
 
 //
