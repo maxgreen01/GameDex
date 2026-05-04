@@ -31,8 +31,8 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
     const value = e.target.value;
     setComment(value);
 
-    if (value.length > 120) {
-      setErrorMessage("Comment cannot exceed 120 characters.");
+    if (value.length > 500) {
+      setErrorMessage("Comment cannot exceed 500 characters.");
     } else {
       setErrorMessage(null);
     }

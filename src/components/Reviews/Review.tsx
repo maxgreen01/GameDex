@@ -14,7 +14,7 @@ import axios from "axios";
 import type { ReviewType } from "@/types/types";
 import { validateString } from "../../../shared/validation";
 //UI IMPORTS//////////////////////////////////////
-import { Card, Heading, VStack, Flex, IconButton, Input, Text, Avatar, Button, Spinner } from "@chakra-ui/react";
+import { Card, Heading, VStack, Flex, IconButton, Input, Field, Text, Avatar, Button, Spinner } from "@chakra-ui/react";
 import Rating from "../Rating";
 import { MdModeEdit, MdDelete } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
@@ -48,16 +48,40 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
   let [editedComment, setEditedComment] = useState(comment);
   let [editedRating, setEditedRating] = useState(rating);
   let [loading, setLoading] = useState(false);
+  let [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   //edit review button
   function clickEditButton() {
     setEditReview(true);
   }
 
+  function commentOnChange(e: string) {
+    const value = e;
+    setEditedComment(value);
+
+    if (value.length > 500) {
+      setErrorMessage("Comment cannot exceed 500 characters.");
+    } else {
+      setErrorMessage(null);
+    }
+  }
+
   async function onSubmitEdit() {
-    setEditLoading(true);
     //validation
-    //should be 500 characters or less.
+    if (editedComment.length === 0) {
+      setErrorMessage("You haven't typed anything yet!");
+      return;
+    }
+
+    if (editedComment.length > 500) {
+      setErrorMessage("Comment cannot exceed 500 characters!");
+      return;
+    }
+
+    if (rating === 0) {
+      setErrorMessage("Please provide a rating!");
+      return;
+    }
 
     setEditLoading(true);
 
@@ -105,7 +129,7 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
     }
   }
 
-  if (loading) {
+  if (loading || editLoading) {
     return (
       <Card.Root
         size="md"
@@ -121,6 +145,7 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
       <Card.Root
         size="md"
         variant={usersReview ? "subtle" : "outline"}
+        w="100%"
       >
         <Card.Header>
           <Flex
@@ -205,32 +230,42 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
           <Flex pt={2}>
             {!profilePage ? (
               // game details page
-              <Rating
-                readOnly={!editReview}
-                value={editedRating}
-                onValueChange={(newValue) => setEditedRating(newValue)}
-              />
+              <Field.Root invalid={rating === 0}>
+                {editReview && <Field.Label p={2}>Rating:</Field.Label>}
+                <Rating
+                  readOnly={!editReview}
+                  value={editedRating}
+                  onValueChange={(newValue) => setEditedRating(newValue)}
+                />
+              </Field.Root>
             ) : editReview ? (
               // profile page, editing
-              <Rating
-                readOnly={false}
-                value={editedRating}
-                onValueChange={(newValue) => setEditedRating(newValue)}
-              />
+              <Field.Root invalid={rating === 0}>
+                <Field.Label p={2}>Rating:</Field.Label>
+                <Rating
+                  readOnly={false}
+                  value={editedRating}
+                  onValueChange={(newValue) => setEditedRating(newValue)}
+                />
+              </Field.Root>
             ) : null}
           </Flex>
         </Card.Header>
         <Card.Body color="fg.muted">
           {editReview ? (
             <div>
-              <Input
-                value={editedComment}
-                onChange={(e) => setEditedComment(e.target.value)}
-              ></Input>
+              <Field.Root invalid={!!errorMessage}>
+                <Field.Label p={2}>Your Review:</Field.Label>
+                <Input
+                  value={editedComment}
+                  onChange={(e) => commentOnChange(e.target.value)}
+                ></Input>
+                <Field.ErrorText>{"Must be 500 characters or less!"}</Field.ErrorText>
+              </Field.Root>
             </div>
           ) : (
             <div>
-              <Text>{editedComment}</Text>
+              <Text wordBreak="break-word">{editedComment}</Text>
             </div>
           )}
         </Card.Body>
