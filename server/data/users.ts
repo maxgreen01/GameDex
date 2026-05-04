@@ -10,18 +10,18 @@ export async function getUserById(id: string) {
   return doc.data() as User;
 }
 
-async function queryUserByUsername(username: string) {
+export async function queryUserByUsername(username: string) {
   const query = await users.where("username", "==", username).get();
   if (query.empty) throw new NotFoundError("User not found");
-  return query;
+  return query.docs[0];
 }
 
 export async function getUserByUsername(username: string) {
   const query = await queryUserByUsername(username);
-  return query.docs[0].data() as User;
+  return query.data() as User;
 }
 
 export async function updateUserProfile(username: string, data: ProfileData) {
   const query = await queryUserByUsername(username);
-  await query.docs[0].ref.update(data);
+  await query.ref.update(data);
 }

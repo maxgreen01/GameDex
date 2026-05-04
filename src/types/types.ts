@@ -47,3 +47,9 @@ export interface ReviewType {
   createdAt: /*?*/ string;
   updatedAt: /*?*/ string;
 }
+
+export type CollectionSummary = {
+  _id: string;
+  name: string;
+  gameImages: string[];
+};

@@ -1,0 +1,67 @@
+import { Router } from "express";
+import { createCollection, deleteCollection, getCollectionById, getCollectionsByUserId, updateCollection } from "../data/collections.ts";
+import { type AuthenticatedRequest, requireAuth } from "../middleware/requireAuth.ts";
+import { ForbiddenError, respondWithError } from "../../shared/errors.ts";
+import { validateCollectionCreationData, validateCollectionUpdateData, validateString } from "../../shared/validation.ts";
+
+const router = Router();
+
+router.post("/", requireAuth, async (req, res) => {
+  try {
+    const userId = (req as AuthenticatedRequest).user.username;
+    const data = validateCollectionCreationData(req.body);
+    const result = await createCollection(userId, data);
+    return res.status(201).json(result);
+  } catch (e) {
+    return respondWithError(res, e);
+  }
+});
+
+router.get("/user/:userId", async (req, res) => {
+  try {
+    const userId = validateString(req.params.userId, "User ID");
+    const collections = await getCollectionsByUserId(userId);
+    return res.status(200).json(collections);
+  } catch (e) {
+    return respondWithError(res, e);
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  try {
+    const id = validateString(req.params.id, "Collection ID");
+    const collection = await getCollectionById(id);
+    return res.status(200).json(collection);
+  } catch (e) {
+    return respondWithError(res, e);
+  }
+});
+
+router.post("/:id", requireAuth, async (req, res) => {
+  try {
+    const userId = (req as AuthenticatedRequest).user.username;
+    const id = validateString(req.params.id, "Collection ID");
+    const collection = await getCollectionById(id);
+    if (userId !== collection.userId) throw new ForbiddenError("A user can only update their own collections");
+    const data = validateCollectionUpdateData(req.body);
+    const result = await updateCollection(id, data);
+    return res.status(201).json(result);
+  } catch (e) {
+    return respondWithError(res, e);
+  }
+});
+
+router.delete("/:id", requireAuth, async (req, res) => {
+  try {
+    const userId = (req as AuthenticatedRequest).user.username;
+    const id = validateString(req.params.id, "Collection ID");
+    const collection = await getCollectionById(id);
+    if (userId !== collection.userId) throw new ForbiddenError("A user can only delete their own collections");
+    const result = await deleteCollection(id);
+    return res.status(204).json(result);
+  } catch (e) {
+    return respondWithError(res, e);
+  }
+});
+
+export default router;
