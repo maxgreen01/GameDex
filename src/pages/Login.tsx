@@ -1,5 +1,5 @@
 //IMPORTS////////////////////////////////////////
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { login } from "../services/auth";
@@ -7,10 +7,12 @@ import { validateLogin } from "../../shared/validation";
 //UI IMPORTS//////////////////////////////////////
 import { Button, Box, AbsoluteCenter, Input, Stack, IconButton } from "@chakra-ui/react";
 import { LuChevronLeft } from "react-icons/lu";
+import AuthContext from "../components/Auth/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
 
+  const [user, setUser] = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,6 +24,7 @@ function Login() {
     try {
       const loginData = validateLogin({ email, password });
 
+      setUser(undefined); // Mark client-side auth state as not yet determined
       const { user, token } = await login(loginData.email, loginData.password);
 
       const response = await fetch("/auth/login", {
@@ -33,11 +36,10 @@ function Login() {
       });
       if (!response.ok) throw new Error("Failed to login");
 
-      localStorage.setItem("token", token);
-
       toast.success(`Welcome back ${user.email}`);
       navigate("/mainfeed");
     } catch (err: any) {
+      setUser(user); // Revert client-side auth state change
       toast.error(err.message);
     } finally {
       setLoading(false);
