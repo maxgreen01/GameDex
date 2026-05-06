@@ -24,8 +24,9 @@ function Login() {
     try {
       const loginData = validateLogin({ email, password });
 
-      setUser(undefined); // Mark client-side auth state as not yet determined
-      const { user, token } = await login(loginData.email, loginData.password);
+      // If we aren't logged in, we expect an auth state change, so mark client-side auth state as undetermined
+      if (user === null) setUser(undefined);
+      const { user: firebaseUser, token } = await login(loginData.email, loginData.password);
 
       const response = await fetch("/auth/login", {
         method: "POST",
@@ -36,7 +37,7 @@ function Login() {
       });
       if (!response.ok) throw new Error("Failed to login");
 
-      toast.success(`Welcome back ${user.email}`);
+      toast.success(`Welcome back ${firebaseUser.email}`);
       navigate("/mainfeed");
     } catch (err: any) {
       setUser(user); // Revert client-side auth state change

@@ -29,7 +29,8 @@ const Navbar: FC<Props> = ({ profilePage = false }) => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      setUser(undefined); // Mark client-side auth state as not yet determined
+      // If we were logged in, we expect an auth state change, so mark client-side auth state as undetermined
+      if (user !== null) setUser(undefined);
       toast.success("Logout successful!");
       navigate("/login");
     } catch (e: any) {
