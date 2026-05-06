@@ -36,7 +36,7 @@ export function validateStrUsingRegex(data: unknown, regex: RegExp, label = "Str
 // Return the trimmed string if it is valid.
 export function validateAlphabetical(data: unknown, label: string = "String", options?: { allowNumbers?: boolean; ignoreChars?: string }, minLen?: number, maxLen?: number) {
   const str = validateString(data, label, minLen, maxLen);
-  const ignoreChars = options?.ignoreChars ?? "" + (options?.allowNumbers ? "0123456789" : "");
+  const ignoreChars = (options?.ignoreChars ?? "") + (options?.allowNumbers ? "0123456789" : "");
   if (!validator.isAlpha(str, "en-US", { ignore: ignoreChars })) {
     throw new BadRequestError(`${label} must be ${options?.allowNumbers ? "alphanumeric" : "alphabetical"}${options?.ignoreChars ? `or contain the following characters: '${options.ignoreChars}'` : ""}`);
   }

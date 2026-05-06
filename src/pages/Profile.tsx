@@ -62,6 +62,7 @@ const Profile: FC<object> = () => {
     queryFn: () => getCollectionSummariesByUserId(username),
     retry: false,
     staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 
   const userMutation = useMutation<void, void, ProfileData>({

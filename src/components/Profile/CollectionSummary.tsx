@@ -62,6 +62,7 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
 
       onUpdate(); //triggers refetch in parent
       setEditCollection(false);
+      setGameIdsToRemove([]);
       console.log(result);
     } catch (e: any) {
       console.log(e);
@@ -72,6 +73,7 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
   }
 
   async function onClickGame(gameId: string) {
+    console.log("clicking game:", gameId, typeof gameId);
     if (gameIdsToRemove.includes(gameId)) {
       setGameIdsToRemove(gameIdsToRemove.filter((game) => game !== gameId));
     } else {
