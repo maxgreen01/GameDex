@@ -23,18 +23,14 @@
 //   comment: string
 // }
 //IMPORTS/////////////////////////////////////////
-import type { FC } from "react";
-import { allPlatforms } from "../types/types.ts";
-import type { ReviewType } from "../types/types.ts";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import axios from "axios";
-import type { Platform, userDetails } from "../types/types.ts";
-import getUserDetails from "@/services/users.ts";
-import { useNavigate } from "react-router-dom";
+import { type FC, useContext, useEffect, useState } from "react";
+import { Navigate, useParams } from "react-router-dom";
+import { type Platform, type ReviewType, allPlatforms } from "../types/types.ts";
 //UI IMPORTS//////////////////////////////////////
 import { Box, Flex, Image, ScrollArea, Card, Heading, Text, Spinner } from "@chakra-ui/react";
 import Rating from "./Rating.tsx";
+import AuthContext from "./Auth/AuthContext.tsx";
 import Review from "./Reviews/Review.tsx";
 import AddReviewForm from "./Reviews/AddReviewForm.tsx";
 //-------------------------------------------------//
@@ -52,12 +48,11 @@ const GameDetails: FC<Props> = ({}) => {
   const [platforms, setPlatforms] = useState<Platform[]>([]);
   const [description, setDescription] = useState("");
   const [reviews, setReviews] = useState<ReviewType[]>([]);
-  const [user, setUser] = useState<userDetails | null>(null);
   const [userReview, setUserReview] = useState<ReviewType | null>(null);
   //const [showAddReviewButton, setShowAddReviewButton] = useState<boolean>(false);
 
   const { id } = useParams();
-  let navigate = useNavigate();
+  const [user] = useContext(AuthContext);
 
   //calculates the ratings according to the reviews. TODO: NEEDS TO BE REFLECTED IN THE MAIN DASHBOARD AND GAME DETAILS
   useEffect(() => {
@@ -85,18 +80,12 @@ const GameDetails: FC<Props> = ({}) => {
 
     async function getReviews() {
       try {
-        let userExists = await getUserDetails();
-        if (!userExists) {
-          navigate("/login");
-          return;
-        }
+        if (user === null || user === undefined) return;
 
-        setUser(userExists);
-
-        let { data: gameReviewsExceptCurrUser } = await axios.get(`http://localhost:3000/api/reviews/game/${id}/excluding/${userExists.username}`);
+        let { data: gameReviewsExceptCurrUser } = await axios.get(`http://localhost:3000/api/reviews/game/${id}/excluding/${user.username}`);
         setReviews(gameReviewsExceptCurrUser);
 
-        let { data: currentUserReview } = await axios.get(`http://localhost:3000/api/reviews/game/${id}/user/${userExists.username}`);
+        let { data: currentUserReview } = await axios.get(`http://localhost:3000/api/reviews/game/${id}/user/${user.username}`);
         if (currentUserReview) {
           setUserReview(currentUserReview);
         }
@@ -109,7 +98,7 @@ const GameDetails: FC<Props> = ({}) => {
 
     loadGame();
     getReviews();
-  }, [id]);
+  }, [id, user]);
 
   //only gets most common platforms from given ones
   let showPlatforms = platforms?.filter((p) => {
@@ -133,6 +122,11 @@ const GameDetails: FC<Props> = ({}) => {
       return true;
     });
 
+  if (user === null) {
+    return <Navigate to={"/login"} />;
+  }
+
+  //add loading and if user
   if (loading) {
     return (
       <Flex
