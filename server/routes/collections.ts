@@ -6,6 +6,7 @@ import { validateCollectionCreationData, validateCollectionUpdateData, validateS
 
 const router = Router();
 
+//adds a collection?
 router.post("/", requireAuth, async (req, res) => {
   try {
     const userId = (req as AuthenticatedRequest).user.username;
@@ -17,6 +18,7 @@ router.post("/", requireAuth, async (req, res) => {
   }
 });
 
+//get collections by user id
 router.get("/user/:userId", async (req, res) => {
   try {
     const userId = validateString(req.params.userId, "User ID");
@@ -27,6 +29,7 @@ router.get("/user/:userId", async (req, res) => {
   }
 });
 
+//get collection by id
 router.get("/:id", async (req, res) => {
   try {
     const id = validateString(req.params.id, "Collection ID");
@@ -37,6 +40,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+//updates collection
 router.post("/:id", requireAuth, async (req, res) => {
   try {
     const userId = (req as AuthenticatedRequest).user.username;

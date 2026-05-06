@@ -31,11 +31,19 @@ export async function updateCollection(id: string, data: CollectionUpdateData) {
   if (data.name) await docRef.update({ name: data.name });
   if (data.gameIdsToAdd) {
     for (const gameId of data.gameIdsToAdd) {
-      // TODO: Verify that the game exists
+      const gameExists = await fetch(`/api/games/${gameId}`);
+      if (!gameExists) throw new NotFoundError("Game not found");
     }
-    await docRef.update({ games: FieldValue.arrayUnion(...data.gameIdsToAdd) });
+
+    await docRef.update({ gameIds: FieldValue.arrayUnion(...data.gameIdsToAdd.map(Number)) });
   }
-  if (data.gameIdsToRemove) await docRef.update({ games: FieldValue.arrayRemove(...data.gameIdsToRemove) });
+  if (data.gameIdsToRemove) {
+    //await docRef.update({ gameIds: FieldValue.arrayRemove(...data.gameIdsToRemove) });
+    await docRef.update({ gameIds: FieldValue.arrayRemove(...data.gameIdsToRemove.map(Number)) });
+    console.log("removed gameIds:", data.gameIdsToRemove);
+    const updated = await docRef.get();
+    console.log("gameIds after remove:", updated.data()?.gameIds);
+  }
   return { message: "Collection updated successfully" };
 }
 

@@ -10,7 +10,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "server": "ts-node server/server.ts",
+    "server": "tsx server/server.ts",
     "prepare": "husky",
     "lint-staged": "lint-staged"
   },

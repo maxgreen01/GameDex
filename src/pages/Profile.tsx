@@ -19,7 +19,7 @@ import Navbar from "@/components/Navbar";
 import CollectionSummary from "@/components/Profile/CollectionSummary.tsx";
 import ProfileEditButton from "@/components/Profile/ProfileEditButton.tsx";
 import Review from "@/components/Reviews/Review";
-import { Flex, Box, Avatar, VStack, Text, Separator, Tabs, Spinner } from "@chakra-ui/react";
+import { Flex, Box, Avatar, VStack, Text, Separator, Carousel, Tabs, Spinner } from "@chakra-ui/react";
 import NotFoundPage from "@/pages/NotFoundPage.tsx";
 
 const EMPTY_USER: User = {
@@ -56,6 +56,7 @@ const Profile: FC<object> = () => {
     queryKey: ["getCollectionsByUserId", username],
     queryFn: () => getCollectionSummariesByUserId(username),
     retry: false,
+    staleTime: 0,
   });
 
   const userMutation = useMutation<void, void, ProfileData>({
@@ -118,6 +119,37 @@ const Profile: FC<object> = () => {
 
   const user = userQuery.data as User;
   const collections = collectionsQuery.data as TCollectionSummary[] | undefined;
+  console.log("Collections: ", collections);
+  console.log("Collections query state:", collectionsQuery.status, collectionsQuery.error, collectionsQuery.data);
+  // const collections: TCollectionSummary[] = [
+  //   {
+  //     _id: "1",
+  //     name: "Favorites",
+  //     gameImages: [
+  //       "https://media.rawg.io/media/games/618/618c2031a07bbff6b4f611f10b6bcdbc.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //     ],
+  //   },
+  //   {
+  //     _id: "2",
+  //     name: "Wishlist",
+  //     gameImages: ["https://media.rawg.io/media/games/b8c/b8c243eaa0fbac8115e0cdccac3f91dc.jpg"],
+  //   },
+  // ];
 
   return (
     <div>
@@ -252,6 +284,10 @@ const Profile: FC<object> = () => {
                 <CollectionSummary
                   key={collection._id}
                   summary={collection}
+                  onUpdate={() => queryClient.invalidateQueries({ queryKey: ["getCollectionsByUserId", username] })}
+                  onDelete={() => {
+                    queryClient.setQueryData(["getCollectionsByUserId", username], (old: TCollectionSummary[] | undefined) => (old ? old.filter((c) => c._id !== collection._id) : []));
+                  }}
                 />
               ))
             ) : (
