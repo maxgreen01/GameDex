@@ -5,6 +5,7 @@ import { BsNintendoSwitch } from "react-icons/bs";
 import { IoLogoAndroid } from "react-icons/io";
 import { MdOutlinePhoneIphone } from "react-icons/md";
 import type { IconType } from "react-icons";
+import type { User } from "firebase/auth";
 
 export interface Platform {
   platform: {
@@ -36,6 +37,14 @@ export const allPlatforms: Record<string, IconType> = {
   linux: FaLinux,
 };
 
+type FirebaseUser = User | null;
+
+export interface userDetails {
+  user: FirebaseUser;
+  username: string;
+  displayName: string;
+}
+
 export interface ReviewType {
   _id?: string;
   gameId: string;
@@ -51,5 +60,5 @@ export interface ReviewType {
 export type CollectionSummary = {
   _id: string;
   name: string;
-  gameImages: string[];
+  games: { gameId: string; gameImage: string }[];
 };

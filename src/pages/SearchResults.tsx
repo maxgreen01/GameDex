@@ -2,13 +2,17 @@
 NOTES: THE CARDS IN THIS PAGE STILL NEED TO BECOME CLICKABLE. THIS CAN BE DONE AFTER WE ADD A CARD DETAIL PAGE.
 */
 
-import { type FC, useEffect, useState } from "react";
+import type { FC } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import type { CarouselCardData } from "../types/types.ts";
 import CarouselCard from "@/components/Carousel/CarouselCard";
 import { Box, Heading, SimpleGrid, Spinner, Center, Text } from "@chakra-ui/react";
 import Navbar from "@/components/Navbar";
+import { onAuthStateChanged, type User } from "@firebase/auth";
+import { auth, db } from "../firebaseClient";
+import { doc, getDoc } from "firebase/firestore";
 import SearchBar from "@/components/SearchBar";
 
 interface SearchResultsProps {}
@@ -21,7 +25,34 @@ const SearchResults: FC<SearchResultsProps> = () => {
   const [loading, setLoading] = useState(true); //loading state
   const [error, setError] = useState<string | null>(null); //error state
 
+  //To obtain the username prop to pass to Navigate
+  const [user, setUser] = useState<User | null>(null);
+  const [username, setUsername] = useState<string>("");
+
   const navigate = useNavigate();
+
+  //Verifying Auth Use Effect
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        navigate("/login");
+        return;
+      }
+
+      setUser(firebaseUser);
+
+      const snap = await getDoc(doc(db, "users", firebaseUser.uid));
+
+      if (snap.exists()) {
+        const data = snap.data();
+        setUsername(data.username);
+      } else {
+        setUsername("User");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
 
   //Fires whenever the searchQuery term changes. Grabs data from /search route, and sets results.
   useEffect(() => {
@@ -52,7 +83,10 @@ const SearchResults: FC<SearchResultsProps> = () => {
   //The HTML that is rendered, including navbar, searchbar, and results. Spinner is included if loading is true.
   return (
     <>
-      <Navbar />
+      <Navbar
+        username={username}
+        profilePage={false}
+      />
       <Box p="8">
         <Heading
           mb="8"

@@ -6,10 +6,6 @@ import { validateProfileData, validateString } from "../../shared/validation.ts"
 
 const router = Router();
 
-router.get("/", requireAuth, async (req, res) => {
-  return res.status(200).json((req as AuthenticatedRequest).user);
-});
-
 router.get("/:username", async (req, res) => {
   try {
     const username = validateString(req.params.username, "Username");

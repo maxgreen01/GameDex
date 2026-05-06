@@ -199,6 +199,7 @@ export function validateCollectionCreationData(data: unknown, label: string = "C
 // Throw an error if a collection update data object is invalid; return it if not.
 export function validateCollectionUpdateData(data: unknown, label: string = "Collection Update Data") {
   const obj = validateObject(data, label);
+  console.log("Data in server: ", obj);
   return {
     name: obj.name ? validateString(obj.name, "Collection Name") : undefined,
     gameIdsToAdd: obj.gameIdsToAdd ? validateArrayElements(obj.gameIdsToAdd, (item) => validateString(item, "Game ID"), "Game IDs To Add") : undefined,
@@ -245,6 +246,15 @@ export function validateArrayElements<T>(data: unknown, func: (item: unknown) =>
   if (numElements > 0 && arr.length !== numElements) throw new BadRequestError(`${label} does not have ${numElements} elements`);
   return arr.map(func);
 }
+
+// // Same as above but can be empty array
+// export function validateArrayElementsWithEmpty<T>(data: unknown, func: (item: unknown) => T, label: string = "Array", numElements: number = 0) {
+//   if (!Array.isArray(data)) throw new BadRequestError(`${label} is not an array`);
+//   const arr = data as unknown[];
+//   // if (numElements !== -1 && arr.length === 0) throw new BadRequestError(`${label} is empty`); // skip the empty check if `numElements == -1`
+//   if (numElements > 0 && arr.length !== numElements) throw new BadRequestError(`${label} does not have ${numElements} elements`);
+//   return arr.map(func);
+// }
 
 // Throw an error if an object contains any fields other than the allowed ones, which are passed as an array of strings.
 // The object is not *required* to have all of these fields, because the value of each field should be checked individually and separately.

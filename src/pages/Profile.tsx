@@ -3,8 +3,11 @@
 
 //IMPORTS////////////////////////////////////////
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type FC, useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { type FC, useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "../firebaseClient";
+import { doc, getDoc } from "firebase/firestore";
 import type { ProfileData, User } from "../../shared/types";
 import type { CollectionSummary as TCollectionSummary, ReviewType } from "@/types/types";
 import axios from "axios";
@@ -16,9 +19,8 @@ import Navbar from "@/components/Navbar";
 import CollectionSummary from "@/components/Profile/CollectionSummary.tsx";
 import ProfileEditButton from "@/components/Profile/ProfileEditButton.tsx";
 import Review from "@/components/Reviews/Review";
-import { Flex, Box, Avatar, VStack, Text, Separator, Tabs, Spinner } from "@chakra-ui/react";
+import { Flex, Box, Avatar, VStack, Text, Separator, Carousel, Tabs, Spinner } from "@chakra-ui/react";
 import NotFoundPage from "@/pages/NotFoundPage.tsx";
-import AuthContext from "../components/Auth/AuthContext.tsx";
 
 const EMPTY_USER: User = {
   username: "N/A",
@@ -36,11 +38,13 @@ const Profile: FC<object> = () => {
 
   if (username === undefined) return <NotFoundPage />;
 
-  const [currentUser] = useContext(AuthContext);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const [currentUser, setCurrentUser] = useState<User>(EMPTY_USER);
   const [userReviews, setUserReviews] = useState<ReviewType[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
 
-  const queryClient = useQueryClient();
   const userQuery = useQuery({
     queryKey: ["getUser", username],
     queryFn: () => getUserByUsername(username),
@@ -52,12 +56,31 @@ const Profile: FC<object> = () => {
     queryKey: ["getCollectionsByUserId", username],
     queryFn: () => getCollectionSummariesByUserId(username),
     retry: false,
+    staleTime: 0,
   });
 
   const userMutation = useMutation<void, void, ProfileData>({
     mutationFn: (profileData) => updateUserProfile(username, profileData),
-    onSuccess: () => queryClient.invalidateQueries(), // TODO: More precise invalidation?
+    onSuccess: () => queryClient.invalidateQueries(),
   });
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        navigate("/login");
+        return;
+      }
+
+      const snap = await getDoc(doc(db, "users", firebaseUser.uid));
+
+      if (snap.exists()) {
+        const data = snap.data() as User;
+        setCurrentUser(data);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
 
   useEffect(() => {
     if (!userQuery.data || userQuery.data.username === "N/A") return;
@@ -96,10 +119,44 @@ const Profile: FC<object> = () => {
 
   const user = userQuery.data as User;
   const collections = collectionsQuery.data as TCollectionSummary[] | undefined;
+  console.log("Collections: ", collections);
+  console.log("Collections query state:", collectionsQuery.status, collectionsQuery.error, collectionsQuery.data);
+  // const collections: TCollectionSummary[] = [
+  //   {
+  //     _id: "1",
+  //     name: "Favorites",
+  //     gameImages: [
+  //       "https://media.rawg.io/media/games/618/618c2031a07bbff6b4f611f10b6bcdbc.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
+  //     ],
+  //   },
+  //   {
+  //     _id: "2",
+  //     name: "Wishlist",
+  //     gameImages: ["https://media.rawg.io/media/games/b8c/b8c243eaa0fbac8115e0cdccac3f91dc.jpg"],
+  //   },
+  // ];
 
   return (
     <div>
-      <Navbar profilePage />
+      <Navbar
+        username={currentUser.username}
+        profilePage={true}
+      ></Navbar>
 
       <Flex direction="column">
         {/* Profile Header */}
@@ -140,7 +197,7 @@ const Profile: FC<object> = () => {
                 <Text textStyle="sm">{user.username}</Text>
               </VStack>
 
-              {currentUser && user.username === currentUser.username && (
+              {user.username === currentUser.username && (
                 <Flex>
                   <ProfileEditButton
                     initialData={user}
@@ -227,6 +284,10 @@ const Profile: FC<object> = () => {
                 <CollectionSummary
                   key={collection._id}
                   summary={collection}
+                  onUpdate={() => queryClient.invalidateQueries({ queryKey: ["getCollectionsByUserId", username] })}
+                  onDelete={() => {
+                    queryClient.setQueryData(["getCollectionsByUserId", username], (old: TCollectionSummary[] | undefined) => (old ? old.filter((c) => c._id !== collection._id) : []));
+                  }}
                 />
               ))
             ) : (
