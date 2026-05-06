@@ -15,8 +15,8 @@ export async function requireAuth(req: Request, res: Response, next: () => unkno
     if (token === undefined) throw new UnauthorizedError("Authorization header is missing or invalid");
     const decodedToken = await auth.verifyIdToken(token);
     (req as AuthenticatedRequest).user = await getUserById(decodedToken.uid);
-    next();
   } catch (e) {
     return respondWithError(res, e);
   }
+  return next();
 }

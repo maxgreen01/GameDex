@@ -1,6 +1,12 @@
 import { useAxiosClient } from "../hooks.ts";
 import type { ProfileData, User } from "../../shared/types.ts";
 
+export async function getCurrentUser() {
+  const axiosClient = useAxiosClient();
+  const result = await axiosClient.get("/api/users");
+  return result.data as User;
+}
+
 export async function getUserByUsername(username: string) {
   const axiosClient = useAxiosClient();
   const result = await axiosClient.get(`/api/users/${username}`);

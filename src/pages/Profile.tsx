@@ -3,11 +3,8 @@
 
 //IMPORTS////////////////////////////////////////
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type FC, useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "../firebaseClient";
-import { doc, getDoc } from "firebase/firestore";
+import { type FC, useContext, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import type { ProfileData, User } from "../../shared/types";
 import type { CollectionSummary as TCollectionSummary, ReviewType } from "@/types/types";
 import axios from "axios";
@@ -21,6 +18,7 @@ import ProfileEditButton from "@/components/Profile/ProfileEditButton.tsx";
 import Review from "@/components/Reviews/Review";
 import { Flex, Box, Avatar, VStack, Text, Separator, Carousel, Tabs, Spinner } from "@chakra-ui/react";
 import NotFoundPage from "@/pages/NotFoundPage.tsx";
+import AuthContext from "../components/Auth/AuthContext.tsx";
 
 const EMPTY_USER: User = {
   username: "N/A",
@@ -38,13 +36,11 @@ const Profile: FC<object> = () => {
 
   if (username === undefined) return <NotFoundPage />;
 
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  const [currentUser, setCurrentUser] = useState<User>(EMPTY_USER);
+  const [currentUser] = useContext(AuthContext);
   const [userReviews, setUserReviews] = useState<ReviewType[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
 
+  const queryClient = useQueryClient();
   const userQuery = useQuery({
     queryKey: ["getUser", username],
     queryFn: () => getUserByUsername(username),
@@ -61,26 +57,8 @@ const Profile: FC<object> = () => {
 
   const userMutation = useMutation<void, void, ProfileData>({
     mutationFn: (profileData) => updateUserProfile(username, profileData),
-    onSuccess: () => queryClient.invalidateQueries(),
+    onSuccess: () => queryClient.invalidateQueries(), // TODO: More precise invalidation?
   });
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) {
-        navigate("/login");
-        return;
-      }
-
-      const snap = await getDoc(doc(db, "users", firebaseUser.uid));
-
-      if (snap.exists()) {
-        const data = snap.data() as User;
-        setCurrentUser(data);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [navigate]);
 
   useEffect(() => {
     if (!userQuery.data || userQuery.data.username === "N/A") return;
@@ -153,10 +131,7 @@ const Profile: FC<object> = () => {
 
   return (
     <div>
-      <Navbar
-        username={currentUser.username}
-        profilePage={true}
-      ></Navbar>
+      <Navbar profilePage />
 
       <Flex direction="column">
         {/* Profile Header */}
@@ -197,7 +172,7 @@ const Profile: FC<object> = () => {
                 <Text textStyle="sm">{user.username}</Text>
               </VStack>
 
-              {user.username === currentUser.username && (
+              {currentUser && user.username === currentUser.username && (
                 <Flex>
                   <ProfileEditButton
                     initialData={user}
