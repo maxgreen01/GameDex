@@ -11,7 +11,7 @@ import { doc, getDoc } from "firebase/firestore";
 import type { ProfileData, User } from "../../shared/types";
 import type { CollectionSummary as TCollectionSummary, ReviewType } from "@/types/types";
 import axios from "axios";
-import { getCollectionSummariesByUserId } from "../data/collections.ts";
+import { addCollection, getCollectionSummariesByUserId } from "../data/collections.ts";
 import { getUserByUsername, updateUserProfile } from "../data/users.ts";
 
 //UI IMPORTS//////////////////////////////////////
@@ -19,8 +19,9 @@ import Navbar from "@/components/Navbar";
 import CollectionSummary from "@/components/Profile/CollectionSummary.tsx";
 import ProfileEditButton from "@/components/Profile/ProfileEditButton.tsx";
 import Review from "@/components/Reviews/Review";
-import { Flex, Box, Avatar, VStack, Text, Separator, Carousel, Tabs, Spinner } from "@chakra-ui/react";
+import { Flex, Box, Avatar, VStack, Text, Field, Input, Separator, Button, Tabs, Spinner } from "@chakra-ui/react";
 import NotFoundPage from "@/pages/NotFoundPage.tsx";
+import toast from "react-hot-toast";
 
 const EMPTY_USER: User = {
   username: "N/A",
@@ -44,6 +45,10 @@ const Profile: FC<object> = () => {
   const [currentUser, setCurrentUser] = useState<User>(EMPTY_USER);
   const [userReviews, setUserReviews] = useState<ReviewType[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [showAddCollectionForm, setShowAddCollectionForm] = useState(false);
+  const [newCollectionTitle, setNewCollectionTitle] = useState("");
+  const [collectionLoading, setCollectionLoading] = useState(false);
+  let [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const userQuery = useQuery({
     queryKey: ["getUser", username],
@@ -119,37 +124,50 @@ const Profile: FC<object> = () => {
 
   const user = userQuery.data as User;
   const collections = collectionsQuery.data as TCollectionSummary[] | undefined;
-  console.log("Collections: ", collections);
-  console.log("Collections query state:", collectionsQuery.status, collectionsQuery.error, collectionsQuery.data);
-  // const collections: TCollectionSummary[] = [
-  //   {
-  //     _id: "1",
-  //     name: "Favorites",
-  //     gameImages: [
-  //       "https://media.rawg.io/media/games/618/618c2031a07bbff6b4f611f10b6bcdbc.jpg",
-  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
-  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
-  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
-  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
-  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
-  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
-  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
-  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
-  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
-  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
-  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
-  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
-  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
-  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
-  //       "https://media.rawg.io/media/games/490/49016e06ae2103881ff6373248843069.jpg",
-  //     ],
-  //   },
-  //   {
-  //     _id: "2",
-  //     name: "Wishlist",
-  //     gameImages: ["https://media.rawg.io/media/games/b8c/b8c243eaa0fbac8115e0cdccac3f91dc.jpg"],
-  //   },
-  // ];
+
+  // adding collection forms
+  async function onUpdate() {
+    queryClient.invalidateQueries({ queryKey: ["getCollectionsByUserId", username] });
+  }
+  async function onChangeAddCollection(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = e.target.value;
+    setNewCollectionTitle(value);
+
+    if (value.length > 50) {
+      setErrorMessage("Collection title cannot exceed 50 characters.");
+    } else {
+      setErrorMessage(null);
+    }
+  }
+  async function onSubmitAddCollection(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    if (newCollectionTitle.length === 0) {
+      setErrorMessage("You haven't typed anything yet!");
+      return;
+    }
+
+    if (newCollectionTitle.length > 500) {
+      setErrorMessage("Comment cannot exceed 500 characters!");
+      return;
+    }
+
+    setCollectionLoading(true);
+
+    try {
+      let result = await addCollection(newCollectionTitle);
+      console.log(result);
+      toast.success("Collection added!");
+      onUpdate();
+    } catch (e) {
+      console.log("Error: Collection could not be added");
+      toast.error("Error: Collection could not be added");
+    }
+
+    setNewCollectionTitle("");
+    setCollectionLoading(false);
+    setShowAddCollectionForm(false);
+  }
 
   return (
     <div>
@@ -220,81 +238,148 @@ const Profile: FC<object> = () => {
           </Flex>
         </Box>
 
+        {/* Bottom part of page */}
         <Separator variant="solid" />
 
-        <Tabs.Root
-          defaultValue="reviews"
-          fitted
-          variant="subtle"
-        >
-          <Tabs.List m={4}>
-            <Tabs.Trigger value="reviews">Reviews</Tabs.Trigger>
-            <Tabs.Trigger value="collections">Collections</Tabs.Trigger>
-          </Tabs.List>
+        {showAddCollectionForm ? (
+          <>
+            <Flex
+              justifyContent={"center"}
+              alignItems={"center"}
+              // minH={"50vh"}
+              h={"calc(100vh - 400px)"}
+            >
+              <Box w={"400px"}>
+                <form onSubmit={onSubmitAddCollection}>
+                  <Field.Root invalid={!!errorMessage}>
+                    <Field.Label p={2}>New Collection Title</Field.Label>
+                    <Input
+                      value={newCollectionTitle}
+                      onChange={(e) => onChangeAddCollection(e)}
+                    />
+                    <Field.ErrorText>{errorMessage}</Field.ErrorText>
+                  </Field.Root>
+                  <Flex
+                    boxSizing={"border-box"}
+                    gap={4}
+                    w={"100%"}
+                    pt={4}
+                  >
+                    <Button
+                      w="50%"
+                      flex={1}
+                      variant="outline"
+                      onClick={() => {
+                        setShowAddCollectionForm(false);
+                        setNewCollectionTitle("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      w="50%"
+                      flex={1}
+                      type="submit"
+                    >
+                      Submit
+                    </Button>
+                  </Flex>
+                </form>
+              </Box>
+            </Flex>
+          </>
+        ) : (
+          //  tabs
+          <Tabs.Root
+            defaultValue="reviews"
+            fitted
+            variant="subtle"
+          >
+            <Tabs.List m={4}>
+              <Tabs.Trigger value="reviews">Reviews</Tabs.Trigger>
+              <Tabs.Trigger value="collections">Collections</Tabs.Trigger>
+            </Tabs.List>
 
-          <Tabs.Content value="reviews">
-            {reviewsLoading ? (
-              <Flex
-                justify="center"
-                p={8}
-              >
-                <Spinner
-                  size="lg"
-                  color="white"
-                />
-              </Flex>
-            ) : userReviews.length > 0 ? (
-              userReviews.map((review) => (
-                <Review
-                  key={review._id}
-                  reviewId={review._id ?? ""}
-                  rating={review.rating}
-                  profilePage={true}
-                  usersReview={true}
-                  gameId={review.gameId}
-                  gameTitle={review.gameTitle}
-                  username={user.username}
-                  displayName={user.displayName}
-                  comment={review.text}
-                  setUserReview={(val) => {
-                    if (!val) {
-                      setUserReviews((prev) => prev.filter((r) => r._id !== review._id));
-                    }
-                  }}
-                />
-              ))
-            ) : (
-              <Text>No reviews yet.</Text>
-            )}
-          </Tabs.Content>
+            {/* reviews */}
+            <Tabs.Content value="reviews">
+              {reviewsLoading ? (
+                <Flex
+                  justify="center"
+                  p={8}
+                >
+                  <Spinner
+                    size="lg"
+                    color="white"
+                  />
+                </Flex>
+              ) : userReviews.length > 0 ? (
+                userReviews.map((review) => (
+                  <Review
+                    key={review._id}
+                    reviewId={review._id ?? ""}
+                    rating={review.rating}
+                    profilePage={true}
+                    usersReview={true}
+                    gameId={review.gameId}
+                    gameTitle={review.gameTitle}
+                    username={user.username}
+                    displayName={user.displayName}
+                    comment={review.text}
+                    setUserReview={(val) => {
+                      if (!val) {
+                        setUserReviews((prev) => prev.filter((r) => r._id !== review._id));
+                      }
+                    }}
+                  />
+                ))
+              ) : (
+                <Text>No reviews yet.</Text>
+              )}
+            </Tabs.Content>
 
-          <Tabs.Content value="collections">
-            {collectionsQuery.isLoading ? (
-              <Flex
-                justify="center"
-                p={8}
-              >
-                <Spinner
-                  size="lg"
-                  color="white"
-                />
-              </Flex>
-            ) : collections && collections.length > 0 ? (
-              collections.map((collection) => (
-                <CollectionSummary
-                  key={collection._id}
-                  summary={collection}
-                  onUpdate={() => queryClient.invalidateQueries({ queryKey: ["getCollectionsByUserId", username] })}
-                  onDelete={() => {
-                    queryClient.setQueryData(["getCollectionsByUserId", username], (old: TCollectionSummary[] | undefined) => (old ? old.filter((c) => c._id !== collection._id) : []));
-                  }}
-                />
-              ))
-            ) : (
-              <Text>No collections yet.</Text>
-            )}
-          </Tabs.Content>
-        </Tabs.Root>
+            {/* collections */}
+            <Tabs.Content value="collections">
+              {collectionsQuery.isLoading && (
+                <Flex
+                  justify="center"
+                  p={8}
+                >
+                  <Spinner
+                    size="lg"
+                    color="white"
+                  />
+                </Flex>
+              )}
+              {/* Add collection form/button */}
+              {!showAddCollectionForm && (
+                <Box>
+                  <Button
+                    w={"100%"}
+                    onClick={() => setShowAddCollectionForm(true)}
+                  >
+                    Add A Collection
+                  </Button>
+                </Box>
+              )}
+
+              {!collectionsQuery.isLoading &&
+                (collections && collections.length > 0 ? (
+                  collections.map((collection) => (
+                    <CollectionSummary
+                      key={collection._id}
+                      summary={collection}
+                      onUpdate={onUpdate}
+                      onDelete={() => {
+                        queryClient.setQueryData(["getCollectionsByUserId", username], (old: TCollectionSummary[] | undefined) => (old ? old.filter((c) => c._id !== collection._id) : []));
+                      }}
+                    />
+                  ))
+                ) : (
+                  <Text>No collections yet.</Text>
+                ))}
+            </Tabs.Content>
+          </Tabs.Root>
+        )}
       </Flex>
     </div>
   );
