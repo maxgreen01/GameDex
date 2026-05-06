@@ -58,23 +58,27 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
     setLoading(true);
     //setUserReview(newReview);
 
-    await axios.post(`http://localhost:3000/api/reviews`, {
-      gameId,
-      userId: username,
-      rating,
-      text: comment,
-      displayName,
-    });
+    try {
+      await axios.post(`http://localhost:3000/api/reviews`, {
+        gameId,
+        userId: username,
+        rating,
+        text: comment,
+        displayName,
+      });
 
-    let { data: userReview } = await axios.get(`http://localhost:3000/api/reviews/game/${gameId}/user/${username}`);
+      let { data: userReview } = await axios.get(`http://localhost:3000/api/reviews/game/${gameId}/user/${username}`);
 
-    if (!userReview) {
+      if (!userReview) {
+        console.log("Error: Review could not be added");
+        toast.error("Error: Review could not be added");
+      } else {
+        setUserReview(userReview);
+      }
+    } catch (e) {
       console.log("Error: Review could not be added");
       toast.error("Error: Review could not be added");
-    } else {
-      setUserReview(userReview);
     }
-
     setShowForm(false); //idt this is needed by once reivew is given it shud swtich to show the review and not form in game details
 
     setLoading(false);
@@ -95,7 +99,12 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
     return (
       <>
         <Box>
-          <Button onClick={() => setShowForm(true)}>Add A Review</Button>
+          <Button
+            w={"100%"}
+            onClick={() => setShowForm(true)}
+          >
+            Add A Review
+          </Button>
         </Box>
       </>
     );

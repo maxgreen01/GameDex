@@ -58,3 +58,12 @@ export async function deleteCollection(id: string) {
   const result = await axiosClient.delete(`/api/collections/${id}`);
   return result;
 }
+
+export async function addCollection(collectionTitle: string) {
+  const token = localStorage.getItem("token");
+  const axiosClient = axios.create({
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const result = await axiosClient.post(`/api/collections/`, { name: collectionTitle });
+  return result;
+}

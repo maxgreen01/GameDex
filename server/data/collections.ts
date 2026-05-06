@@ -13,8 +13,11 @@ export async function getCollectionById(id: string) {
 }
 
 export async function getCollectionsByUserId(userId: string) {
+  const user = await queryUserByUsername(userId);
+  if (!user) throw new NotFoundError("User not found");
+
   const query = await collections.where("userId", "==", userId).get();
-  if (query.empty) throw new NotFoundError("User not found");
+  if (query.empty) return [];
   return query.docs.map((doc) => ({ _id: doc.id, ...doc.data() }) as WithId<Collection>);
 }
 
