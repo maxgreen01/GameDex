@@ -1,6 +1,6 @@
 //IMPORTS////////////////////////////////////////
 import { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { login } from "../services/auth";
 import { validateLogin } from "../../shared/validation";
@@ -50,6 +50,10 @@ function Login() {
   const goHome = () => {
     navigate("/");
   };
+
+  if (user) {
+    return <Navigate to="/mainfeed" />;
+  }
 
   return (
     <div>
