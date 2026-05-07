@@ -101,6 +101,7 @@ const Profile: FC<object> = () => {
   }
 
   const user = userQuery.data as User;
+  const isSelf = user.username === currentUser?.username;
   const collections = collectionsQuery.data as TCollectionSummary[] | undefined;
 
   // adding collection forms
@@ -190,7 +191,7 @@ const Profile: FC<object> = () => {
                 <Text textStyle="sm">{user.username}</Text>
               </VStack>
 
-              {currentUser && user.username === currentUser.username && (
+              {currentUser && isSelf && (
                 <Flex>
                   <ProfileEditButton
                     initialData={user}
@@ -300,6 +301,7 @@ const Profile: FC<object> = () => {
                     username={user.username}
                     displayName={user.displayName}
                     comment={review.text}
+                    canEdit={isSelf}
                     setUserReview={(val) => {
                       if (!val) {
                         setUserReviews((prev) => prev.filter((r) => r._id !== review._id));

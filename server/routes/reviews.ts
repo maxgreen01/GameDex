@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { FieldValue } from "firebase-admin/firestore";
 import { db } from "../firebaseAdmin.ts";
+import { requireAuth } from "../middleware/requireAuth.ts";
 
 const router = Router();
 
@@ -46,7 +47,7 @@ router.get("/:reviewId", async (req, res) => {
 });
 
 // same as createReview()
-router.post("/", async (req, res) => {
+router.post("/", requireAuth, async (req, res) => {
   try {
     let { gameId, userId, rating, text, displayName } = req.body;
 
@@ -135,7 +136,7 @@ router.post("/", async (req, res) => {
 });
 
 // same as deleteReview
-router.delete("/:reviewId", async (req, res) => {
+router.delete("/:reviewId", requireAuth, async (req, res) => {
   try {
     let { reviewId } = req.params;
     let { userId } = req.body;
@@ -226,7 +227,7 @@ router.get("/game/:gameId", async (req, res) => {
 });
 
 // same as getReviewsByUserId
-router.get("/user/:userId", async (req, res) => {
+router.get("/user/:userId", requireAuth, async (req, res) => {
   try {
     let { userId } = req.params;
 
@@ -267,7 +268,7 @@ router.get("/user/:userId", async (req, res) => {
 });
 
 // same as editReviews
-router.put("/:reviewId", async (req, res) => {
+router.put("/:reviewId", requireAuth, async (req, res) => {
   try {
     let { reviewId } = req.params;
     let { userId, rating, text } = req.body;
@@ -331,7 +332,7 @@ router.put("/:reviewId", async (req, res) => {
 });
 
 // same as getReviewByGameIdAndUserId
-router.get("/game/:gameId/user/:userId", async (req, res) => {
+router.get("/game/:gameId/user/:userId", requireAuth, async (req, res) => {
   try {
     let { gameId, userId } = req.params;
 
@@ -376,7 +377,7 @@ router.get("/game/:gameId/user/:userId", async (req, res) => {
 });
 
 // same as getReviewsExcludingUser()
-router.get("/game/:gameId/excluding/:userId", async (req, res) => {
+router.get("/game/:gameId/excluding/:userId", requireAuth, async (req, res) => {
   try {
     let { gameId, userId } = req.params;
 

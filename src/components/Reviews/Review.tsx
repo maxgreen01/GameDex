@@ -37,11 +37,12 @@ interface Props {
   usersReview: boolean;
   comment: string;
   rating: number;
+  canEdit: boolean;
   //passed down from parents for when edits and deletes happen
   setUserReview?: React.Dispatch<React.SetStateAction<ReviewType | null>>;
 }
 
-const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username, displayName, usersReview, comment, rating, setUserReview }) => {
+const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username, displayName, usersReview, comment, rating, canEdit, setUserReview }) => {
   let [editReview, setEditReview] = useState(false);
   // if editLoading is true, send it to parent to make page load?
   let [editLoading, setEditLoading] = useState(false);
@@ -200,32 +201,34 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
               </Link>
             )}
 
-            <Flex>
-              {usersReview && !editReview && (
-                <>
+            {canEdit && (
+              <Flex>
+                {usersReview && !editReview && (
+                  <>
+                    <IconButton
+                      onClick={clickEditButton}
+                      variant="ghost"
+                    >
+                      <MdModeEdit />
+                    </IconButton>
+                    <IconButton
+                      onClick={clickDeleteButton}
+                      variant="ghost"
+                    >
+                      <MdDelete />
+                    </IconButton>
+                  </>
+                )}
+                {usersReview && editReview && (
                   <IconButton
-                    onClick={clickEditButton}
                     variant="ghost"
+                    onClick={onSubmitEdit}
                   >
-                    <MdModeEdit />
+                    <FaCheck />
                   </IconButton>
-                  <IconButton
-                    onClick={clickDeleteButton}
-                    variant="ghost"
-                  >
-                    <MdDelete />
-                  </IconButton>
-                </>
-              )}
-              {usersReview && editReview && (
-                <IconButton
-                  variant="ghost"
-                  onClick={onSubmitEdit}
-                >
-                  <FaCheck />
-                </IconButton>
-              )}
-            </Flex>
+                )}
+              </Flex>
+            )}
           </Flex>
           <Flex pt={2}>
             {!profilePage ? (
