@@ -1,16 +1,18 @@
 //IMPORTS////////////////////////////////////////
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useContext, useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { login } from "../services/auth";
 import { validateLogin } from "../../shared/validation";
 //UI IMPORTS//////////////////////////////////////
 import { Button, Box, AbsoluteCenter, Input, Stack, IconButton } from "@chakra-ui/react";
 import { LuChevronLeft } from "react-icons/lu";
+import AuthContext from "../components/Auth/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
 
+  const [user, setUser] = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,7 +24,9 @@ function Login() {
     try {
       const loginData = validateLogin({ email, password });
 
-      const { user, token } = await login(loginData.email, loginData.password);
+      // If we aren't logged in, we expect an auth state change, so mark client-side auth state as undetermined
+      if (user === null) setUser(undefined);
+      const { user: firebaseUser, token } = await login(loginData.email, loginData.password);
 
       const response = await fetch("/auth/login", {
         method: "POST",
@@ -33,11 +37,10 @@ function Login() {
       });
       if (!response.ok) throw new Error("Failed to login");
 
-      localStorage.setItem("token", token);
-
-      toast.success(`Welcome back ${user.email}`);
+      toast.success(`Welcome back ${firebaseUser.email}`);
       navigate("/mainfeed");
     } catch (err: any) {
+      setUser(user); // Revert client-side auth state change
       toast.error(err.message);
     } finally {
       setLoading(false);
@@ -47,6 +50,10 @@ function Login() {
   const goHome = () => {
     navigate("/");
   };
+
+  if (user) {
+    return <Navigate to="/mainfeed" />;
+  }
 
   return (
     <div>

@@ -10,11 +10,11 @@ import type { FC } from "react";
 import type { CarouselCardData } from "@/types/types.ts";
 import { useState, useEffect } from "react";
 import CarouselCard from "./CarouselCard.tsx";
-import axios from "axios";
 
 //UI IMPORTS//////////////////////////////////////
 import { Carousel, HStack, IconButton, Span, Spinner, Center } from "@chakra-ui/react";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
+import { useAxiosClient } from "@/hooks.ts";
 
 //-------------------------------------------------//
 
@@ -30,6 +30,8 @@ const CarouselRow: FC<Props> = ({ category, username, onLoaded }) => {
   const [cards, setCards] = useState<CarouselCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
+
+  const axiosClient = useAxiosClient();
 
   //REMOVE FOR TESTING
   //GENERATE
@@ -144,7 +146,7 @@ const CarouselRow: FC<Props> = ({ category, username, onLoaded }) => {
         if (category == "popular") {
           //get popular cards
           try {
-            let { data } = await axios.get("/api/games/popular");
+            let { data } = await axiosClient.get("/api/games/popular");
             //console.log("results", data.results);
             setCards(data.results);
             // console.log("Popular games: ", data.results);
@@ -161,7 +163,7 @@ const CarouselRow: FC<Props> = ({ category, username, onLoaded }) => {
           }
 
           try {
-            let { data } = await axios.get(`/api/games/recommended/${username}`, {
+            let { data } = await axiosClient.get(`/api/games/recommended/${username}`, {
               params: { t: Date.now() }, // fuck cache
             });
             setCards(data.results);
@@ -177,7 +179,7 @@ const CarouselRow: FC<Props> = ({ category, username, onLoaded }) => {
           }
 
           try {
-            let { data } = await axios.get(`/api/games/outside/${username}`, {
+            let { data } = await axiosClient.get(`/api/games/outside/${username}`, {
               params: { t: Date.now() },
             });
             setCards(data.results);
@@ -189,7 +191,7 @@ const CarouselRow: FC<Props> = ({ category, username, onLoaded }) => {
         } else if (category == "newest") {
           //get newest games
           try {
-            let { data } = await axios.get("/api/games/newest");
+            let { data } = await axiosClient.get("/api/games/newest");
             //console.log("results", data.results);
             setCards(data.results);
             // CALCULATE RATING

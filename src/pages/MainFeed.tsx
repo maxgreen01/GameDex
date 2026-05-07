@@ -1,21 +1,16 @@
 //IMPORTS////////////////////////////////////////
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../firebaseClient";
-import type { User } from "firebase/auth";
+import { useContext, useState } from "react";
+import { Navigate } from "react-router-dom";
 //UI IMPORTS/////////////////////////////////////
+import AuthContext from "../components/Auth/AuthContext";
 import Carousel from "../components/Carousel/Carousel";
 import Navbar from "@/components/Navbar";
 import SearchBar from "../components/SearchBar";
 import { Center, Spinner } from "@chakra-ui/react";
 
 function MainFeed() {
-  const navigate = useNavigate();
+  const [user] = useContext(AuthContext);
 
-  const [user, setUser] = useState<User | null>(null);
-  const [username, setUsername] = useState<string>("");
   const [loadedCarousels, setLoadedCarousels] = useState<string[]>([]);
 
   function handleCarouselLoaded(category: string) {
@@ -25,40 +20,22 @@ function MainFeed() {
     });
   }
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) {
-        navigate("/login");
-        return;
-      }
+  if (user === null) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
+  }
 
-      setUser(firebaseUser);
-
-      const snap = await getDoc(doc(db, "users", firebaseUser.uid));
-
-      if (snap.exists()) {
-        const data = snap.data();
-        setUsername(data.username);
-      } else {
-        setUsername("User");
-      }
-    });
-
-    return () => unsubscribe();
-  }, [navigate]);
-
-  if (!user) return null;
-
-  let expectedCarousels = username ? 4 : 2;
+  let expectedCarousels = user ? 4 : 2;
   let allCarouselsLoaded = loadedCarousels.length >= expectedCarousels;
 
   return (
     <div>
-      <Navbar
-        profilePage={false}
-        username={username}
-      ></Navbar>
-      {/* <h1>Welcome, {username}!</h1> */}
+      <Navbar />
+      {/* <h1>Welcome, {user.username}!</h1> */}
       {/* <button onClick={handleLogout}>Log Out</button> */}
       <SearchBar></SearchBar>
 
@@ -80,19 +57,19 @@ function MainFeed() {
           onLoaded={handleCarouselLoaded}
         />
 
-        {/*  Only render once username is loaded to avoid making 
+        {/*  Only render once username is loaded to avoid making
       an API call with an empty/undefined username */}
-        {username && (
+        {user && (
           <Carousel
             category="recommended"
-            username={username}
+            username={user.username}
             onLoaded={handleCarouselLoaded}
           />
         )}
-        {username && (
+        {user && (
           <Carousel
             category="outside"
-            username={username}
+            username={user.username}
             onLoaded={handleCarouselLoaded}
           />
         )}

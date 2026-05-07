@@ -3,14 +3,10 @@
 
 //IMPORTS////////////////////////////////////////
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type FC, useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "../firebaseClient";
-import { doc, getDoc } from "firebase/firestore";
+import { type FC, useContext, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import type { ProfileData, User } from "../../shared/types";
 import type { CollectionSummary as TCollectionSummary, ReviewType } from "@/types/types";
-import axios from "axios";
 import { addCollection, getCollectionSummariesByUserId } from "../data/collections.ts";
 import { getUserByUsername, updateUserProfile } from "../data/users.ts";
 
@@ -21,7 +17,9 @@ import ProfileEditButton from "@/components/Profile/ProfileEditButton.tsx";
 import Review from "@/components/Reviews/Review";
 import { Flex, Box, Avatar, VStack, Text, Field, Input, Separator, Button, Tabs, Spinner } from "@chakra-ui/react";
 import NotFoundPage from "@/pages/NotFoundPage.tsx";
+import AuthContext from "../components/Auth/AuthContext.tsx";
 import toast from "react-hot-toast";
+import { useAxiosClient } from "@/hooks.ts";
 
 const EMPTY_USER: User = {
   username: "N/A",
@@ -39,10 +37,7 @@ const Profile: FC<object> = () => {
 
   if (username === undefined) return <NotFoundPage />;
 
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  const [currentUser, setCurrentUser] = useState<User>(EMPTY_USER);
+  const [currentUser] = useContext(AuthContext);
   const [userReviews, setUserReviews] = useState<ReviewType[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [showAddCollectionForm, setShowAddCollectionForm] = useState(false);
@@ -50,6 +45,9 @@ const Profile: FC<object> = () => {
   const [collectionLoading, setCollectionLoading] = useState(false);
   let [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const axiosClient = useAxiosClient();
+
+  const queryClient = useQueryClient();
   const userQuery = useQuery({
     queryKey: ["getUser", username],
     queryFn: () => getUserByUsername(username),
@@ -67,26 +65,8 @@ const Profile: FC<object> = () => {
 
   const userMutation = useMutation<void, void, ProfileData>({
     mutationFn: (profileData) => updateUserProfile(username, profileData),
-    onSuccess: () => queryClient.invalidateQueries(),
+    onSuccess: () => queryClient.invalidateQueries(), // TODO: More precise invalidation?
   });
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) {
-        navigate("/login");
-        return;
-      }
-
-      const snap = await getDoc(doc(db, "users", firebaseUser.uid));
-
-      if (snap.exists()) {
-        const data = snap.data() as User;
-        setCurrentUser(data);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [navigate]);
 
   useEffect(() => {
     if (!userQuery.data || userQuery.data.username === "N/A") return;
@@ -95,11 +75,11 @@ const Profile: FC<object> = () => {
       try {
         setReviewsLoading(true);
 
-        let { data: reviews } = await axios.get(`http://localhost:3000/api/reviews/user/${userQuery.data.username}`);
+        let { data: reviews } = await axiosClient.get(`http://localhost:3000/api/reviews/user/${userQuery.data.username}`);
 
         let reviewsWithTitles = await Promise.all(
           reviews.map(async (review: ReviewType) => {
-            let { data: game } = await axios.get(`http://localhost:3000/api/games/${review.gameId}`);
+            let { data: game } = await axiosClient.get(`http://localhost:3000/api/games/${review.gameId}`);
 
             return {
               ...review,
@@ -124,6 +104,7 @@ const Profile: FC<object> = () => {
   }
 
   const user = userQuery.data as User;
+  const isSelf = user.username === currentUser?.username;
   const collections = collectionsQuery.data as TCollectionSummary[] | undefined;
 
   // adding collection forms
@@ -172,10 +153,7 @@ const Profile: FC<object> = () => {
 
   return (
     <div>
-      <Navbar
-        username={currentUser.username}
-        profilePage={true}
-      ></Navbar>
+      <Navbar profilePage />
 
       <Flex direction="column">
         {/* Profile Header */}
@@ -216,7 +194,7 @@ const Profile: FC<object> = () => {
                 <Text textStyle="sm">{user.username}</Text>
               </VStack>
 
-              {user.username === currentUser.username && (
+              {currentUser && isSelf && (
                 <Flex>
                   <ProfileEditButton
                     initialData={user}
@@ -326,6 +304,7 @@ const Profile: FC<object> = () => {
                     username={user.username}
                     displayName={user.displayName}
                     comment={review.text}
+                    canEdit={isSelf}
                     setUserReview={(val) => {
                       if (!val) {
                         setUserReviews((prev) => prev.filter((r) => r._id !== review._id));
