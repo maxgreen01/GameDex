@@ -235,7 +235,7 @@ const Profile: FC<object> = () => {
           </Flex>
 
           <Flex m={8}>
-            <Text>{user.description.length ? user.description : "(No description set.)"}</Text>
+            <Text>{user.description || "(No description set.)"}</Text>
           </Flex>
         </Box>
 
