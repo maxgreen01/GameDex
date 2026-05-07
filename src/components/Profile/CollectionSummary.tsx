@@ -107,11 +107,15 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
   useEffect(() => {
     const observer = new ResizeObserver((entries) => {
       const width = entries[0].contentRect.width;
-      setSlidesPerPageDependingOnViewport(Math.max(1, Math.floor(width / 85)));
+      if (width > 50) {
+        // ignore tiny widths during re-render
+        setSlidesPerPageDependingOnViewport(Math.max(1, Math.floor(width / 85)));
+      }
     });
     if (carouselRef.current) observer.observe(carouselRef.current);
     return () => observer.disconnect();
   }, []);
+  console.log("slideCount:", summary.games.length, "slidesPerPage:", slidesPerPageDependingOnViewport);
 
   if (loading) {
     return (
