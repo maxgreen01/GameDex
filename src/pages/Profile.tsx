@@ -7,7 +7,6 @@ import { type FC, useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import type { ProfileData, User } from "../../shared/types";
 import type { CollectionSummary as TCollectionSummary, ReviewType } from "@/types/types";
-import axios from "axios";
 import { addCollection, getCollectionSummariesByUserId } from "../data/collections.ts";
 import { getUserByUsername, updateUserProfile } from "../data/users.ts";
 
@@ -20,6 +19,7 @@ import { Flex, Box, Avatar, VStack, Text, Field, Input, Separator, Button, Tabs,
 import NotFoundPage from "@/pages/NotFoundPage.tsx";
 import AuthContext from "../components/Auth/AuthContext.tsx";
 import toast from "react-hot-toast";
+import { useAxiosClient } from "@/hooks.ts";
 
 const EMPTY_USER: User = {
   username: "N/A",
@@ -45,6 +45,8 @@ const Profile: FC<object> = () => {
   const [collectionLoading, setCollectionLoading] = useState(false);
   let [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const axiosClient = useAxiosClient();
+
   const queryClient = useQueryClient();
   const userQuery = useQuery({
     queryKey: ["getUser", username],
@@ -58,6 +60,7 @@ const Profile: FC<object> = () => {
     queryFn: () => getCollectionSummariesByUserId(username),
     retry: false,
     staleTime: 0,
+    refetchOnWindowFocus: true,
   });
 
   const userMutation = useMutation<void, void, ProfileData>({
@@ -72,11 +75,11 @@ const Profile: FC<object> = () => {
       try {
         setReviewsLoading(true);
 
-        let { data: reviews } = await axios.get(`http://localhost:3000/api/reviews/user/${userQuery.data.username}`);
+        let { data: reviews } = await axiosClient.get(`http://localhost:3000/api/reviews/user/${userQuery.data.username}`);
 
         let reviewsWithTitles = await Promise.all(
           reviews.map(async (review: ReviewType) => {
-            let { data: game } = await axios.get(`http://localhost:3000/api/games/${review.gameId}`);
+            let { data: game } = await axiosClient.get(`http://localhost:3000/api/games/${review.gameId}`);
 
             return {
               ...review,
@@ -210,7 +213,7 @@ const Profile: FC<object> = () => {
           </Flex>
 
           <Flex m={8}>
-            <Text>{user.description.length ? user.description : "(No description set.)"}</Text>
+            <Text>{user.description || "(No description set.)"}</Text>
           </Flex>
         </Box>
 

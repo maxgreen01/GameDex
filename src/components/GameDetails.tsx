@@ -23,16 +23,20 @@
 //   comment: string
 // }
 //IMPORTS/////////////////////////////////////////
-import axios from "axios";
 import { type FC, useContext, useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
-import { type Platform, type ReviewType, allPlatforms } from "../types/types.ts";
+import { type Platform, type ReviewType, type CollectionSummary, allPlatforms } from "../types/types.ts";
+import { updateCollection } from "@/data/collections.ts";
 //UI IMPORTS//////////////////////////////////////
-import { Box, Flex, Image, ScrollArea, Card, Heading, Text, Spinner } from "@chakra-ui/react";
+import { Box, Flex, Image, ScrollArea, Dialog, Checkbox, Button, Portal, CloseButton, Card, Heading, Text, Spinner, Stack } from "@chakra-ui/react";
 import Rating from "./Rating.tsx";
 import AuthContext from "./Auth/AuthContext.tsx";
 import Review from "./Reviews/Review.tsx";
 import AddReviewForm from "./Reviews/AddReviewForm.tsx";
+import { getCollectionsByUserTooAdd } from "@/data/collections.ts";
+import toast from "react-hot-toast";
+import Navbar from "./Navbar.tsx";
+import { useAxiosClient } from "@/hooks.ts";
 //-------------------------------------------------//
 
 export interface Props {
@@ -49,17 +53,39 @@ const GameDetails: FC<Props> = ({}) => {
   const [description, setDescription] = useState("");
   const [reviews, setReviews] = useState<ReviewType[]>([]);
   const [userReview, setUserReview] = useState<ReviewType | null>(null);
+  const [playlistsToAddTo, setPlaylistsToAddTo] = useState<CollectionSummary[]>([]);
+  const [playlistLoading, setPlaylistLoading] = useState(false);
+  const [selectedPlaylistIds, setSelectedPlaylistIds] = useState<{ id: string; name: string }[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   //const [showAddReviewButton, setShowAddReviewButton] = useState<boolean>(false);
 
   const { id } = useParams();
   const [user] = useContext(AuthContext);
+  const axiosClient = useAxiosClient();
 
-  //calculates the ratings according to the reviews. TODO: NEEDS TO BE REFLECTED IN THE MAIN DASHBOARD AND GAME DETAILS
+  //calculates the ratings according to the reviews.
   useEffect(() => {
-    if (reviews.length === 0) return;
-    let avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+    let allReviews = [...reviews];
+
+    if (userReview) {
+      allReviews.push(userReview);
+    }
+
+    if (allReviews.length === 0) {
+      setRating(0);
+      return;
+    }
+
+    let total = 0;
+
+    for (let i = 0; i < allReviews.length; i++) {
+      total += allReviews[i].rating;
+    }
+
+    let avg = total / allReviews.length;
     setRating(Math.round(avg * 2) / 2);
-  }, [reviews]);
+  }, [reviews, userReview]);
 
   //fetchingGame
   useEffect(() => {
@@ -67,7 +93,7 @@ const GameDetails: FC<Props> = ({}) => {
 
     async function loadGame() {
       try {
-        let { data } = await axios.get(`http://localhost:3000/api/games/${id}`);
+        let { data } = await axiosClient.get(`http://localhost:3000/api/games/${id}`);
 
         setBackgroundImage(data.background_image);
         setName(data.name);
@@ -82,10 +108,10 @@ const GameDetails: FC<Props> = ({}) => {
       try {
         if (user === null || user === undefined) return;
 
-        let { data: gameReviewsExceptCurrUser } = await axios.get(`http://localhost:3000/api/reviews/game/${id}/excluding/${user.username}`);
+        let { data: gameReviewsExceptCurrUser } = await axiosClient.get(`http://localhost:3000/api/reviews/game/${id}/excluding/${user.username}`);
         setReviews(gameReviewsExceptCurrUser);
 
-        let { data: currentUserReview } = await axios.get(`http://localhost:3000/api/reviews/game/${id}/user/${user.username}`);
+        let { data: currentUserReview } = await axiosClient.get(`http://localhost:3000/api/reviews/game/${id}/user/${user.username}`);
         if (currentUserReview) {
           setUserReview(currentUserReview);
         }
@@ -99,6 +125,41 @@ const GameDetails: FC<Props> = ({}) => {
     loadGame();
     getReviews();
   }, [id, user]);
+
+  //add game to playlist
+  async function calculatePlaylists() {
+    //get playlists
+    setPlaylistLoading(true);
+    try {
+      let playlists = await getCollectionsByUserTooAdd(id || ""); //callToFunction
+      console.log("Playlists gotten: ", playlists);
+      setPlaylistsToAddTo(playlists);
+    } catch (e: any) {
+      console.log(e);
+      toast.error(e.message);
+    }
+
+    setPlaylistLoading(false);
+  }
+
+  async function onSubmitAddToPlaylists() {
+    setPlaylistLoading(true);
+    try {
+      let results = await Promise.all(
+        selectedPlaylistIds.map((playlist) => {
+          updateCollection(playlist.name, playlist.id, [id || ""], []);
+        })
+      );
+      console.log(results);
+      //onUpdate()
+    } catch (e: any) {
+      console.log(e);
+      toast.error(e.message);
+    }
+
+    setPlaylistLoading(false);
+    setDialogOpen(false);
+  }
 
   //only gets most common platforms from given ones
   let showPlatforms = platforms?.filter((p) => {
@@ -143,6 +204,7 @@ const GameDetails: FC<Props> = ({}) => {
   }
   return (
     <div>
+      <Navbar />
       <Flex h="100vh">
         {/* game details */}
         <Box
@@ -196,10 +258,96 @@ const GameDetails: FC<Props> = ({}) => {
                     w="100%"
                   >
                     {/*lineClamp={2} to card title to cut off long titles*/}
-                    <Heading>{name}</Heading>
+                    <Flex
+                      flexDirection={"row"}
+                      justifyContent={"space-between"}
+                    >
+                      <Heading>{name}</Heading>
+                      <Dialog.Root
+                        size="cover"
+                        placement="center"
+                        motionPreset="slide-in-bottom"
+                        open={dialogOpen}
+                        onOpenChange={(details) => setDialogOpen(details.open)}
+                      >
+                        <Dialog.Trigger asChild>
+                          <Button
+                            variant="surface"
+                            size="sm"
+                            borderRadius={24}
+                            onClick={() => {
+                              calculatePlaylists();
+                              setDialogOpen(true);
+                            }}
+                          >
+                            +
+                          </Button>
+                        </Dialog.Trigger>
+                        <Portal>
+                          <Dialog.Backdrop />
+                          <Dialog.Positioner>
+                            <Dialog.Content>
+                              <Dialog.Header>
+                                <Dialog.Title>Collections</Dialog.Title>
+                                <Dialog.CloseTrigger asChild>
+                                  <CloseButton size="sm" />
+                                </Dialog.CloseTrigger>
+                              </Dialog.Header>
+                              <Dialog.Body>
+                                Click all the collections you want to add this game to.
+                                {playlistLoading ? (
+                                  <Flex
+                                    justify="center"
+                                    p={8}
+                                  >
+                                    <Spinner
+                                      size="lg"
+                                      color="white"
+                                    />
+                                  </Flex>
+                                ) : (
+                                  <Stack>
+                                    {playlistsToAddTo.map((playlist) => (
+                                      <Checkbox.Root
+                                        key={playlist._id}
+                                        variant={"outline"}
+                                        onCheckedChange={(details) => {
+                                          if (details.checked) {
+                                            setSelectedPlaylistIds([...selectedPlaylistIds, { id: playlist._id, name: playlist.name }]);
+                                          } else {
+                                            setSelectedPlaylistIds(selectedPlaylistIds.filter((p) => p.id !== playlist._id));
+                                          }
+                                        }}
+                                      >
+                                        <Checkbox.HiddenInput />
+                                        <Checkbox.Control />
+                                        <Checkbox.Label>{playlist.name}</Checkbox.Label>
+                                      </Checkbox.Root>
+                                    ))}
+                                  </Stack>
+                                )}
+                              </Dialog.Body>
+                              {!playlistLoading && (
+                                <>
+                                  <Dialog.Footer>
+                                    <Dialog.ActionTrigger asChild>
+                                      <Button variant="outline">Cancel</Button>
+                                    </Dialog.ActionTrigger>
+                                    <Button onClick={() => onSubmitAddToPlaylists()}>Save</Button>
+                                  </Dialog.Footer>
+                                  <Dialog.CloseTrigger asChild>
+                                    <CloseButton size="sm" />
+                                  </Dialog.CloseTrigger>
+                                </>
+                              )}
+                            </Dialog.Content>
+                          </Dialog.Positioner>
+                        </Portal>
+                      </Dialog.Root>
+                    </Flex>
                     <Rating
                       readOnly={true}
-                      value={Math.max(0.5, Math.round(Number(rating) * 2) / 2)}
+                      value={Math.round(Number(rating) * 2) / 2}
                       starSize="lg"
                     />
                     <Flex>

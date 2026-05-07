@@ -3,6 +3,7 @@ import express from "express";
 import axios from "axios";
 import { db } from "../firebaseAdmin.ts";
 import { generateKey } from "node:crypto";
+import { requireAuth } from "../middleware/requireAuth.ts";
 
 const router = express.Router();
 const apiKey = process.env.RAWG_API_KEY;
@@ -99,7 +100,7 @@ router.get("/newest", async (req, res) => {
   }
 });
 
-router.get("/recommended/:userId", async (req, res) => {
+router.get("/recommended/:userId", requireAuth, async (req, res) => {
   try {
     let { userId } = req.params;
 
@@ -168,7 +169,7 @@ router.get("/recommended/:userId", async (req, res) => {
   }
 });
 
-router.get("/outside/:userId", async (req, res) => {
+router.get("/outside/:userId", requireAuth, async (req, res) => {
   try {
     let { userId } = req.params;
 

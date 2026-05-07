@@ -4,12 +4,12 @@
 import type { FC } from "react";
 import { useState } from "react";
 import type { ReviewType } from "@/types/types";
-import axios from "axios";
 //import * as reviewFunctions from "../../../server/data/reviews";
 
 //UI IMPORTS//////////////////////////////////////
 import { Input, Box, Field, Button, RatingGroup, Spinner } from "@chakra-ui/react";
 import toast from "react-hot-toast";
+import { useAxiosClient } from "@/hooks";
 //-------------------------------------------------//
 
 interface Props {
@@ -26,6 +26,8 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
   let [comment, setComment] = useState("");
   let [showForm, setShowForm] = useState(false);
   let [loading, setLoading] = useState(false);
+
+  const axiosClient = useAxiosClient();
 
   function commentOnChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
@@ -59,7 +61,7 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
     //setUserReview(newReview);
 
     try {
-      await axios.post(`http://localhost:3000/api/reviews`, {
+      await axiosClient.post(`http://localhost:3000/api/reviews`, {
         gameId,
         userId: username,
         rating,
@@ -67,7 +69,7 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
         displayName,
       });
 
-      let { data: userReview } = await axios.get(`http://localhost:3000/api/reviews/game/${gameId}/user/${username}`);
+      let { data: userReview } = await axiosClient.get(`http://localhost:3000/api/reviews/game/${gameId}/user/${username}`);
 
       if (!userReview) {
         console.log("Error: Review could not be added");

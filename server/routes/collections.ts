@@ -68,4 +68,24 @@ router.delete("/:id", requireAuth, async (req, res) => {
   }
 });
 
+router.get("/addToCollection/:gameId", requireAuth, async (req, res) => {
+  try {
+    const userId = (req as AuthenticatedRequest).user.username;
+    let gameId = validateString(req.params.gameId, "addToCollection gameId");
+
+    let collections = await getCollectionsByUserId(userId);
+    let filteredCollections = [];
+
+    for (let i = 0; i < collections.length; i++) {
+      if (!collections[i].gameIds.map(String).includes(gameId)) {
+        filteredCollections.push(collections[i]);
+      }
+    }
+
+    return res.status(200).json(filteredCollections);
+  } catch (e) {
+    return respondWithError(res, e);
+  }
+});
+
 export default router;

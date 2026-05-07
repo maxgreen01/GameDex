@@ -4,12 +4,12 @@ NOTES: THE CARDS IN THIS PAGE STILL NEED TO BECOME CLICKABLE. THIS CAN BE DONE A
 
 import { type FC, useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import type { CarouselCardData } from "../types/types.ts";
 import CarouselCard from "@/components/Carousel/CarouselCard";
 import { Box, Heading, SimpleGrid, Spinner, Center, Text } from "@chakra-ui/react";
 import Navbar from "@/components/Navbar";
 import SearchBar from "@/components/SearchBar";
+import { useAxiosClient } from "@/hooks.ts";
 
 interface SearchResultsProps {}
 
@@ -20,6 +20,8 @@ const SearchResults: FC<SearchResultsProps> = () => {
   const [results, setResults] = useState<CarouselCardData[]>([]); //to hold the results from the search query
   const [loading, setLoading] = useState(true); //loading state
   const [error, setError] = useState<string | null>(null); //error state
+
+  const axiosClient = useAxiosClient();
 
   const navigate = useNavigate();
 
@@ -34,7 +36,7 @@ const SearchResults: FC<SearchResultsProps> = () => {
       setLoading(true);
       setError(null);
       try {
-        const { data } = await axios.get("/api/games/search", {
+        const { data } = await axiosClient.get("/api/games/search", {
           params: { search: searchQuery },
         });
         setResults(data.results || []);

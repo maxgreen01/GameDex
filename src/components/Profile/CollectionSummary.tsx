@@ -62,6 +62,7 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
 
       onUpdate(); //triggers refetch in parent
       setEditCollection(false);
+      setGameIdsToRemove([]);
       console.log(result);
     } catch (e: any) {
       console.log(e);
@@ -72,6 +73,7 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
   }
 
   async function onClickGame(gameId: string) {
+    console.log("clicking game:", gameId, typeof gameId);
     if (gameIdsToRemove.includes(gameId)) {
       setGameIdsToRemove(gameIdsToRemove.filter((game) => game !== gameId));
     } else {
@@ -146,11 +148,7 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
                   </div>
                 ) : (
                   <>
-                    <Card.Title>
-                      <ChakraLink asChild>
-                        <Link to={`/collections/${summary._id}`}>{summary.name}</Link>
-                      </ChakraLink>
-                    </Card.Title>
+                    <Card.Title>{summary.name}</Card.Title>
 
                     <Text textStyle="sm">
                       Includes {summary.games.length} game{summary.games.length === 1 ? "" : "s"}.
@@ -241,7 +239,10 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
                     </Carousel.Item>
                   ))
                 : summary.games.map((game, index) => (
-                    <Link to={`/games/${game.gameId}`}>
+                    <Link
+                      to={`/games/${game.gameId}`}
+                      key={game.gameId}
+                    >
                       <Carousel.Item
                         index={index}
                         key={game.gameId}
