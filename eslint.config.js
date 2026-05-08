@@ -36,7 +36,14 @@ export default defineConfig([
       },
     },
     rules: {
-      "no-unused-vars": "warn",
+      "no-unused-vars": [
+        "warn",
+        {
+          varsIgnorePattern: "^_",
+          argsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
       "no-undef": "error",
       "no-redeclare": "warn",
       "prefer-const": "warn",

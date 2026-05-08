@@ -3,10 +3,7 @@ import { Link } from "react-router-dom";
 //UI IMPORTS//////////////////////////////////////
 import { Box, Center, HStack, IconButton, Popover, Portal, Spacer, Text, VStack } from "@chakra-ui/react";
 import { MdNotInterested, MdPersonAdd, MdPersonRemove } from "react-icons/md";
-import { useAxiosClient } from "@/hooks";
-import { useState } from "react";
 import { Tooltip } from "../ui/tooltip";
-import toast from "react-hot-toast";
 
 interface Props {
   data: string[]; // list of friend usernames (either friends or incoming friend requests, depending on the context)
@@ -15,42 +12,11 @@ interface Props {
   isSelf: boolean; // true if this is the current user's profile
   isOpen: boolean;
   onOpenChange: (open: Popover.OpenChangeDetails) => void;
-  updateData(friend: string, method: string): void; // function to update the friend data in the parent component when a friend is accepted/declined/removed
+  updateData(friend: string, action: string): void; // function to update the friend data in the parent component when a friend is accepted/declined/removed
 }
 
 // Popup that shows either the user's friends or incoming friend requests, depending on the context
 function ProfileFriendPopup({ data, isRequests, username, isSelf, isOpen, onOpenChange, updateData }: Props) {
-  const axiosClient = useAxiosClient();
-
-  // Either accept an request, decline an request, or remove a friend
-  const handleUpdateFriend = async (friend: string, method: "post" | "put" | "delete") => {
-    let successMsg = "";
-    let errorMsg = "";
-    switch (method) {
-      case "post":
-        successMsg = "accepted friend request";
-        errorMsg = "accept friend request";
-        break;
-      case "put":
-        successMsg = "declined friend request";
-        errorMsg = "decline friend request";
-        break;
-      case "delete":
-        successMsg = "removed friend";
-        errorMsg = "remove friend";
-        break;
-    }
-
-    try {
-      await axiosClient[method](`http://localhost:3000/api/users/${username}/friends/${friend}`);
-      updateData(friend, method); // update the parent's state
-      toast.success(`Successfully ${successMsg}!`);
-    } catch (e) {
-      console.error(`Failed to ${errorMsg}:`, e);
-      toast.error(`Failed to ${errorMsg}.`);
-    }
-  };
-
   return (
     <Popover.Root
       size={"sm"}
@@ -103,7 +69,7 @@ function ProfileFriendPopup({ data, isRequests, username, isSelf, isOpen, onOpen
                                     content="Accept"
                                   >
                                     <IconButton
-                                      onClick={() => handleUpdateFriend(friend, "post")}
+                                      onClick={() => updateData(friend, "accept")}
                                       variant="ghost"
                                     >
                                       <MdPersonAdd />
@@ -115,7 +81,7 @@ function ProfileFriendPopup({ data, isRequests, username, isSelf, isOpen, onOpen
                                     content="Decline"
                                   >
                                     <IconButton
-                                      onClick={() => handleUpdateFriend(friend, "put")}
+                                      onClick={() => updateData(friend, "decline")}
                                       variant="ghost"
                                     >
                                       <MdNotInterested />
@@ -129,7 +95,7 @@ function ProfileFriendPopup({ data, isRequests, username, isSelf, isOpen, onOpen
                                   content="Remove Friend"
                                 >
                                   <IconButton
-                                    onClick={() => handleUpdateFriend(friend, "delete")}
+                                    onClick={() => updateData(friend, "delete")}
                                     variant="ghost"
                                   >
                                     <MdPersonRemove />
