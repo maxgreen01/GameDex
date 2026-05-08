@@ -14,12 +14,14 @@ import { getUserByUsername, updateUserProfile } from "../data/users.ts";
 import Navbar from "@/components/Navbar";
 import CollectionSummary from "@/components/Profile/CollectionSummary.tsx";
 import ProfileEditButton from "@/components/Profile/ProfileEditButton.tsx";
+import ProfileFriendPopup from "@/components/Profile/ProfileFriendPopup.tsx";
 import Review from "@/components/Reviews/Review";
-import { Flex, Box, Avatar, VStack, Text, Field, Input, Separator, Button, Tabs, Spinner } from "@chakra-ui/react";
+import { Flex, Box, Avatar, VStack, Text, Field, Input, Separator, Button, Tabs, Spinner, HStack, Icon } from "@chakra-ui/react";
 import NotFoundPage from "@/pages/NotFoundPage.tsx";
 import AuthContext from "../components/Auth/AuthContext.tsx";
 import toast from "react-hot-toast";
 import { useAxiosClient } from "@/hooks.ts";
+import { MdGroupAdd, MdNotInterested } from "react-icons/md";
 
 const EMPTY_USER: User = {
   username: "N/A",
@@ -27,7 +29,8 @@ const EMPTY_USER: User = {
   displayName: "N/A",
   description: "N/A",
   friends: [],
-  pendingInvites: [],
+  incomingRequests: [],
+  outgoingRequests: [],
   reviews: [],
   createdAt: -1,
 };
@@ -35,14 +38,17 @@ const EMPTY_USER: User = {
 const Profile: FC<object> = () => {
   const { username } = useParams();
 
-  if (username === undefined) return <NotFoundPage />;
-
   const [currentUser] = useContext(AuthContext);
   const [userReviews, setUserReviews] = useState<ReviewType[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [showAddCollectionForm, setShowAddCollectionForm] = useState(false);
   const [newCollectionTitle, setNewCollectionTitle] = useState("");
   const [collectionLoading, setCollectionLoading] = useState(false);
+
+  // no need to store friend info in state because it comes directly from the user query
+  const [showFriendsList, setShowFriendsList] = useState(false);
+  const [showFriendRequests, setShowFriendRequests] = useState(false);
+
   let [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const axiosClient = useAxiosClient();
@@ -99,19 +105,21 @@ const Profile: FC<object> = () => {
     getUserReviews();
   }, [userQuery.data]);
 
-  if (userQuery.isError) {
+  if (username === undefined || userQuery.isError) {
     return <NotFoundPage />;
   }
 
   const user = userQuery.data as User;
-  const isSelf = user.username === currentUser?.username;
+  const isSelf = user?.username === currentUser?.username;
   const collections = collectionsQuery.data as TCollectionSummary[] | undefined;
+  const friends = user.friends ?? [];
+  const friendRequests = user.incomingRequests ?? [];
 
   // adding collection forms
-  async function onUpdate() {
+  function onUpdate() {
     queryClient.invalidateQueries({ queryKey: ["getCollectionsByUserId", username] });
   }
-  async function onChangeAddCollection(e: React.ChangeEvent<HTMLInputElement>) {
+  function onChangeAddCollection(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
     setNewCollectionTitle(value);
 
@@ -142,13 +150,58 @@ const Profile: FC<object> = () => {
       toast.success("Collection added!");
       onUpdate();
     } catch (e) {
-      console.log("Error: Collection could not be added");
       toast.error("Error: Collection could not be added");
     }
 
     setNewCollectionTitle("");
     setCollectionLoading(false);
     setShowAddCollectionForm(false);
+  }
+
+  async function handleOutgoingFriendRequest(method: "post" | "put") {
+    try {
+      if (method === "post") {
+        console.log("Sending friend request to:", user.username);
+        await axiosClient.post(`http://localhost:3000/api/users/${currentUser?.username}/friends/${user?.username}`);
+        toast.success("Friend request sent!");
+      } else if (method === "put") {
+        await axiosClient.put(`http://localhost:3000/api/users/${currentUser?.username}/friends/${user?.username}`);
+        toast.success("Friend request cancelled");
+      }
+    } catch (e) {
+      toast.error("Error updating friend request: " + (e as Error).message);
+    }
+  }
+
+  // instead of refetching the entire user after accepting/declining a friend request,
+  // just update the cached user data
+  function handleIncomingFriendRequestUpdate(friend: string, method: string) {
+    queryClient.setQueryData<User>(["getUser", username], (old) => {
+      if (!old) return old;
+
+      // always remove the incoming request
+      const incomingRequests = old.incomingRequests.filter((f) => f !== friend);
+      // only add to the friends list if accepting the request
+      const friends = method === "post" ? [...old.friends, friend] : old.friends;
+
+      return {
+        ...old,
+        friends,
+        incomingRequests,
+      };
+    });
+  }
+
+  // remove a friend from the cached user data, assuming it's already been done in the remote
+  function handleRemoveFriend(friend: string) {
+    queryClient.setQueryData<User>(["getUser", username], (old) => {
+      if (!old) return old;
+
+      return {
+        ...old,
+        friends: old.friends.filter((f) => f !== friend),
+      };
+    });
   }
 
   return (
@@ -194,7 +247,7 @@ const Profile: FC<object> = () => {
                 <Text textStyle="sm">{user.username}</Text>
               </VStack>
 
-              {currentUser && isSelf && (
+              {isSelf && (
                 <Flex>
                   <ProfileEditButton
                     initialData={user}
@@ -202,13 +255,66 @@ const Profile: FC<object> = () => {
                   />
                 </Flex>
               )}
+
+              {/* friend request button */}
+              {/* // todo this and the friend popups go off screen with thin windows */}
+              {!isSelf &&
+                !friends.includes(currentUser?.username ?? "") &&
+                (!currentUser?.outgoingRequests?.includes(user.username) ? (
+                  // send a new request
+                  <Flex>
+                    <Button
+                      onClick={() => handleOutgoingFriendRequest("post")}
+                      variant="outline"
+                    >
+                      <MdGroupAdd /> <Text>Send Friend Request</Text>
+                    </Button>
+                  </Flex>
+                ) : (
+                  // outgoing request exists, so show cancel button
+                  <Flex>
+                    <Button
+                      onClick={() => handleOutgoingFriendRequest("put")}
+                      variant="outline"
+                    >
+                      <MdNotInterested /> <Text>Cancel Friend Request</Text>
+                    </Button>
+                  </Flex>
+                ))}
             </Flex>
 
+            {/* friend info stack */}
             <Flex>
-              <VStack gap={0}>
-                <Text>Friends</Text>
-                <Text>{user.friends.length}</Text>
-              </VStack>
+              <HStack gap={10}>
+                {/* friends popup */}
+                <ProfileFriendPopup
+                  data={friends}
+                  username={user.username}
+                  isOpen={showFriendsList}
+                  isSelf={isSelf}
+                  onOpenChange={(e) => {
+                    setShowFriendsList(e.open);
+                    setShowFriendRequests(false);
+                  }}
+                  updateData={handleRemoveFriend}
+                />
+
+                {/* incoming friend requests popup */}
+                {isSelf && (
+                  <ProfileFriendPopup
+                    data={friendRequests}
+                    isRequests
+                    username={user.username}
+                    isSelf={isSelf}
+                    isOpen={showFriendRequests}
+                    onOpenChange={(e) => {
+                      setShowFriendRequests(e.open);
+                      setShowFriendsList(false);
+                    }}
+                    updateData={handleIncomingFriendRequestUpdate}
+                  />
+                )}
+              </HStack>
             </Flex>
           </Flex>
 
