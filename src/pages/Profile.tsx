@@ -20,6 +20,7 @@ import NotFoundPage from "@/pages/NotFoundPage.tsx";
 import AuthContext from "../components/Auth/AuthContext.tsx";
 import toast from "react-hot-toast";
 import { useAxiosClient } from "@/hooks.ts";
+import { useColorMode } from "@/components/ui/color-mode.tsx";
 
 const EMPTY_USER: User = {
   username: "N/A",
@@ -44,7 +45,7 @@ const Profile: FC<object> = () => {
   const [newCollectionTitle, setNewCollectionTitle] = useState("");
   const [collectionLoading, setCollectionLoading] = useState(false);
   let [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+  const { colorMode } = useColorMode();
   const axiosClient = useAxiosClient();
 
   const queryClient = useQueryClient();
@@ -186,7 +187,7 @@ const Profile: FC<object> = () => {
                 align="flex-start"
               >
                 <Text
-                  color="white"
+                  color={colorMode === "dark" ? "white" : "black"}
                   textStyle="lg"
                 >
                   {user.displayName}

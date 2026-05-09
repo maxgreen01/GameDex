@@ -8,7 +8,7 @@ import { Card, HStack, Flex, Box, Input, Field, VStack, Image, Spinner, Carousel
 import { MdModeEdit, MdDelete } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
 import toast from "react-hot-toast";
-import { sum } from "firebase/firestore";
+import { useColorMode } from "../ui/color-mode";
 
 interface Props {
   summary: TCollectionSummary;
@@ -24,6 +24,7 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
   let [loading, setLoading] = useState(false);
   let [errorMessage, setErrorMessage] = useState<string | null>(null);
   let [gameIdsToRemove, setGameIdsToRemove] = useState<string[]>([]);
+  const { colorMode } = useColorMode();
 
   function clickEditButton() {
     setEditCollection(true);
@@ -236,7 +237,7 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
                           transition="opacity 0.2s"
                         >
                           <IconButton variant="plain">
-                            <MdDelete />
+                            <MdDelete color={colorMode === "dark" ? "black" : "white"} />
                           </IconButton>
                         </Box>
                       </Box>

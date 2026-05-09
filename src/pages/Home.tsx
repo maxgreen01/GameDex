@@ -1,17 +1,20 @@
 //IMPORTS/////////////////////////////////////////
 import { Link } from "react-router-dom";
 import logo from "../assets/logo.svg";
+import logoDark from "../assets/logoDark.svg";
 //UI IMPORTS//////////////////////////////////////
 import { Button, ButtonGroup, Box, AbsoluteCenter, Image } from "@chakra-ui/react";
+import { useColorMode } from "@/components/ui/color-mode";
 
 function Home() {
+  let { colorMode } = useColorMode();
   return (
     <div>
       <Box>
         <AbsoluteCenter>
           <Box>
             <Image
-              src={logo}
+              src={colorMode === "dark" ? logo : logoDark}
               alt="Logo"
               height="16"
               mx="auto"
