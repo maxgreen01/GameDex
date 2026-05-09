@@ -1,22 +1,32 @@
 services:
   frontend:
+    restart: always
     build:
       context: ./
       dockerfile: Dockerfile
       target: development
+    depends_on:
+      - backend
+    env_file:
+      - .env
     environment:
       - VITE_BACKEND_URL=http://backend:3000 # can't use localhost here because it's inside the container
     ports:
       - 5173:5173
     stdin_open: true
     volumes:
-      - ./:/usr/src/app
       - /usr/src/app/node_modules
-    restart: always
     networks:
       - react-express
-    depends_on:
-      - backend
+    develop:
+      watch:
+        - action: sync
+          path: ./
+          target: /usr/src/app
+          ignore:
+            - node_modules
+            - server
+            - scripts
 
   backend:
     restart: always
@@ -24,42 +34,58 @@ services:
       context: ./
       dockerfile: server/Dockerfile
       target: development
+    depends_on:
+      - elasticsearch
+    # - redis
     env_file:
       - .env
     volumes:
       - ./:/usr/src/app
       - /usr/src/app/node_modules
-    # depends_on:
-    # - elasticsearch
-    # - redis
     networks:
       - react-express
       - express-elastic
       - express-redis
     expose:
       - 3000
+    # for some reason, watch isn't actually reflecting changes in the server
+    # develop:
+    #   watch:
+    #     - action: sync+restart
+    #       path: ./server
+    #       target: /usr/src/app/server
+    #     - action: sync+restart
+    #       path: ./shared
+    #       target: /usr/src/app/shared
+    #     - action: sync+restart
+    #       path: ./scripts
+    #       target: /usr/src/app/scripts
 
-  # elasticsearch:
-  #   restart: always
-  #   image: docker.elastic.co/elasticsearch/elasticsearch:9.4.0
-  #   environment:
-  #     - discovery.type=single-node
-  #     - ES_JAVA_OPTS=-Xms1g -Xmx1g
-  #   ports:
-  #     - 9200:9200
-  #   volumes:
-  #     - elasticsearch_data:/usr/share/elasticsearch/data
-  #   networks:
-  #     - express-elastic
-  # redis:
-  #   restart: always
-  #   image: redis:7.2-alpine
-  #   ports:
-  #     - 6379:6379
-  #   volumes:
-  #     - redis_data:/data
-  #   networks:
-  #     - express-redis
+  elasticsearch:
+    restart: always
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.0
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - ES_LOG_STYLE=console
+      - ELASTIC_USERNAME=${ELASTIC_USERNAME}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    ports:
+      - 9200:9200
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - express-elastic
+
+# redis:
+#   restart: always
+#   image: redis:7.2-alpine
+#   ports:
+#     - 6379:6379
+#   volumes:
+#     - redis_data:/data
+#   networks:
+#     - express-redis
 
 networks:
   react-express:

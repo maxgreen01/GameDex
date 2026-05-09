@@ -27,6 +27,10 @@ export async function updateUserProfile(username: string, data: ProfileData) {
   await query.ref.update(data);
 }
 
+//
+// ========== Friend management ==========
+//
+
 // Send a friend request from username to friendUsername
 export async function requestFriend(username: string, friendUsername: string) {
   const userDoc = await queryUserByUsername(username);
