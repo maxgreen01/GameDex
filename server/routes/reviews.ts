@@ -227,7 +227,7 @@ router.get("/game/:gameId", async (req, res) => {
 });
 
 // same as getReviewsByUserId
-router.get("/user/:userId", requireAuth, async (req, res) => {
+router.get("/user/:userId", async (req, res) => {
   try {
     let { userId } = req.params;
 
@@ -332,7 +332,7 @@ router.put("/:reviewId", requireAuth, async (req, res) => {
 });
 
 // same as getReviewByGameIdAndUserId
-router.get("/game/:gameId/user/:userId", requireAuth, async (req, res) => {
+router.get("/game/:gameId/user/:userId", async (req, res) => {
   try {
     let { gameId, userId } = req.params;
 
@@ -377,7 +377,7 @@ router.get("/game/:gameId/user/:userId", requireAuth, async (req, res) => {
 });
 
 // same as getReviewsExcludingUser()
-router.get("/game/:gameId/excluding/:userId", requireAuth, async (req, res) => {
+router.get("/game/:gameId/excluding/:userId", async (req, res) => {
   try {
     let { gameId, userId } = req.params;
 
