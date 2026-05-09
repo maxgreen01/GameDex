@@ -12,7 +12,7 @@ import { useColorMode } from "../ui/color-mode";
 
 interface Props {
   summary: TCollectionSummary;
-  onUpdate: () => void;
+  onUpdate: () => Promise<void>;
   onDelete: () => void;
 }
 
@@ -61,9 +61,10 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
       let result = await updateCollection(collectionTitle, summary._id, [], gameIdsToRemove);
       //idk do smtg w result? cud be an error
 
-      onUpdate(); //triggers refetch in parent
+      await onUpdate(); //triggers refetch in parent
       setEditCollection(false);
       setGameIdsToRemove([]);
+      setLoading(false);
       console.log(result);
     } catch (e: any) {
       console.log(e);

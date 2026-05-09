@@ -353,7 +353,9 @@ const Profile: FC<object> = () => {
                     <CollectionSummary
                       key={collection._id}
                       summary={collection}
-                      onUpdate={onUpdate}
+                      onUpdate={async () => {
+                        await queryClient.invalidateQueries({ queryKey: ["getCollectionsByUserId", username] });
+                      }}
                       onDelete={() => {
                         queryClient.setQueryData(["getCollectionsByUserId", username], (old: TCollectionSummary[] | undefined) => (old ? old.filter((c) => c._id !== collection._id) : []));
                       }}
