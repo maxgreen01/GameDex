@@ -153,7 +153,7 @@ const Profile: FC<object> = () => {
 
   return (
     <div>
-      <Navbar profilePage />
+      <Navbar profilePage={isSelf} />
 
       <Flex direction="column">
         {/* Profile Header */}
