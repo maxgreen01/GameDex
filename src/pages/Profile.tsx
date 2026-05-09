@@ -81,11 +81,11 @@ const Profile: FC<object> = () => {
       try {
         setReviewsLoading(true);
 
-        let { data: reviews } = await axiosClient.get(`http://localhost:3000/api/reviews/user/${userQuery.data.username}`);
+        let { data: reviews } = await axiosClient.get(`/api/reviews/user/${userQuery.data.username}`);
 
         let reviewsWithTitles = await Promise.all(
           reviews.map(async (review: ReviewType) => {
-            let { data: game } = await axiosClient.get(`http://localhost:3000/api/games/${review.gameId}`);
+            let { data: game } = await axiosClient.get(`/api/games/${review.gameId}`);
 
             return {
               ...review,
@@ -191,11 +191,11 @@ const Profile: FC<object> = () => {
 
       switch (action) {
         case "accept":
-          await axiosClient.post(`http://localhost:3000/api/users/${currentUser?.username}/friends/${friend}`);
+          await axiosClient.post(`/api/users/${currentUser?.username}/friends/${friend}`);
           successVerb = "accepted";
           break;
         case "decline":
-          await axiosClient.put(`http://localhost:3000/api/users/${currentUser?.username}/friends/${friend}`);
+          await axiosClient.put(`/api/users/${currentUser?.username}/friends/${friend}`);
           successVerb = "declined";
           break;
         default:
@@ -225,13 +225,13 @@ const Profile: FC<object> = () => {
       // the current user is always the sender
       switch (action) {
         case "send":
-          await axiosClient.post(`http://localhost:3000/api/users/${currentUser?.username}/friends/${friend}`);
+          await axiosClient.post(`/api/users/${currentUser?.username}/friends/${friend}`);
           updateUserFriendsCache(currentUser?.username ?? "", friend, { outgoingRequests: "add" });
           updateUserFriendsCache(friend, currentUser?.username ?? "", { incomingRequests: "add" });
           successVerb = "sent";
           break;
         case "cancel":
-          await axiosClient.put(`http://localhost:3000/api/users/${currentUser?.username}/friends/${friend}`);
+          await axiosClient.put(`/api/users/${currentUser?.username}/friends/${friend}`);
           updateUserFriendsCache(currentUser?.username ?? "", friend, { outgoingRequests: "remove" });
           updateUserFriendsCache(friend, currentUser?.username ?? "", { incomingRequests: "remove" });
           successVerb = "cancelled";
@@ -250,7 +250,7 @@ const Profile: FC<object> = () => {
   // Remove an existing friend
   async function removeFriend(friend: string) {
     try {
-      await axiosClient.delete(`http://localhost:3000/api/users/${currentUser?.username}/friends/${friend}`);
+      await axiosClient.delete(`/api/users/${currentUser?.username}/friends/${friend}`);
 
       updateUserFriendsCache(currentUser?.username ?? "", friend, { friends: "remove" });
       updateUserFriendsCache(friend, currentUser?.username ?? "", { friends: "remove" });

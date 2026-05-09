@@ -34,7 +34,7 @@ export async function updateCollection(id: string, data: CollectionUpdateData) {
   if (data.name) await docRef.update({ name: data.name });
   if (data.gameIdsToAdd) {
     for (const gameId of data.gameIdsToAdd) {
-      const gameExists = await fetch(`http://localhost:3000/api/games/${gameId}`);
+      const gameExists = await fetch(`/api/games/${gameId}`);
       if (!gameExists) throw new NotFoundError("Game not found");
     }
 

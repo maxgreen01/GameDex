@@ -1,0 +1,72 @@
+services:
+  frontend:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      target: development
+    environment:
+      - VITE_BACKEND_URL=http://backend:3000 # can't use localhost here because it's inside the container
+    ports:
+      - 5173:5173
+    stdin_open: true
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    restart: always
+    networks:
+      - react-express
+    depends_on:
+      - backend
+
+  backend:
+    restart: always
+    build:
+      context: ./
+      dockerfile: server/Dockerfile
+      target: development
+    env_file:
+      - .env
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    # depends_on:
+    # - elasticsearch
+    # - redis
+    networks:
+      - react-express
+      - express-elastic
+      - express-redis
+    expose:
+      - 3000
+
+  # elasticsearch:
+  #   restart: always
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:9.4.0
+  #   environment:
+  #     - discovery.type=single-node
+  #     - ES_JAVA_OPTS=-Xms1g -Xmx1g
+  #   ports:
+  #     - 9200:9200
+  #   volumes:
+  #     - elasticsearch_data:/usr/share/elasticsearch/data
+  #   networks:
+  #     - express-elastic
+  # redis:
+  #   restart: always
+  #   image: redis:7.2-alpine
+  #   ports:
+  #     - 6379:6379
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - express-redis
+
+networks:
+  react-express:
+  express-elastic:
+  express-redis:
+
+volumes:
+  mongo_data:
+  elasticsearch_data:
+  redis_data:
