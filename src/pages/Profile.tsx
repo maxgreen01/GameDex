@@ -45,6 +45,7 @@ const Profile: FC<object> = () => {
   const [newCollectionTitle, setNewCollectionTitle] = useState("");
   const [collectionLoading, setCollectionLoading] = useState(false);
   let [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("reviews");
   const { colorMode } = useColorMode();
   const axiosClient = useAxiosClient();
 
@@ -149,6 +150,7 @@ const Profile: FC<object> = () => {
 
     setNewCollectionTitle("");
     setCollectionLoading(false);
+    setActiveTab("collections");
     setShowAddCollectionForm(false);
   }
 
@@ -274,6 +276,8 @@ const Profile: FC<object> = () => {
             defaultValue="reviews"
             fitted
             variant="subtle"
+            value={activeTab}
+            onValueChange={(details) => setActiveTab(details.value)}
           >
             <Tabs.List m={4}>
               <Tabs.Trigger value="reviews">Reviews</Tabs.Trigger>
