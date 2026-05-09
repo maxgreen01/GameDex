@@ -1,7 +1,7 @@
 //IMPORTS////////////////////////////////////////
 import { Link } from "react-router-dom";
 //UI IMPORTS//////////////////////////////////////
-import { Box, Center, HStack, IconButton, Popover, Portal, Spacer, Text, VStack } from "@chakra-ui/react";
+import { Box, Center, Flex, HStack, IconButton, Popover, Portal, Spacer, StackSeparator, Text, VStack } from "@chakra-ui/react";
 import { MdNotInterested, MdPersonAdd, MdPersonRemove } from "react-icons/md";
 import { Tooltip } from "../ui/tooltip";
 
@@ -45,12 +45,24 @@ function ProfileFriendPopup({ data, isRequests, username, isSelf, isOpen, onOpen
             <Popover.Body>
               {data.length ? (
                 <>
-                  <Popover.Title fontWeight="medium">{isRequests ? "Incoming Friend Requests" : `${isSelf ? "Your" : `${username}'s`} Friends`}</Popover.Title>
-                  <VStack>
+                  <Popover.Title
+                    fontWeight="medium"
+                    textDecoration={"underline"}
+                  >
+                    {isRequests ? "Incoming Friend Requests" : `${isSelf ? "Your" : `${username}'s`} Friends`}
+                  </Popover.Title>
+                  <VStack
+                    gap={0}
+                    mt={2}
+                    separator={<StackSeparator />}
+                  >
                     {data.map((friend) => {
                       return (
-                        <HStack
+                        <Flex
                           key={friend}
+                          direction={"row"}
+                          justify="space-between"
+                          align="center"
                           width="80%"
                         >
                           <Link to={`/profile/${friend}`}>{friend}</Link>
@@ -104,7 +116,7 @@ function ProfileFriendPopup({ data, isRequests, username, isSelf, isOpen, onOpen
                               )}
                             </>
                           )}
-                        </HStack>
+                        </Flex>
                       );
                     })}
                   </VStack>
