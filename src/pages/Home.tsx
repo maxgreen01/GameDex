@@ -18,7 +18,7 @@ function Home() {
               alt="Logo"
               height="16"
               mx="auto"
-              className="logo-glow"
+              className={colorMode === "dark" ? "logo-glow" : "logo-glow-light"}
             ></Image>
 
             <h1>Welcome to GameDex!</h1>
