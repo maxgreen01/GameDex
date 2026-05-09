@@ -317,7 +317,8 @@ const Profile: FC<object> = () => {
               {/* friend request button - never show for your own profile or if you're already friends */}
               {/* // todo this and the friend popups go off screen with thin windows */}
               {!isSelf &&
-                !friends.includes(currentUser?.username ?? "") &&
+                currentUser?.username &&
+                !friends.includes(currentUser?.username) &&
                 (currentUser?.incomingRequests?.includes(user.username) ? (
                   // current user has an incoming request from this profile user, so show accept button
                   <Flex>
