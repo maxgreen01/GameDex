@@ -39,7 +39,7 @@ const Navbar: FC<Props> = ({ profilePage = false }) => {
     }
   };
 
-  const username = user?.username ?? "N/A";
+  const username = user?.username ?? "";
   return (
     <Box
       w="100%"
@@ -78,7 +78,8 @@ const Navbar: FC<Props> = ({ profilePage = false }) => {
             </Text>
           </Flex>
         </Link>
-        {/* user icon */}
+
+        {/* user icon, or login/logout button */}
         <Flex>
           {profilePage ? (
             <Button
@@ -86,6 +87,13 @@ const Navbar: FC<Props> = ({ profilePage = false }) => {
               onClick={handleLogout}
             >
               Logout
+            </Button>
+          ) : username === "" ? (
+            <Button
+              variant="ghost"
+              onClick={() => navigate(`/login`)}
+            >
+              Login
             </Button>
           ) : (
             <Menu.Root positioning={{ placement: "bottom" }}>

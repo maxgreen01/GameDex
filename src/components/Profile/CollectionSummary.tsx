@@ -1,7 +1,7 @@
 //IMPORTS////////////////////////////////////////
 import { Link } from "react-router-dom";
 import type { CollectionSummary as TCollectionSummary } from "@/types/types.ts";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
 import { updateCollection, deleteCollection as delCol } from "@/data/collections";
 //UI IMPORTS//////////////////////////////////////
 import { Card, HStack, Flex, Box, Input, Field, VStack, Image, Spinner, Carousel, IconButton, Link as ChakraLink, Text } from "@chakra-ui/react";
@@ -9,6 +9,7 @@ import { MdModeEdit, MdDelete } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { sum } from "firebase/firestore";
+import AuthContext from "@/components/Auth/AuthContext.tsx";
 
 interface Props {
   summary: TCollectionSummary;
@@ -24,6 +25,8 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
   let [loading, setLoading] = useState(false);
   let [errorMessage, setErrorMessage] = useState<string | null>(null);
   let [gameIdsToRemove, setGameIdsToRemove] = useState<string[]>([]);
+
+  const [user] = useContext(AuthContext);
 
   function clickEditButton() {
     setEditCollection(true);
@@ -107,11 +110,15 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
   useEffect(() => {
     const observer = new ResizeObserver((entries) => {
       const width = entries[0].contentRect.width;
-      setSlidesPerPageDependingOnViewport(Math.max(1, Math.floor(width / 85)));
+      if (width > 50) {
+        // ignore tiny widths during re-render
+        setSlidesPerPageDependingOnViewport(Math.max(1, Math.floor(width / 85)));
+      }
     });
     if (carouselRef.current) observer.observe(carouselRef.current);
     return () => observer.disconnect();
   }, []);
+  console.log("slideCount:", summary.games.length, "slidesPerPage:", slidesPerPageDependingOnViewport);
 
   if (loading) {
     return (
@@ -159,7 +166,7 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
             </Flex>
 
             <Flex>
-              {!editCollection && (
+              {!editCollection && user?.username === summary.userId && (
                 <>
                   <IconButton
                     onClick={clickEditButton}

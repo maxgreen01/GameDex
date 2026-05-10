@@ -22,9 +22,9 @@ function updateUserFriendsCache(queryClient: QueryClient, user: string, otherUse
 
     return {
       ...old,
-      friends: processList(old.friends, options.friends),
-      incomingRequests: processList(old.incomingRequests, options.incomingRequests),
-      outgoingRequests: processList(old.outgoingRequests, options.outgoingRequests),
+      friends: processList(old.friends ?? [], options.friends),
+      incomingRequests: processList(old.incomingRequests ?? [], options.incomingRequests),
+      outgoingRequests: processList(old.outgoingRequests ?? [], options.outgoingRequests),
     };
   });
 }
