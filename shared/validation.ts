@@ -184,7 +184,8 @@ export function validateProfileData(data: unknown, label: string = "Profile Data
   const obj = validateObject(data, label);
   return {
     displayName: validateDisplayName(obj.displayName),
-    description: validateString(obj.description, "Description", 0),
+    description: validateString(obj.description ?? "", "Description", 0),
+    privateProfile: typeof obj.privateProfile === "boolean" ? obj.privateProfile : false,
   } as ProfileData;
 }
 

@@ -16,7 +16,7 @@ import CollectionSummary from "@/components/Profile/CollectionSummary.tsx";
 import ProfileEditButton from "@/components/Profile/ProfileEditButton.tsx";
 import ProfileFriendPopup from "@/components/Profile/ProfileFriendPopup.tsx";
 import Review from "@/components/Reviews/Review";
-import { Flex, Box, Avatar, VStack, Text, Field, Input, Separator, Button, Tabs, Spinner, HStack } from "@chakra-ui/react";
+import { Flex, Box, Avatar, VStack, Text, Field, Input, Separator, Button, Tabs, Spinner, HStack, Switch } from "@chakra-ui/react";
 import NotFoundPage from "@/pages/NotFoundPage.tsx";
 import AuthContext from "../components/Auth/AuthContext.tsx";
 import toast from "react-hot-toast";
@@ -32,6 +32,7 @@ const EMPTY_USER: User = {
   incomingRequests: [],
   outgoingRequests: [],
   reviews: [],
+  privateProfile: false,
   createdAt: -1,
 };
 
@@ -77,8 +78,25 @@ const Profile: FC<object> = () => {
     },
   });
 
+  const user = userQuery.data as User;
+  const isSelf = !!currentUser && user?.username === currentUser.username;
+  const collections = collectionsQuery.data as TCollectionSummary[] | undefined;
+  const friends = user.friends ?? [];
+  const friendRequests = user.incomingRequests ?? [];
+
+  // private profiles can only be viewed by the owner or their friends
+  const isFriend = !!currentUser && friends.includes(currentUser?.username);
+  const canView = !user.privateProfile || isSelf || isFriend;
+
   useEffect(() => {
     if (!userQuery.data || userQuery.data.username === "N/A") return;
+
+    // if profile is private, initialize the reviews and collections as empty
+    if (!canView) {
+      setUserReviews([]);
+      setReviewsLoading(false);
+      return;
+    }
 
     async function getUserReviews() {
       try {
@@ -106,17 +124,11 @@ const Profile: FC<object> = () => {
     }
 
     getUserReviews();
-  }, [userQuery.data]);
+  }, [userQuery.data, canView]);
 
   if (username === undefined || userQuery.isError) {
     return <NotFoundPage />;
   }
-
-  const user = userQuery.data as User;
-  const isSelf = !!currentUser && user?.username === currentUser.username;
-  const collections = collectionsQuery.data as TCollectionSummary[] | undefined;
-  const friends = user.friends ?? [];
-  const friendRequests = user.incomingRequests ?? [];
 
   // adding collection forms
   function onUpdate() {
@@ -205,12 +217,33 @@ const Profile: FC<object> = () => {
               </VStack>
 
               {isSelf && (
-                <Flex>
-                  <ProfileEditButton
-                    initialData={user}
-                    onAction={(data, onSuccess) => userMutation.mutate(data, { onSuccess })}
-                  />
-                </Flex>
+                <HStack>
+                  <Flex>
+                    <ProfileEditButton
+                      initialData={user}
+                      onAction={(data, onSuccess) => userMutation.mutate(data, { onSuccess })}
+                    />
+                  </Flex>
+
+                  <HStack>
+                    <Text fontSize="sm">Private Profile</Text>
+
+                    <Switch.Root
+                      checked={user.privateProfile}
+                      onCheckedChange={(e) => {
+                        userMutation.mutate({
+                          displayName: user.displayName,
+                          username: user.username,
+                          description: user.description,
+                          privateProfile: e.checked,
+                        });
+                      }}
+                    >
+                      <Switch.HiddenInput />
+                      <Switch.Control />
+                    </Switch.Root>
+                  </HStack>
+                </HStack>
               )}
 
               {/* friend request button - never show for your own profile or if you're already friends */}
@@ -331,7 +364,9 @@ const Profile: FC<object> = () => {
 
             {/* reviews */}
             <Tabs.Content value="reviews">
-              {reviewsLoading ? (
+              {!canView ? (
+                <Text>This user's reviews are private.</Text>
+              ) : reviewsLoading ? (
                 <Flex
                   justify="center"
                   p={8}
@@ -381,7 +416,7 @@ const Profile: FC<object> = () => {
                 </Flex>
               )}
               {/* Add collection form/button */}
-              {!showAddCollectionForm && (
+              {isSelf && !showAddCollectionForm && (
                 <Box>
                   <Button
                     w={"100%"}
@@ -392,7 +427,10 @@ const Profile: FC<object> = () => {
                 </Box>
               )}
 
-              {!collectionsQuery.isLoading &&
+              {!canView ? (
+                <Text>This user's collections are private.</Text>
+              ) : (
+                !collectionsQuery.isLoading &&
                 (collections && collections.length > 0 ? (
                   collections.map((collection) => (
                     <CollectionSummary
@@ -406,7 +444,8 @@ const Profile: FC<object> = () => {
                   ))
                 ) : (
                   <Text>No collections yet.</Text>
-                ))}
+                ))
+              )}
             </Tabs.Content>
           </Tabs.Root>
         )}
