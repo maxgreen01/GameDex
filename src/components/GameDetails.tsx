@@ -37,7 +37,7 @@ import { getCollectionsByUserTooAdd } from "@/data/collections.ts";
 import toast from "react-hot-toast";
 import Navbar from "./Navbar.tsx";
 import { useAxiosClient } from "@/hooks.ts";
-import { FaPlus } from "react-icons/fa";
+import { MdAdd } from "react-icons/md";
 //-------------------------------------------------//
 
 export interface Props {
@@ -281,7 +281,7 @@ const GameDetails: FC<Props> = ({}) => {
                               setDialogOpen(true);
                             }}
                           >
-                            <FaPlus />
+                            <MdAdd />
                           </IconButton>
                         </Dialog.Trigger>
                         <Portal>
