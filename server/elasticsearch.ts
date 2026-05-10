@@ -28,6 +28,7 @@ export async function createUserIndex() {
 }
 
 export async function addUserToSearchIndex(user: User | ProfileData) {
+  console.log(`Adding user ${user.username} to Elasticsearch index...`);
   try {
     await esClient.index({
       index: USERS_INDEX,
@@ -43,19 +44,20 @@ export async function addUserToSearchIndex(user: User | ProfileData) {
   }
 }
 
-export async function updateUserInSearchIndex(user: User | ProfileData) {
+export async function updateUserInSearchIndex(username: string, user: User | ProfileData) {
+  console.log(`Updating user ${username} in Elasticsearch index...`);
   try {
     await esClient.update({
       index: USERS_INDEX,
-      id: user.username,
+      id: username,
       doc: {
-        username: user.username,
+        username: username,
         displayName: user.displayName,
         description: user.description,
       },
     });
   } catch (e) {
-    console.error(`Error updating user ${user.username} in Elasticsearch index:`, e);
+    console.error(`Error updating user ${username} in Elasticsearch index:`, e);
   }
 }
 

@@ -41,10 +41,7 @@ async function seedUsersIndex() {
 
   // fetch all users from Firestore
   const snapshot = await db.collection("users").get();
-  const users = snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
+  const users = snapshot.docs.map((doc) => doc.data());
 
   if (users.length === 0) {
     return;
@@ -58,7 +55,7 @@ async function seedUsersIndex() {
       return [
         // first object is the action that should be taken (i.e. add to index)
         {
-          index: { _index: USERS_INDEX, _id: doc.id },
+          index: { _index: USERS_INDEX, _id: doc.username },
         },
         // second object is the data to be indexed
         {

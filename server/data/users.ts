@@ -26,7 +26,7 @@ export async function getUserByUsername(username: string) {
 export async function updateUserProfile(username: string, data: ProfileData) {
   const query = await queryUserByUsername(username);
   await query.ref.update(data);
-  await updateUserInSearchIndex(data);
+  await updateUserInSearchIndex(username, data);
 }
 
 //
