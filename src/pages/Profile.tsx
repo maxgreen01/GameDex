@@ -16,12 +16,12 @@ import CollectionSummary from "@/components/Profile/CollectionSummary.tsx";
 import ProfileEditButton from "@/components/Profile/ProfileEditButton.tsx";
 import ProfileFriendPopup from "@/components/Profile/ProfileFriendPopup.tsx";
 import Review from "@/components/Reviews/Review";
-import { Flex, Box, Avatar, VStack, Text, Field, Input, Separator, Button, Tabs, Spinner, HStack, Icon } from "@chakra-ui/react";
+import { Flex, Box, Avatar, VStack, Text, Field, Input, Separator, Button, Tabs, Spinner, HStack } from "@chakra-ui/react";
 import NotFoundPage from "@/pages/NotFoundPage.tsx";
 import AuthContext from "../components/Auth/AuthContext.tsx";
 import toast from "react-hot-toast";
 import { useAxiosClient } from "@/hooks.ts";
-import { MdGroupAdd, MdNotInterested, MdPersonAdd } from "react-icons/md";
+import ManageFriendRequestButton from "@/components/Profile/ManageFriendRequestButton.tsx";
 
 const EMPTY_USER: User = {
   username: "N/A",
@@ -84,11 +84,11 @@ const Profile: FC<object> = () => {
       try {
         setReviewsLoading(true);
 
-        let { data: reviews } = await axiosClient.get(`http://localhost:3000/api/reviews/user/${userQuery.data.username}`);
+        let { data: reviews } = await axiosClient.get(`/api/reviews/user/${userQuery.data.username}`);
 
         let reviewsWithTitles = await Promise.all(
           reviews.map(async (review: ReviewType) => {
-            let { data: game } = await axiosClient.get(`http://localhost:3000/api/games/${review.gameId}`);
+            let { data: game } = await axiosClient.get(`/api/games/${review.gameId}`);
 
             return {
               ...review,
@@ -113,7 +113,7 @@ const Profile: FC<object> = () => {
   }
 
   const user = userQuery.data as User;
-  const isSelf = user?.username === currentUser?.username;
+  const isSelf = !!currentUser && user?.username === currentUser.username;
   const collections = collectionsQuery.data as TCollectionSummary[] | undefined;
   const friends = user.friends ?? [];
   const friendRequests = user.incomingRequests ?? [];
@@ -159,110 +159,6 @@ const Profile: FC<object> = () => {
     setNewCollectionTitle("");
     setCollectionLoading(false);
     setShowAddCollectionForm(false);
-  }
-
-  // Update a user's friend data in the cache instead of refetching the entire user.
-  // Use `options` to specify whether to add to or remove from `friends`, `incomingRequests`, or `outgoingRequests`.
-  function updateUserFriendsCache(user: string, otherUser: string, options: { [key in "friends" | "incomingRequests" | "outgoingRequests"]?: "add" | "remove" | undefined }) {
-    queryClient.setQueryData<User>(["getUser", user], (old) => {
-      if (!old) return old;
-
-      // Helper function to process the add/remove logic for a specific array
-      const processList = (list: string[], action?: "add" | "remove") => {
-        if (action === "add") {
-          return [...list, otherUser];
-        } else if (action === "remove") {
-          return list.filter((id) => id !== otherUser);
-        } else {
-          return list; // Return original array if no action is specified
-        }
-      };
-
-      return {
-        ...old,
-        friends: processList(old.friends ?? [], options.friends),
-        incomingRequests: processList(old.incomingRequests ?? [], options.incomingRequests),
-        outgoingRequests: processList(old.outgoingRequests ?? [], options.outgoingRequests),
-      };
-    });
-  }
-
-  // Either accept or decline an incoming friend request
-  async function updateIncomingFriendRequest(friend: string, action: "accept" | "decline") {
-    try {
-      let successVerb: string;
-
-      switch (action) {
-        case "accept":
-          await axiosClient.post(`http://localhost:3000/api/users/${currentUser?.username}/friends/${friend}`);
-          successVerb = "accepted";
-          break;
-        case "decline":
-          await axiosClient.put(`http://localhost:3000/api/users/${currentUser?.username}/friends/${friend}`);
-          successVerb = "declined";
-          break;
-        default:
-          throw new Error(`Invalid action "${action}" for updateIncomingFriendRequest function!`);
-      }
-
-      // update the query data for both users to avoid refetching their entire objects
-
-      // even if the action is taken from another user's page, the current user is actually the recipient
-      const recipient = (isSelf ? username : currentUser?.username) ?? "";
-      // always remove the invite, and only add to the friends list if the request was accepted
-      updateUserFriendsCache(recipient, friend, { incomingRequests: "remove", friends: action === "accept" ? "add" : undefined });
-      updateUserFriendsCache(friend, recipient, { outgoingRequests: "remove", friends: action === "accept" ? "add" : undefined });
-
-      toast.success(`Successfully ${successVerb} friend request!`);
-    } catch (e) {
-      console.error(`Failed to ${action} friend request:`, e);
-      toast.error(`Failed to ${action} friend request.`);
-    }
-  }
-
-  // Either send or cancel an outgoing friend request
-  async function updateOutgoingFriendRequest(friend: string, action: "send" | "cancel") {
-    try {
-      let successVerb: string;
-
-      // the current user is always the sender
-      switch (action) {
-        case "send":
-          await axiosClient.post(`http://localhost:3000/api/users/${currentUser?.username}/friends/${friend}`);
-          updateUserFriendsCache(currentUser?.username ?? "", friend, { outgoingRequests: "add" });
-          updateUserFriendsCache(friend, currentUser?.username ?? "", { incomingRequests: "add" });
-          successVerb = "sent";
-          break;
-        case "cancel":
-          await axiosClient.put(`http://localhost:3000/api/users/${currentUser?.username}/friends/${friend}`);
-          updateUserFriendsCache(currentUser?.username ?? "", friend, { outgoingRequests: "remove" });
-          updateUserFriendsCache(friend, currentUser?.username ?? "", { incomingRequests: "remove" });
-          successVerb = "cancelled";
-          break;
-        default:
-          throw new Error(`Invalid action "${action}" for updateOutgoingFriendRequest function!`);
-      }
-
-      toast.success(`Friend request ${successVerb}!`);
-    } catch (e) {
-      console.error(`Failed to ${action} friend request:`, e);
-      toast.error(`Failed to ${action} friend request.`);
-    }
-  }
-
-  // Remove an existing friend
-  async function removeFriend(friend: string) {
-    try {
-      await axiosClient.delete(`http://localhost:3000/api/users/${currentUser?.username}/friends/${friend}`);
-
-      updateUserFriendsCache(currentUser?.username ?? "", friend, { friends: "remove" });
-      updateUserFriendsCache(friend, currentUser?.username ?? "", { friends: "remove" });
-
-      toast.success(`Friend "${friend}" removed!`);
-    } catch (e) {
-      console.error(`Failed to remove friend:`, e);
-      toast.error(`Failed to remove friend.`);
-    }
   }
 
   return (
@@ -319,40 +215,14 @@ const Profile: FC<object> = () => {
 
               {/* friend request button - never show for your own profile or if you're already friends */}
               {/* // todo this and the friend popups go off screen with thin windows */}
-              {!isSelf &&
-                currentUser?.username &&
-                !friends.includes(currentUser?.username) &&
-                (currentUser?.incomingRequests?.includes(user.username) ? (
-                  // current user has an incoming request from this profile user, so show accept button
-                  <Flex>
-                    <Button
-                      onClick={() => updateIncomingFriendRequest(user.username, "accept")}
-                      variant="outline"
-                    >
-                      <MdPersonAdd /> <Text>Accept Friend Request</Text>
-                    </Button>
-                  </Flex>
-                ) : currentUser?.outgoingRequests?.includes(user.username) ? (
-                  // outgoing request exists, so show cancel button
-                  <Flex>
-                    <Button
-                      onClick={() => updateOutgoingFriendRequest(user.username, "cancel")}
-                      variant="outline"
-                    >
-                      <MdNotInterested /> <Text>Cancel Friend Request</Text>
-                    </Button>
-                  </Flex>
-                ) : (
-                  // send a new request
-                  <Flex>
-                    <Button
-                      onClick={() => updateOutgoingFriendRequest(user.username, "send")}
-                      variant="outline"
-                    >
-                      <MdGroupAdd /> <Text>Send Friend Request</Text>
-                    </Button>
-                  </Flex>
-                ))}
+              {!isSelf && currentUser && (
+                <ManageFriendRequestButton
+                  currentUser={currentUser}
+                  otherUser={user.username}
+                  axiosClient={axiosClient}
+                  queryClient={queryClient}
+                />
+              )}
             </Flex>
 
             {/* friend info stack */}
@@ -361,14 +231,15 @@ const Profile: FC<object> = () => {
                 {/* friends popup */}
                 <ProfileFriendPopup
                   data={friends}
-                  username={user.username}
+                  user={user}
                   isOpen={showFriendsList}
                   isSelf={isSelf}
                   onOpenChange={(e) => {
                     setShowFriendsList(e.open);
                     setShowFriendRequests(false);
                   }}
-                  updateData={(friend, _action) => removeFriend(friend)}
+                  axiosClient={axiosClient}
+                  queryClient={queryClient}
                 />
 
                 {/* incoming friend requests popup */}
@@ -376,14 +247,15 @@ const Profile: FC<object> = () => {
                   <ProfileFriendPopup
                     data={friendRequests}
                     isRequests
-                    username={user.username}
+                    user={user}
                     isSelf={isSelf}
                     isOpen={showFriendRequests}
                     onOpenChange={(e) => {
                       setShowFriendRequests(e.open);
                       setShowFriendsList(false);
                     }}
-                    updateData={updateIncomingFriendRequest}
+                    axiosClient={axiosClient}
+                    queryClient={queryClient}
                   />
                 )}
               </HStack>

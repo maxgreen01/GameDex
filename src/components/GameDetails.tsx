@@ -94,7 +94,7 @@ const GameDetails: FC<Props> = ({}) => {
 
     async function loadGame() {
       try {
-        let { data } = await axiosClient.get(`http://localhost:3000/api/games/${id}`);
+        let { data } = await axiosClient.get(`/api/games/${id}`);
 
         setBackgroundImage(data.background_image);
         setName(data.name);
@@ -109,10 +109,10 @@ const GameDetails: FC<Props> = ({}) => {
       try {
         if (user === null || user === undefined) return;
 
-        let { data: gameReviewsExceptCurrUser } = await axiosClient.get(`http://localhost:3000/api/reviews/game/${id}/excluding/${user.username}`);
+        let { data: gameReviewsExceptCurrUser } = await axiosClient.get(`/api/reviews/game/${id}/excluding/${user.username}`);
         setReviews(gameReviewsExceptCurrUser);
 
-        let { data: currentUserReview } = await axiosClient.get(`http://localhost:3000/api/reviews/game/${id}/user/${user.username}`);
+        let { data: currentUserReview } = await axiosClient.get(`/api/reviews/game/${id}/user/${user.username}`);
         if (currentUserReview) {
           setUserReview(currentUserReview);
         }

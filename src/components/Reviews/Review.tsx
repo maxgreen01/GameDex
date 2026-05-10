@@ -90,7 +90,7 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
 
     try {
       editedComment = validateString(editedComment, "Review", 0, 500);
-      let { data: updatedReview } = await axiosClient.put(`http://localhost:3000/api/reviews/${reviewId}`, {
+      let { data: updatedReview } = await axiosClient.put(`/api/reviews/${reviewId}`, {
         userId: username,
         rating: editedRating,
         text: editedComment,
@@ -117,7 +117,7 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
     setLoading(true);
     console.log("Review id: ", reviewId);
     try {
-      let { data: deletedComment } = await axiosClient.delete(`http://localhost:3000/api/reviews/${reviewId}`, { data: { userId: username } });
+      let { data: deletedComment } = await axiosClient.delete(`/api/reviews/${reviewId}`, { data: { userId: username } });
 
       if (deletedComment.success) {
         toast.success(`Comment Deleted`);

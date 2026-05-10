@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { FieldValue } from "firebase-admin/firestore";
-import { db } from "../firebaseAdmin.ts";
+import { db } from "../services/firebaseAdmin.ts";
 import { requireAuth } from "../middleware/requireAuth.ts";
 
 const router = Router();

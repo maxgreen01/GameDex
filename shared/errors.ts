@@ -38,13 +38,14 @@ export class ForbiddenError extends StatusError {
 export class NotFoundError extends StatusError {
   constructor(message: string) {
     super(404, message);
+    this.name = this.constructor.name;
   }
 }
 
 // Returns the message and status code of an error to be displayed to a client.
 export function getErrorInfo(err: unknown): [number, string] {
   if (err instanceof StatusError) {
-    console.error(`Error ${err.status}:`, err.message);
+    console.error(`Error ${err.status}:`, err.message, err.stack);
     return [err.status, err.message];
   } else {
     console.error("Internal error:", err);
