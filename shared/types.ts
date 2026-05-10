@@ -6,7 +6,8 @@ export type User = {
   displayName: string;
   description: string;
   friends: string[];
-  pendingInvites: string[];
+  incomingRequests: string[];
+  outgoingRequests: string[];
   reviews: string[];
   createdAt: number;
 };
