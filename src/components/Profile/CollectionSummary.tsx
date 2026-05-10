@@ -124,7 +124,7 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
     return (
       <Card.Root
         size="md"
-        variant={"outline"}
+        variant="subtle"
       >
         <Card.Body color="fg.muted">
           <Spinner size="lg"></Spinner>
@@ -133,7 +133,10 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
     );
   } else {
     return (
-      <Card.Root variant={"outline"}>
+      <Card.Root
+        size="md"
+        variant="subtle"
+      >
         <Card.Header>
           <Flex
             w="100%"
