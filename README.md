@@ -1,75 +1,82 @@
-# React + TypeScript + Vite
+# GameDex
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+GameDex is a social game discovery platform where users can review games, build collections, connect with friends, and discover new games through recommendations and search.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+# Features
 
-## React Compiler
+- User authentication
+- Game reviews and ratings
+- Custom game collections
+- Friend request system
+- Public and private profiles
+- User search with Elasticsearch
+- RAWG API game integration
+- Personalized recommendations
+- Responsive UI with Chakra UI
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+---
 
-Note: This will impact Vite dev & build performances.
+# Tech Stack
 
-## Expanding the ESLint configuration
+## Frontend
+- React
+- TypeScript
+- Vite
+- Chakra UI
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Backend
+- Node.js
+- Express
+- Firebase
+- Elasticsearch
 
-```js
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
+## Other
+- Docker
+- Redis
+- RAWG API
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+# Running the Project
+
+This project is intended to be run using Docker.
+
+## Start the application
+
+```bash
+docker compose up --watch
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The frontend will be available at:
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
-
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```txt
+http://localhost:5173
 ```
+
+---
+
+# Core Functionality
+
+## Home Page
+The home page contains multiple game discovery carousels including popular games, newly released games, and personalized recommended games.
+
+## Game Search
+Users can search for games and view detailed information pulled from the RAWG API.
+
+## Reviews
+Users can create, edit, and delete reviews for games.
+
+## Collections
+Users can create custom collections and organize games into them.
+
+## Friends
+Users can send friend requests, accept requests, and manage their friends list.
+
+## Privacy
+Profiles support public and private modes. Private profiles restrict reviews and collections to friends only.
+
+
+# Repository
+https://github.com/maxgreen01/GameDex
