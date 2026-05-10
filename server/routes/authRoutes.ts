@@ -1,7 +1,7 @@
 import express from "express";
 import { auth, db } from "../firebaseAdmin.ts";
 import { validateSignup } from "../../shared/validation.ts";
-import { updateUserInSearchIndex } from "../elasticsearch.ts";
+import { addUserToSearchIndex } from "../elasticsearch.ts";
 
 const router = express.Router();
 
@@ -40,7 +40,7 @@ router.post("/signup", async (req, res) => {
       createdAt: Date.now(),
     });
 
-    await updateUserInSearchIndex({
+    await addUserToSearchIndex({
       username,
       displayName,
       description: "",
