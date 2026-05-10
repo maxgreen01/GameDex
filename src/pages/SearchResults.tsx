@@ -6,7 +6,7 @@ import { type FC, useContext, useEffect, useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import type { CarouselCardData } from "../types/types.ts";
 import CarouselCard from "@/components/Carousel/CarouselCard";
-import { Box, Heading, SimpleGrid, Spinner, Center, Text, Accordion, Span, VStack, StackSeparator, Flex } from "@chakra-ui/react";
+import { Box, Heading, SimpleGrid, Spinner, Center, Text, Accordion, Span, VStack, Flex } from "@chakra-ui/react";
 import Navbar from "@/components/Navbar";
 import SearchBar from "@/components/SearchBar";
 import { useAxiosClient } from "@/hooks.ts";
@@ -43,7 +43,7 @@ const SearchResults: FC<SearchResultsProps> = () => {
       setLoading(true);
       setError(null);
       try {
-        const users = await axiosClient.get("/api/search/users", {
+        const users = await axiosClient.get("/api/users/search", {
           params: { search: searchQuery },
         });
         setUserResults(users.data || []);
@@ -84,6 +84,7 @@ const SearchResults: FC<SearchResultsProps> = () => {
                 justify="space-between"
                 align="center"
                 width="80%"
+                height="40px"
               >
                 <Link to={`/profile/${otherUser}`}>{otherUser}</Link>
 

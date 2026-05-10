@@ -5,7 +5,6 @@ import collectionRoutes from "./routes/collections.ts";
 import rawgRoutes from "./routes/rawgRoutes.ts";
 import reviewRoutes from "./routes/reviews.ts";
 import userRoutes from "./routes/users.ts";
-import searchRoutes from "./routes/search.ts";
 
 const app = express();
 
@@ -17,7 +16,6 @@ app.use("/api/collections", collectionRoutes);
 app.use("/api/games", rawgRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/search", searchRoutes);
 
 const PORT = 3000;
 app.listen(PORT, () => {

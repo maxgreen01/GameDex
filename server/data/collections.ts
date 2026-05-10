@@ -1,6 +1,6 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { queryUserByUsername } from "./users.ts";
-import { db } from "../firebaseAdmin.ts";
+import { db } from "../services/firebaseAdmin.ts";
 import { NotFoundError } from "../../shared/errors.ts";
 import type { Collection, CollectionCreationData, CollectionUpdateData, WithId } from "../../shared/types.ts";
 import { getGameFromRAWG } from "../routes/rawgRoutes.ts";

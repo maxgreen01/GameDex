@@ -1,5 +1,5 @@
 import { Client } from "@elastic/elasticsearch";
-import type { ProfileData, User } from "../shared/types.ts";
+import type { ProfileData, User } from "../../shared/types.ts";
 
 const esClient = new Client({
   node: "http://elasticsearch:9200",

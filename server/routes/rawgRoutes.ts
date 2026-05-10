@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import axios from "axios";
-import { db } from "../firebaseAdmin.ts";
+import { db } from "../services/firebaseAdmin.ts";
 import { requireAuth } from "../middleware/requireAuth.ts";
 
 const router = express.Router();

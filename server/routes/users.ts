@@ -3,11 +3,24 @@ import { addFriend, declineFriendRequest, getUserByUsername, requestFriend, remo
 import { type AuthenticatedRequest, requireAuth } from "../middleware/requireAuth.ts";
 import { BadRequestError, ForbiddenError, respondWithError } from "../../shared/errors.ts";
 import { validateProfileData, validateString } from "../../shared/validation.ts";
+import { searchUsers } from "../services/elasticsearch.ts";
 
 const router = Router();
 
 router.get("/", requireAuth, async (req, res) => {
   return res.status(200).json((req as AuthenticatedRequest).user);
+});
+
+router.get("/search", async (req, res) => {
+  try {
+    const query = req.query.search as string;
+
+    const result = await searchUsers(query);
+    res.status(200).json(result);
+  } catch (e) {
+    console.error("Error performing search:", e);
+    res.status(500).json({ error: e });
+  }
 });
 
 router.get("/:username", async (req, res) => {

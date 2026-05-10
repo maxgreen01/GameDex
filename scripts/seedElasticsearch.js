@@ -1,5 +1,5 @@
-import esClient, { createUserIndex, USERS_INDEX } from "../server/elasticsearch.ts";
-import { db } from "../server/firebaseAdmin.ts";
+import esClient, { createUserIndex, USERS_INDEX } from "../server/services/elasticsearch.ts";
+import { db } from "../server/services/firebaseAdmin.ts";
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));

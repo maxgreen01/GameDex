@@ -1,8 +1,8 @@
-import { db } from "../firebaseAdmin.ts";
+import { db } from "../services/firebaseAdmin.ts";
 import { BadRequestError, NotFoundError } from "../../shared/errors.ts";
 import type { ProfileData, User } from "../../shared/types.ts";
 import { FieldValue } from "firebase-admin/firestore";
-import { updateUserInSearchIndex } from "../elasticsearch.ts";
+import { updateUserInSearchIndex } from "../services/elasticsearch.ts";
 
 const users = db.collection("users");
 

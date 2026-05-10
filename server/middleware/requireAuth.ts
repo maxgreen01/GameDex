@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { auth } from "../firebaseAdmin.ts";
+import { auth } from "../services/firebaseAdmin.ts";
 import { getUserById } from "../data/users.ts";
 import { respondWithError, UnauthorizedError } from "../../shared/errors.ts";
 import type { User } from "../../shared/types.ts";

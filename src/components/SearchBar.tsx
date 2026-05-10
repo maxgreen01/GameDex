@@ -24,7 +24,7 @@ const SearchBar: FC<Props> = ({ existingInput: existingSearchInput }) => {
   const handleSearch = (e: any) => {
     if (e.key === "Enter" && searchInput.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchInput.trim())}`); //encodeURIComponent is used to ensure that spaces and odd inputs dont break our search
-      setSearchInput("");
+      // setSearchInput("");
     }
   };
 

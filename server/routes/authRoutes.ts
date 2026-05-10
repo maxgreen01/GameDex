@@ -1,7 +1,7 @@
 import express from "express";
-import { auth, db } from "../firebaseAdmin.ts";
+import { auth, db } from "../services/firebaseAdmin.ts";
 import { validateSignup } from "../../shared/validation.ts";
-import { addUserToSearchIndex } from "../elasticsearch.ts";
+import { addUserToSearchIndex } from "../services/elasticsearch.ts";
 
 const router = express.Router();
 
