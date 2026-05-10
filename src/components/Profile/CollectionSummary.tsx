@@ -124,7 +124,7 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
     return (
       <Card.Root
         size="md"
-        variant={"outline"}
+        variant="subtle"
       >
         <Card.Body color="fg.muted">
           <Spinner size="lg"></Spinner>
@@ -133,7 +133,10 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
     );
   } else {
     return (
-      <Card.Root variant={"outline"}>
+      <Card.Root
+        size="md"
+        variant="subtle"
+      >
         <Card.Header>
           <Flex
             w="100%"
@@ -141,28 +144,23 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
             justify={"space-between"}
           >
             <Flex>
-              <VStack>
-                {editCollection ? (
-                  <div>
-                    <Field.Root invalid={!!errorMessage}>
-                      {/* <Field.Label p={2}>Title:</Field.Label> */}
-                      <Input
-                        value={collectionTitle}
-                        onChange={(e) => commentOnChange(e.target.value)}
-                      ></Input>
-                      <Field.ErrorText>{errorMessage}</Field.ErrorText>
-                    </Field.Root>
-                  </div>
-                ) : (
-                  <>
-                    <Card.Title>{summary.name}</Card.Title>
-
-                    <Text textStyle="sm">
-                      Includes {summary.games.length} game{summary.games.length === 1 ? "" : "s"}.
-                    </Text>
-                  </>
-                )}
-              </VStack>
+              {editCollection ? (
+                <Field.Root invalid={!!errorMessage}>
+                  {/* <Field.Label p={2}>Title:</Field.Label> */}
+                  <Input
+                    value={collectionTitle}
+                    onChange={(e) => commentOnChange(e.target.value)}
+                  ></Input>
+                  <Field.ErrorText>{errorMessage}</Field.ErrorText>
+                </Field.Root>
+              ) : (
+                <div>
+                  <Card.Title>{summary.name}</Card.Title>
+                  <Text textStyle="sm">
+                    Includes {summary.games.length} game{summary.games.length === 1 ? "" : "s"}.
+                  </Text>
+                </div>
+              )}
             </Flex>
 
             <Flex>

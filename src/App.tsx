@@ -21,7 +21,7 @@ function App() {
   return (
     <QueryClientProvider client={new QueryClient()}>
       <AuthProvider>
-        <Toaster position="top-right" />
+        <Toaster position="top-center" />
         <BrowserRouter>
           <Routes>
             <Route

@@ -28,7 +28,7 @@ import { Navigate, useParams } from "react-router-dom";
 import { type Platform, type ReviewType, type CollectionSummary, allPlatforms } from "../types/types.ts";
 import { updateCollection } from "@/data/collections.ts";
 //UI IMPORTS//////////////////////////////////////
-import { Box, Flex, Image, ScrollArea, Dialog, Checkbox, Button, Portal, CloseButton, Card, Heading, Text, Spinner, Stack } from "@chakra-ui/react";
+import { Box, Flex, Image, ScrollArea, Dialog, Checkbox, Button, Portal, CloseButton, Card, Heading, Text, Spinner, Stack, IconButton } from "@chakra-ui/react";
 import Rating from "./Rating.tsx";
 import AuthContext from "./Auth/AuthContext.tsx";
 import Review from "./Reviews/Review.tsx";
@@ -37,6 +37,7 @@ import { getCollectionsByUserTooAdd } from "@/data/collections.ts";
 import toast from "react-hot-toast";
 import Navbar from "./Navbar.tsx";
 import { useAxiosClient } from "@/hooks.ts";
+import { MdAdd } from "react-icons/md";
 //-------------------------------------------------//
 
 export interface Props {
@@ -271,7 +272,7 @@ const GameDetails: FC<Props> = ({}) => {
                         onOpenChange={(details) => setDialogOpen(details.open)}
                       >
                         <Dialog.Trigger asChild>
-                          <Button
+                          <IconButton
                             variant="surface"
                             size="sm"
                             borderRadius={24}
@@ -280,8 +281,8 @@ const GameDetails: FC<Props> = ({}) => {
                               setDialogOpen(true);
                             }}
                           >
-                            +
-                          </Button>
+                            <MdAdd />
+                          </IconButton>
                         </Dialog.Trigger>
                         <Portal>
                           <Dialog.Backdrop />
