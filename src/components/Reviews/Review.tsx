@@ -13,7 +13,7 @@ import { Link } from "react-router-dom";
 import type { ReviewType } from "@/types/types";
 import { validateString } from "../../../shared/validation";
 //UI IMPORTS//////////////////////////////////////
-import { Card, Heading, VStack, Flex, IconButton, Input, Field, Text, Avatar, Button, Spinner } from "@chakra-ui/react";
+import { Card, Heading, VStack, Flex, IconButton, Input, Field, Text, Avatar, Button, Spinner, Fieldset } from "@chakra-ui/react";
 import Rating from "../Rating";
 import { MdModeEdit, MdDelete } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
@@ -232,46 +232,29 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
               </Flex>
             )}
           </Flex>
-          <Flex pt={2}>
-            {!profilePage ? (
-              // game details page
+        </Card.Header>
+        <Card.Body color="fg.muted">
+          {editReview ? (
+            <Fieldset.Root>
               <Field.Root invalid={rating === 0}>
-                {editReview && <Field.Label p={2}>Rating:</Field.Label>}
+                {editReview && <Field.Label>Rating:</Field.Label>}
                 <Rating
                   readOnly={!editReview}
                   value={editedRating}
                   onValueChange={(newValue) => setEditedRating(newValue)}
                 />
               </Field.Root>
-            ) : editReview ? (
-              // profile page, editing
-              <Field.Root invalid={rating === 0}>
-                <Field.Label p={2}>Rating:</Field.Label>
-                <Rating
-                  readOnly={false}
-                  value={editedRating}
-                  onValueChange={(newValue) => setEditedRating(newValue)}
-                />
-              </Field.Root>
-            ) : null}
-          </Flex>
-        </Card.Header>
-        <Card.Body color="fg.muted">
-          {editReview ? (
-            <div>
               <Field.Root invalid={!!errorMessage}>
-                <Field.Label p={2}>Your Review:</Field.Label>
+                <Field.Label>Your Review:</Field.Label>
                 <Input
                   value={editedComment}
                   onChange={(e) => commentOnChange(e.target.value)}
                 ></Input>
                 <Field.ErrorText>{"Must be 500 characters or less!"}</Field.ErrorText>
               </Field.Root>
-            </div>
+            </Fieldset.Root>
           ) : (
-            <div>
-              <Text wordBreak="break-word">{editedComment}</Text>
-            </div>
+            <Text wordBreak="break-word">{editedComment}</Text>
           )}
         </Card.Body>
       </Card.Root>
