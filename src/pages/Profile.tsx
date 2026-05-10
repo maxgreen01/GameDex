@@ -69,9 +69,12 @@ const Profile: FC<object> = () => {
     refetchOnWindowFocus: true,
   });
 
-  const userMutation = useMutation<void, void, ProfileData>({
+  const userMutation = useMutation<void, Error, ProfileData>({
     mutationFn: (profileData) => updateUserProfile(username, profileData),
-    onSuccess: () => queryClient.invalidateQueries(), // TODO: More precise invalidation?
+    onSuccess: () => queryClient.invalidateQueries(),
+    onError: (error: Error) => {
+      toast.error(error.message ?? "Failed to update profile.");
+    },
   });
 
   useEffect(() => {
@@ -309,7 +312,7 @@ const Profile: FC<object> = () => {
                 <Flex>
                   <ProfileEditButton
                     initialData={user}
-                    onAction={userMutation.mutate}
+                    onAction={(data, onSuccess) => userMutation.mutate(data, { onSuccess })}
                   />
                 </Flex>
               )}

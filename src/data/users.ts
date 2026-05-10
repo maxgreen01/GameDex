@@ -1,5 +1,7 @@
 import { useAxiosClient } from "../hooks.ts";
 import type { ProfileData, User } from "../../shared/types.ts";
+import { isAxiosError } from "axios";
+import { BadRequestError } from "../../shared/errors.ts";
 
 export async function getCurrentUser() {
   const axiosClient = useAxiosClient();
@@ -15,5 +17,12 @@ export async function getUserByUsername(username: string) {
 
 export async function updateUserProfile(username: string, data: ProfileData) {
   const axiosClient = useAxiosClient();
-  await axiosClient.put(`/api/users/${username}`, data);
+  try {
+    await axiosClient.put(`/api/users/${username}`, data);
+  } catch (e) {
+    if (isAxiosError(e)) {
+      throw new BadRequestError(e.response?.data?.error ?? "Failed to update profile.");
+    }
+    throw e;
+  }
 }

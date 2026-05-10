@@ -5,11 +5,12 @@ import type { ProfileData } from "../../../shared/types.ts";
 
 interface Props {
   initialData: ProfileData;
-  onAction: (data: ProfileData) => void;
+  onAction: (data: ProfileData, onSuccess: () => void) => void;
 }
 
 const ProfileEditButton: FC<Props> = ({ initialData, onAction }) => {
   const [data, setData] = useState<ProfileData>(initialData);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     setData(initialData);
@@ -18,15 +19,24 @@ const ProfileEditButton: FC<Props> = ({ initialData, onAction }) => {
   const onChange = (event: { target: { name: string; value: string } }) => {
     setData((user) => ({ ...user, [event.target.name]: event.target.value }));
   };
+
   const action = (_: FormData) => {
-    // TODO: Error checking (display name must not be blank)
-    onAction(data);
+    onAction(data, () => setOpen(false)); // only close on success
   };
 
   return (
-    <Dialog.Root>
+    <Dialog.Root
+      open={open}
+      onOpenChange={(e) => {
+        setOpen(e.open);
+        if (!e.open) setData(initialData);
+      }}
+    >
       <Dialog.Trigger asChild>
-        <IconButton variant="ghost">
+        <IconButton
+          variant="ghost"
+          onClick={() => setOpen(true)}
+        >
           <MdModeEdit />
         </IconButton>
       </Dialog.Trigger>
@@ -60,9 +70,7 @@ const ProfileEditButton: FC<Props> = ({ initialData, onAction }) => {
                   </Field.Root>
                 </Fieldset.Content>
                 <Dialog.Footer>
-                  <Dialog.ActionTrigger asChild>
-                    <Button type="submit">Submit</Button>
-                  </Dialog.ActionTrigger>
+                  <Button type="submit">Submit</Button>
                 </Dialog.Footer>
               </Fieldset.Root>
             </form>
