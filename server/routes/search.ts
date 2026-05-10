@@ -1,5 +1,5 @@
 import { Router } from "express";
-import esClient, { searchUsers } from "../elasticsearch";
+import { searchUsers } from "../elasticsearch";
 
 const router = Router();
 
@@ -18,7 +18,7 @@ const router = Router();
 
 router.get("/users", async (req, res) => {
   try {
-    const query = req.query.q as string;
+    const query = req.query.search as string;
 
     const result = await searchUsers(query);
     res.status(200).json(result);

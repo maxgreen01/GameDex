@@ -33,6 +33,10 @@ router.put("/:username", requireAuth, async (req, res) => {
   }
 });
 
+//
+// ========== Friend management ==========
+//
+
 // Add a friend (accept an incoming request if one exists, or send an outgoing request otherwise)
 router.post("/:username/friends/:friendUsername", requireAuth, async (req, res) => {
   try {

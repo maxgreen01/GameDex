@@ -1,6 +1,7 @@
 import express from "express";
 import { auth, db } from "../firebaseAdmin.ts";
 import { validateSignup } from "../../shared/validation.ts";
+import { updateUserInSearchIndex } from "../elasticsearch.ts";
 
 const router = express.Router();
 
@@ -37,6 +38,12 @@ router.post("/signup", async (req, res) => {
       reviews,
       collections,
       createdAt: Date.now(),
+    });
+
+    await updateUserInSearchIndex({
+      username,
+      displayName,
+      description: "",
     });
 
     return res.status(201).json({ uid: userRecord.uid });

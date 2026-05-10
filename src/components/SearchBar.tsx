@@ -12,10 +12,12 @@ import { LuSearch } from "react-icons/lu";
 
 //-------------------------------------------------//
 
-interface Props {}
+interface Props {
+  existingInput?: string;
+}
 
-const SearchBar: FC<Props> = ({}) => {
-  const [searchInput, setSearchInput] = useState("");
+const SearchBar: FC<Props> = ({ existingInput: existingSearchInput }) => {
+  const [searchInput, setSearchInput] = useState(existingSearchInput || "");
   const navigate = useNavigate();
 
   //function to handle the search term
@@ -32,7 +34,7 @@ const SearchBar: FC<Props> = ({}) => {
       startElement={<LuSearch />}
     >
       <Input
-        placeholder="Search games"
+        placeholder="Search games and users"
         value={searchInput}
         onChange={(e) => setSearchInput(e.target.value)}
         onKeyDown={handleSearch}

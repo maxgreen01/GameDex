@@ -5,10 +5,14 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function waitForElasticsearch(retries = 10, delayMs = 2000) {
+async function waitForElasticsearch(retries = 5, delayMs = 10000) {
+  console.log("Starting to wait for Elasticsearch...");
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      await esClient.ping();
+      const response = await esClient.cluster.health({
+        wait_for_status: "yellow",
+        timeout: "30s",
+      });
       console.log("Elasticsearch is ready!");
       return;
     } catch (e) {
@@ -16,7 +20,7 @@ async function waitForElasticsearch(retries = 10, delayMs = 2000) {
         throw e;
       }
 
-      console.log("Waiting for Elasticsearch...");
+      console.log("Waiting for Elasticsearch..., error:", e.message);
       await delay(delayMs);
     }
   }

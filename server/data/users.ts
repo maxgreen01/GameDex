@@ -1,7 +1,8 @@
 import { db } from "../firebaseAdmin.ts";
-import { NotFoundError } from "../../shared/errors.ts";
+import { BadRequestError, NotFoundError } from "../../shared/errors.ts";
 import type { ProfileData, User } from "../../shared/types.ts";
 import { FieldValue } from "firebase-admin/firestore";
+import { updateUserInSearchIndex } from "../elasticsearch.ts";
 
 const users = db.collection("users");
 
@@ -25,6 +26,7 @@ export async function getUserByUsername(username: string) {
 export async function updateUserProfile(username: string, data: ProfileData) {
   const query = await queryUserByUsername(username);
   await query.ref.update(data);
+  await updateUserInSearchIndex(data);
 }
 
 //
@@ -33,6 +35,7 @@ export async function updateUserProfile(username: string, data: ProfileData) {
 
 // Send a friend request from username to friendUsername
 export async function requestFriend(username: string, friendUsername: string) {
+  if (username === friendUsername) throw new BadRequestError("You cannot send a friend request to yourself!");
   const userDoc = await queryUserByUsername(username);
   const friendDoc = await queryUserByUsername(friendUsername);
   await userDoc.ref.update({
@@ -45,6 +48,7 @@ export async function requestFriend(username: string, friendUsername: string) {
 
 // Revoke an outgoing friend request, which also removes the corresponding incoming request
 export async function revokeFriendRequest(username: string, friendUsername: string) {
+  if (username === friendUsername) throw new BadRequestError("You cannot revoke a friend request to yourself!");
   const userDoc = await queryUserByUsername(username);
   const friendDoc = await queryUserByUsername(friendUsername);
   await userDoc.ref.update({
@@ -57,6 +61,7 @@ export async function revokeFriendRequest(username: string, friendUsername: stri
 
 // Decline an incoming friend request, leaving the outgoing request intact (to avoid showing the declined request)
 export async function declineFriendRequest(username: string, friendUsername: string) {
+  if (username === friendUsername) throw new BadRequestError("You cannot decline a friend request from yourself!");
   const userDoc = await queryUserByUsername(username);
   const friendDoc = await queryUserByUsername(friendUsername);
   await userDoc.ref.update({
@@ -66,6 +71,7 @@ export async function declineFriendRequest(username: string, friendUsername: str
 
 // Accept a friend request, clearing any existing requests between the two users
 export async function addFriend(username: string, friendUsername: string) {
+  if (username === friendUsername) throw new BadRequestError("You cannot add yourself as a friend!");
   const userDoc = await queryUserByUsername(username);
   const friendDoc = await queryUserByUsername(friendUsername);
   await userDoc.ref.update({
@@ -82,6 +88,7 @@ export async function addFriend(username: string, friendUsername: string) {
 
 // Remove a friend
 export async function removeFriend(username: string, friendUsername: string) {
+  if (username === friendUsername) throw new BadRequestError("You cannot remove yourself as a friend!");
   const userDoc = await queryUserByUsername(username);
   const friendDoc = await queryUserByUsername(friendUsername);
   await userDoc.ref.update({

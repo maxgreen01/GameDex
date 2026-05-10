@@ -1,10 +1,10 @@
 import { Client } from "@elastic/elasticsearch";
-import type { User } from "../shared/types.ts";
+import type { ProfileData, User } from "../shared/types.ts";
 
 const esClient = new Client({
   node: "http://elasticsearch:9200",
   auth: {
-    username: process.env.ELASTIC_USERNAME || "",
+    username: process.env.ELASTIC_USERNAME || "elastic",
     password: process.env.ELASTIC_PASSWORD || "",
   },
 });
@@ -18,7 +18,7 @@ export async function createUserIndex() {
       index: USERS_INDEX,
       mappings: {
         properties: {
-          username: { type: "keyword" },
+          username: { type: "text" },
           displayName: { type: "text" },
           description: { type: "text" },
         },
@@ -27,24 +27,32 @@ export async function createUserIndex() {
   }
 }
 
-export async function addUserToIndex(user: User) {
+export async function addUserToSearchIndex(user: User | ProfileData) {
   try {
     await esClient.index({
       index: USERS_INDEX,
       id: user.username,
-      document: user,
+      document: {
+        username: user.username,
+        displayName: user.displayName,
+        description: user.description,
+      },
     });
   } catch (e) {
     console.error(`Error adding user ${user.username} to Elasticsearch index:`, e);
   }
 }
 
-export async function updateUserInIndex(user: User) {
+export async function updateUserInSearchIndex(user: User | ProfileData) {
   try {
     await esClient.update({
       index: USERS_INDEX,
       id: user.username,
-      doc: user,
+      doc: {
+        username: user.username,
+        displayName: user.displayName,
+        description: user.description,
+      },
     });
   } catch (e) {
     console.error(`Error updating user ${user.username} in Elasticsearch index:`, e);
@@ -53,13 +61,34 @@ export async function updateUserInIndex(user: User) {
 
 // Perform full-text search on the users index, prioritizing username, then displayName, then description
 export async function searchUsers(query: string) {
+  query = query?.trim();
+  if (!query) {
+    // query must not be empty
+    return [];
+  }
+
   try {
     const result = await esClient.search({
       index: USERS_INDEX,
       query: {
-        multi_match: {
-          query,
-          fields: ["username^3", "displayName^2", "description"],
+        bool: {
+          should: [
+            {
+              match_phrase_prefix: {
+                username: {
+                  query,
+                  boost: 4,
+                },
+              },
+            },
+            {
+              multi_match: {
+                query,
+                fields: ["username^4", "displayName^3", "description"],
+                fuzziness: "AUTO",
+              },
+            },
+          ],
         },
       },
     });

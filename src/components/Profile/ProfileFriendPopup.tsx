@@ -1,22 +1,27 @@
 //IMPORTS////////////////////////////////////////
 import { Link } from "react-router-dom";
 //UI IMPORTS//////////////////////////////////////
-import { Box, Center, Flex, HStack, IconButton, Popover, Portal, Spacer, StackSeparator, Text, VStack } from "@chakra-ui/react";
+import { Box, Center, Flex, IconButton, Popover, Portal, Spacer, StackSeparator, Text, VStack } from "@chakra-ui/react";
 import { MdNotInterested, MdPersonAdd, MdPersonRemove } from "react-icons/md";
 import { Tooltip } from "../ui/tooltip";
+import { removeFriend, updateIncomingFriendRequest } from "../../../shared/friendLogic";
+import type { AxiosInstance } from "axios";
+import type { QueryClient } from "@tanstack/react-query";
+import type { User } from "../../../shared/types";
 
 interface Props {
   data: string[]; // list of friend usernames (either friends or incoming friend requests, depending on the context)
   isRequests?: boolean; // true if this is for the requests popup
-  username: string; // current user's username
+  user: User; // current user
   isSelf: boolean; // true if this is the current user's profile
   isOpen: boolean;
   onOpenChange: (open: Popover.OpenChangeDetails) => void;
-  updateData(friend: string, action: string): void; // function to update the friend data in the parent component when a friend is accepted/declined/removed
+  axiosClient: AxiosInstance;
+  queryClient: QueryClient;
 }
 
 // Popup that shows either the user's friends or incoming friend requests, depending on the context
-function ProfileFriendPopup({ data, isRequests, username, isSelf, isOpen, onOpenChange, updateData }: Props) {
+function ProfileFriendPopup({ data, isRequests, user, isSelf, isOpen, onOpenChange, axiosClient, queryClient }: Props) {
   return (
     <Popover.Root
       size={"sm"}
@@ -49,10 +54,10 @@ function ProfileFriendPopup({ data, isRequests, username, isSelf, isOpen, onOpen
                     fontWeight="medium"
                     textDecoration={"underline"}
                   >
-                    {isRequests ? "Incoming Friend Requests" : `${isSelf ? "Your" : `${username}'s`} Friends`}
+                    {isRequests ? "Incoming Friend Requests" : `${isSelf ? "Your" : `${user.username}'s`} Friends`}
                   </Popover.Title>
                   <VStack
-                    gap={0}
+                    gap={2}
                     mt={2}
                     separator={<StackSeparator />}
                   >
@@ -81,7 +86,7 @@ function ProfileFriendPopup({ data, isRequests, username, isSelf, isOpen, onOpen
                                     content="Accept"
                                   >
                                     <IconButton
-                                      onClick={() => updateData(friend, "accept")}
+                                      onClick={() => updateIncomingFriendRequest(axiosClient, queryClient, user, friend, "accept")}
                                       variant="ghost"
                                     >
                                       <MdPersonAdd />
@@ -93,7 +98,7 @@ function ProfileFriendPopup({ data, isRequests, username, isSelf, isOpen, onOpen
                                     content="Decline"
                                   >
                                     <IconButton
-                                      onClick={() => updateData(friend, "decline")}
+                                      onClick={() => updateIncomingFriendRequest(axiosClient, queryClient, user, friend, "decline")}
                                       variant="ghost"
                                     >
                                       <MdNotInterested />
@@ -107,7 +112,7 @@ function ProfileFriendPopup({ data, isRequests, username, isSelf, isOpen, onOpen
                                   content="Remove Friend"
                                 >
                                   <IconButton
-                                    onClick={() => updateData(friend, "delete")}
+                                    onClick={() => removeFriend(axiosClient, queryClient, user, friend)}
                                     variant="ghost"
                                   >
                                     <MdPersonRemove />
