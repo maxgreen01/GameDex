@@ -393,6 +393,7 @@ const GameDetails: FC<Props> = ({}) => {
                     displayName={user?.displayName}
                     username={user?.username}
                     comment={userReview.text}
+                    canEdit={true}
                     setUserReview={setUserReview}
                   />
                 ) : (
