@@ -163,9 +163,7 @@ const CarouselRow: FC<Props> = ({ category, username, onLoaded }) => {
           }
 
           try {
-            let { data } = await axiosClient.get(`/api/games/recommended/${username}`, {
-              params: { t: Date.now() }, // fuck cache
-            });
+            let { data } = await axiosClient.get(`/api/games/recommended/${username}`);
             setCards(data.results);
           } catch (e) {
             console.log(e);
@@ -179,15 +177,13 @@ const CarouselRow: FC<Props> = ({ category, username, onLoaded }) => {
           }
 
           try {
-            let { data } = await axiosClient.get(`/api/games/outside/${username}`, {
-              params: { t: Date.now() },
-            });
+            let { data } = await axiosClient.get(`/api/games/outside/${username}`);
             setCards(data.results);
           } catch (e) {
             console.log(e);
           }
 
-          setTitle("Outside");
+          setTitle("Outside Your Box");
         } else if (category == "newest") {
           //get newest games
           try {
@@ -199,10 +195,6 @@ const CarouselRow: FC<Props> = ({ category, username, onLoaded }) => {
             console.error(e);
           }
           setTitle("Newest Releases");
-          // CALCULATE RATING
-        } else if (category == "outside") {
-          //get cards NOT recommmended for them
-          setTitle("Outside Your Box");
           // CALCULATE RATING
         }
       }

@@ -10,7 +10,7 @@ services:
     env_file:
       - .env
     environment:
-      - VITE_BACKEND_URL=http://backend:3000 # can't use localhost here because it's inside the container
+      - IS_CONTAINERIZED=true
     ports:
       - 5173:5173
     stdin_open: true
@@ -36,9 +36,11 @@ services:
       target: development
     depends_on:
       - elasticsearch
-    # - redis
+      - redis
     env_file:
       - .env
+    environment:
+      - IS_CONTAINERIZED=true
     volumes:
       - ./:/usr/src/app
       - /usr/src/app/node_modules
@@ -77,15 +79,18 @@ services:
     networks:
       - express-elastic
 
-# redis:
-#   restart: always
-#   image: redis:7.2-alpine
-#   ports:
-#     - 6379:6379
-#   volumes:
-#     - redis_data:/data
-#   networks:
-#     - express-redis
+  redis:
+    restart: always
+    image: redis/redis-stack:latest
+    environment:
+      - REDIS_ARGS=--save 300 20 --appendonly yes # enable persistence by saving every 5 minutes if at least 20 changes have been made
+    ports:
+      - "6379:6379" # Redis server port
+      - "8001:8001" # RedisInsight web UI port
+    volumes:
+      - redis_data:/usr/share/redis/data
+    networks:
+      - express-redis
 
 networks:
   react-express:
