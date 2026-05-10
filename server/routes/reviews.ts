@@ -5,7 +5,6 @@ import { requireAuth } from "../middleware/requireAuth.ts";
 import { checkCache } from "../middleware/checkCache.ts";
 import { appendCachedJSONArray, cacheJSONResponse, deleteCacheKey, updateCachedJSON } from "../services/redis.ts";
 import type { RedisJSON } from "redis";
-import type { ReviewType } from "@/types/types.ts";
 
 const router = Router();
 
@@ -188,6 +187,7 @@ router.delete("/:reviewId", requireAuth, async (req, res) => {
     // deletes the review
     await reviewsCollection.doc(reviewId).delete();
 
+    // fixme(MG) cache update
     return res.json({ success: true });
   } catch (e) {
     return res.status(500).json({ error: e });
@@ -195,7 +195,7 @@ router.delete("/:reviewId", requireAuth, async (req, res) => {
 });
 
 // same as getReviewsByGameId
-router.get("/game/:gameId", async (req, res) => {
+router.get("/game/:gameId", checkCache, async (req, res) => {
   try {
     let { gameId } = req.params;
 
@@ -229,6 +229,7 @@ router.get("/game/:gameId", async (req, res) => {
       }
     });
 
+    await cacheJSONResponse(req, reviews);
     return res.json(reviews);
   } catch (e) {
     return res.status(500).json({ error: e });
@@ -236,7 +237,7 @@ router.get("/game/:gameId", async (req, res) => {
 });
 
 // same as getReviewsByUserId
-router.get("/user/:userId", async (req, res) => {
+router.get("/user/:userId", checkCache, async (req, res) => {
   try {
     let { userId } = req.params;
 
@@ -270,6 +271,7 @@ router.get("/user/:userId", async (req, res) => {
       }
     });
 
+    await cacheJSONResponse(req, reviews);
     return res.json(reviews);
   } catch (e) {
     return res.status(500).json({ error: e });
@@ -345,7 +347,7 @@ router.put("/:reviewId", requireAuth, async (req, res) => {
 });
 
 // same as getReviewByGameIdAndUserId
-router.get("/game/:gameId/user/:userId", async (req, res) => {
+router.get("/game/:gameId/user/:userId", checkCache, async (req, res) => {
   try {
     let { gameId, userId } = req.params;
 
@@ -383,6 +385,7 @@ router.get("/game/:gameId/user/:userId", async (req, res) => {
       }
     });
 
+    await cacheJSONResponse(req, foundReview);
     return res.json(foundReview);
   } catch (e) {
     return res.status(500).json({ error: e });
@@ -390,7 +393,7 @@ router.get("/game/:gameId/user/:userId", async (req, res) => {
 });
 
 // same as getReviewsExcludingUser()
-router.get("/game/:gameId/excluding/:userId", async (req, res) => {
+router.get("/game/:gameId/excluding/:userId", checkCache, async (req, res) => {
   try {
     let { gameId, userId } = req.params;
 
@@ -439,6 +442,7 @@ router.get("/game/:gameId/excluding/:userId", async (req, res) => {
       }
     }
 
+    await cacheJSONResponse(req, reviews);
     return res.json(reviews);
   } catch (e) {
     return res.status(500).json({ error: e });
@@ -455,12 +459,12 @@ async function updateCachedReview(review: any, isNew: boolean) {
 
   // replace this review's own cache entry
   await updateCachedJSON(`/api/reviews/${reviewId}`, reviewObj);
+  await updateCachedJSON(`/api/reviews/game/${gameId}/user/${userId}`, reviewObj);
 
   // append this review to all the relevant cached arrays
   if (isNew) {
     await appendCachedJSONArray(`/api/reviews/game/${gameId}`, "", reviewObj);
     await appendCachedJSONArray(`/api/reviews/user/${userId}`, "", reviewObj);
-    await appendCachedJSONArray(`/api/reviews/game/${gameId}/user/${userId}`, "", reviewObj);
     await appendCachedJSONArray(`/api/users/${userId}`, "reviews", reviewId);
   }
 

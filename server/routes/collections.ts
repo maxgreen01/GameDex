@@ -3,6 +3,9 @@ import { createCollection, deleteCollection, getCollectionById, getCollectionsBy
 import { type AuthenticatedRequest, requireAuth } from "../middleware/requireAuth.ts";
 import { ForbiddenError, respondWithError } from "../../shared/errors.ts";
 import { validateCollectionCreationData, validateCollectionUpdateData, validateString } from "../../shared/validation.ts";
+import { checkCache } from "../middleware/checkCache.ts";
+import { appendCachedJSONArray, cacheJSONResponse, deleteCacheKey, updateCachedJSON } from "../services/redis.ts";
+import type { RedisJSON } from "redis";
 
 const router = Router();
 
@@ -12,6 +15,7 @@ router.post("/", requireAuth, async (req, res) => {
     const userId = (req as AuthenticatedRequest).user.username;
     const data = validateCollectionCreationData(req.body);
     const result = await createCollection(userId, data);
+    await updateCachedCollection(result, true);
     return res.status(201).json(result);
   } catch (e) {
     return respondWithError(res, e);
@@ -19,10 +23,11 @@ router.post("/", requireAuth, async (req, res) => {
 });
 
 //get collections by user id
-router.get("/user/:userId", async (req, res) => {
+router.get("/user/:userId", checkCache, async (req, res) => {
   try {
     const userId = validateString(req.params.userId, "User ID");
     const collections = await getCollectionsByUserId(userId);
+    await cacheJSONResponse(req, collections);
     return res.status(200).json(collections);
   } catch (e) {
     return respondWithError(res, e);
@@ -30,10 +35,11 @@ router.get("/user/:userId", async (req, res) => {
 });
 
 //get collection by id
-router.get("/:id", async (req, res) => {
+router.get("/:id", checkCache, async (req, res) => {
   try {
     const id = validateString(req.params.id, "Collection ID");
     const collection = await getCollectionById(id);
+    await cacheJSONResponse(req, collection);
     return res.status(200).json(collection);
   } catch (e) {
     return respondWithError(res, e);
@@ -49,6 +55,7 @@ router.post("/:id", requireAuth, async (req, res) => {
     if (userId !== collection.userId) throw new ForbiddenError("A user can only update their own collections");
     const data = validateCollectionUpdateData(req.body);
     const result = await updateCollection(id, data);
+    await updateCachedCollection(result, false);
     return res.status(201).json(result);
   } catch (e) {
     return respondWithError(res, e);
@@ -62,12 +69,14 @@ router.delete("/:id", requireAuth, async (req, res) => {
     const collection = await getCollectionById(id);
     if (userId !== collection.userId) throw new ForbiddenError("A user can only delete their own collections");
     const result = await deleteCollection(id);
+    // fixme(MG) cache update
     return res.status(204).json(result);
   } catch (e) {
     return respondWithError(res, e);
   }
 });
 
+// don't cache this because it depends on the logged in user, not the query params
 router.get("/addToCollection/:gameId", requireAuth, async (req, res) => {
   try {
     const userId = (req as AuthenticatedRequest).user.username;
@@ -87,5 +96,21 @@ router.get("/addToCollection/:gameId", requireAuth, async (req, res) => {
     return respondWithError(res, e);
   }
 });
+
+// update all the relevant Redis cache entries for when a collection is added or updated
+async function updateCachedCollection(collection: any, isNew: boolean) {
+  const collectionId = collection._id;
+  const userId = collection.userId;
+  if (!collectionId || !userId) return;
+  const collectionObj = collection as RedisJSON;
+
+  // replace this collection's own cache entry
+  await updateCachedJSON(`/api/collections/${collectionId}`, collectionObj);
+
+  // append this collection to all the relevant cached arrays
+  if (isNew) {
+    await appendCachedJSONArray(`/api/collections/user/${userId}`, "", collectionObj);
+  }
+}
 
 export default router;
