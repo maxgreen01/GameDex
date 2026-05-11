@@ -9,6 +9,7 @@ export type User = {
   incomingRequests: string[];
   outgoingRequests: string[];
   reviews: string[];
+  privateProfile: boolean;
   createdAt: number;
 };
 
@@ -28,6 +29,7 @@ export type ProfileData = {
   displayName: string;
   username: string;
   description: string;
+  privateProfile: boolean;
 };
 
 export type Platform = {

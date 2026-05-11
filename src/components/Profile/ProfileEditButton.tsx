@@ -88,7 +88,7 @@ const ProfileEditButton: FC<Props> = ({ initialData, mutation }) => {
                     <Field.Label>Description</Field.Label>
                     <Textarea
                       name="description"
-                      value={data.description}
+                      value={data.description ?? ""}
                       onChange={onChange}
                     />
                   </Field.Root>

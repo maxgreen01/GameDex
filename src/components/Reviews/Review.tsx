@@ -19,6 +19,7 @@ import { MdModeEdit, MdDelete } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { useAxiosClient } from "@/hooks";
+import { useColorMode } from "../ui/color-mode";
 //-------------------------------------------------//
 
 interface Props {
@@ -50,7 +51,7 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
   let [editedRating, setEditedRating] = useState(rating);
   let [loading, setLoading] = useState(false);
   let [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+  let { colorMode } = useColorMode();
   const axiosClient = useAxiosClient();
 
   //edit review button
@@ -187,7 +188,7 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
                     align={"flex-start"}
                   >
                     <Text
-                      color={"white"}
+                      color={colorMode == "dark" ? "white" : "black"}
                       textStyle={"lg"}
                     >
                       {displayName ? displayName : "display"}

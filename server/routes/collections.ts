@@ -3,6 +3,7 @@ import { createCollection, deleteCollection, getCollectionById, getCollectionsBy
 import { type AuthenticatedRequest, requireAuth } from "../middleware/requireAuth.ts";
 import { ForbiddenError, respondWithError } from "../../shared/errors.ts";
 import { validateCollectionCreationData, validateCollectionUpdateData, validateString } from "../../shared/validation.ts";
+import { getUserByUsername } from "../data/users.ts";
 
 const router = Router();
 
@@ -19,9 +20,18 @@ router.post("/", requireAuth, async (req, res) => {
 });
 
 //get collections by user id
-router.get("/user/:userId", async (req, res) => {
+router.get("/user/:userId", requireAuth, async (req, res) => {
   try {
     const userId = validateString(req.params.userId, "User ID");
+    const currentUser = (req as AuthenticatedRequest).user;
+    const targetUser = await getUserByUsername(userId);
+
+    const isSelf = currentUser.username === userId;
+    const isFriend = targetUser.friends?.includes(currentUser.username);
+
+    if (targetUser.privateProfile && !isSelf && !isFriend) {
+      throw new ForbiddenError("This user's collections are private.");
+    }
     const collections = await getCollectionsByUserId(userId);
     return res.status(200).json(collections);
   } catch (e) {
