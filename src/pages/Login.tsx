@@ -27,7 +27,7 @@ function Login() {
       // If we aren't logged in, we expect an auth state change, so mark client-side auth state as undetermined
       if (user === null) setUser(undefined);
       const { user: firebaseUser, token } = await login(loginData.email, loginData.password);
-
+      localStorage.setItem("token", token);
       const response = await fetch("/auth/login", {
         method: "POST",
         headers: {
