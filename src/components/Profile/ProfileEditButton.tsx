@@ -17,14 +17,9 @@ const ProfileEditButton: FC<Props> = ({ initialData, mutation }) => {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect, react-x/set-state-in-effect
-    setData(initialData);
-  }, [initialData]);
-
   const toggleOpen = (open: boolean) => {
     setOpen(open);
-    if (!open) {
+    if (open) {
       setData(initialData);
       setPending(false);
       setError(null);
