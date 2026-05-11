@@ -61,7 +61,6 @@ const ProfileEditButton: FC<Props> = ({ initialData, mutation }) => {
       <Dialog.Trigger asChild>
         <IconButton
           variant="ghost"
-          disabled={pending}
           onClick={() => toggleOpen(true)}
         >
           <MdModeEdit />
@@ -79,7 +78,7 @@ const ProfileEditButton: FC<Props> = ({ initialData, mutation }) => {
                 size="lg"
               >
                 <Dialog.CloseTrigger asChild>
-                  <CloseButton />
+                  <CloseButton disabled={pending} />
                 </Dialog.CloseTrigger>
                 <Fieldset.Content>
                   <Field.Root>
