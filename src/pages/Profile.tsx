@@ -89,6 +89,10 @@ const Profile: FC<object> = () => {
   const canView = !user.privateProfile || isSelf || isFriend;
 
   useEffect(() => {
+    queryClient.invalidateQueries();
+  }, [currentUser]);
+
+  useEffect(() => {
     if (!userQuery.data || userQuery.data.username === "N/A") return;
 
     // if profile is private, initialize the reviews and collections as empty
