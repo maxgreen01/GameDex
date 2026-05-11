@@ -22,6 +22,7 @@ import AuthContext from "../components/Auth/AuthContext.tsx";
 import toast from "react-hot-toast";
 import { useAxiosClient } from "@/hooks.ts";
 import ManageFriendRequestButton from "@/components/Profile/ManageFriendRequestButton.tsx";
+import { useColorMode } from "@/components/ui/color-mode.tsx";
 
 const EMPTY_USER: User = {
   username: "N/A",
@@ -50,7 +51,8 @@ const Profile: FC<object> = () => {
   const [showFriendRequests, setShowFriendRequests] = useState(false);
 
   let [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+  const [activeTab, setActiveTab] = useState("reviews");
+  const { colorMode } = useColorMode();
   const axiosClient = useAxiosClient();
 
   const queryClient = useQueryClient();
@@ -158,6 +160,7 @@ const Profile: FC<object> = () => {
 
     setNewCollectionTitle("");
     setCollectionLoading(false);
+    setActiveTab("collections");
     setShowAddCollectionForm(false);
   }
 
@@ -196,7 +199,7 @@ const Profile: FC<object> = () => {
                 align="flex-start"
               >
                 <Text
-                  color="white"
+                  color={colorMode === "dark" ? "white" : "black"}
                   textStyle="lg"
                 >
                   {user.displayName}
@@ -323,6 +326,8 @@ const Profile: FC<object> = () => {
             defaultValue="reviews"
             fitted
             variant="subtle"
+            value={activeTab}
+            onValueChange={(details) => setActiveTab(details.value)}
           >
             <Tabs.List m={4}>
               <Tabs.Trigger value="reviews">Reviews</Tabs.Trigger>
@@ -398,7 +403,9 @@ const Profile: FC<object> = () => {
                     <CollectionSummary
                       key={collection._id}
                       summary={collection}
-                      onUpdate={onUpdate}
+                      onUpdate={async () => {
+                        await queryClient.invalidateQueries({ queryKey: ["getCollectionsByUserId", username] });
+                      }}
                       onDelete={() => {
                         queryClient.setQueryData(["getCollectionsByUserId", username], (old: TCollectionSummary[] | undefined) => (old ? old.filter((c) => c._id !== collection._id) : []));
                       }}
