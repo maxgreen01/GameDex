@@ -20,3 +20,17 @@ export async function requireAuth(req: Request, res: Response, next: () => unkno
   }
   return next();
 }
+
+// Like requireAuth but doesn't fail on missing/invalid token — sets req.user if auth succeeds
+export async function optionalAuth(req: Request, _res: Response, next: () => unknown) {
+  try {
+    const token = validateAuthHeader(req.headers.authorization);
+    if (token !== undefined) {
+      const decodedToken = await auth.verifyIdToken(token);
+      (req as AuthenticatedRequest).user = await getUserById(decodedToken.uid);
+    }
+  } catch {
+    // Treat as unauthenticated
+  }
+  return next();
+}
