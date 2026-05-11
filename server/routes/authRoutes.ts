@@ -27,16 +27,19 @@ router.post("/signup", async (req, res) => {
     let outgoingRequests: string[] = [];
     let reviews: any[] = [];
     let collections: any[] = [];
+    let privateProfile = false;
 
     await db.collection("users").doc(userRecord.uid).set({
       username,
       displayName,
       email,
+      description: "",
       friends,
       incomingRequests,
       outgoingRequests,
       reviews,
       collections,
+      privateProfile,
       createdAt: Date.now(),
     });
 
