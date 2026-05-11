@@ -3,7 +3,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { db } from "../services/firebaseAdmin.ts";
 import { requireAuth } from "../middleware/requireAuth.ts";
 import { checkCache } from "../middleware/checkCache.ts";
-import { appendToCachedJSONArray, cacheJSONResponse, deleteCacheKey, removeFromCachedJSONArray, updateCachedJSON } from "../services/redis.ts";
+import { appendToCachedJSONArray, cacheJSONResponse, deleteJSONCacheKey, removeFromCachedJSONArray, updateCachedJSON } from "../services/redis.ts";
 import type { RedisJSON } from "redis";
 
 const router = Router();
@@ -136,6 +136,7 @@ router.post("/", requireAuth, async (req, res) => {
       updatedAt: newReview.updatedAt,
     };
 
+    console.log("Created review:", returnedReview);
     await updateCachedReview(returnedReview, "create");
     return res.status(201).json();
   } catch (e) {
@@ -170,7 +171,10 @@ router.delete("/:reviewId", requireAuth, async (req, res) => {
       return res.status(404).json({ error: "Review not found." });
     }
 
-    let review = reviewDoc.data() as any;
+    let review = {
+      _id: reviewId,
+      ...(reviewDoc.data() as any),
+    };
 
     if (review.userId !== userId) {
       return res.status(403).json({ error: "You cannot delete this review." });
@@ -187,6 +191,7 @@ router.delete("/:reviewId", requireAuth, async (req, res) => {
     // deletes the review
     await reviewsCollection.doc(reviewId).delete();
 
+    console.log("Deleting cached review:", review);
     await updateCachedReview(review, "delete");
     return res.json({ success: true });
   } catch (e) {
@@ -314,7 +319,7 @@ router.put("/:reviewId", requireAuth, async (req, res) => {
       return res.status(404).json({ error: "Review not found." });
     }
 
-    let review = reviewDoc.data() as any;
+    let review = { _id: reviewId, ...(reviewDoc.data() as any) };
 
     if (review.userId !== userId) {
       return res.status(403).json({ error: "You cannot edit this review." });
@@ -339,6 +344,7 @@ router.put("/:reviewId", requireAuth, async (req, res) => {
       updatedAt,
     };
 
+    console.log("Updated review:", updatedReview);
     await updateCachedReview(updatedReview, "update");
     return res.json(updatedReview);
   } catch (e) {
@@ -451,10 +457,14 @@ router.get("/game/:gameId/excluding/:userId", checkCache, async (req, res) => {
 
 // update all the relevant Redis cache entries for when a review is added or updated
 async function updateCachedReview(review: any, action: "create" | "update" | "delete") {
+  console.log("Updating cached review, action:", action, "review:", review);
   const reviewId = review._id;
   const gameId = review.gameId;
   const userId = review.userId;
-  if (!reviewId || !gameId || !userId) return;
+  if (!reviewId || !gameId || !userId) {
+    console.error("Review object is missing _id, gameId, or userId:", review);
+    return;
+  }
   const reviewObj = review as RedisJSON;
 
   // replace this review's own cache entry
@@ -462,8 +472,8 @@ async function updateCachedReview(review: any, action: "create" | "update" | "de
     await updateCachedJSON(`/api/reviews/${reviewId}`, reviewObj);
     await updateCachedJSON(`/api/reviews/game/${gameId}/user/${userId}`, reviewObj);
   } else if (action === "delete") {
-    await deleteCacheKey(`/api/reviews/${reviewId}`);
-    await deleteCacheKey(`/api/reviews/game/${gameId}/user/${userId}`);
+    await deleteJSONCacheKey(`/api/reviews/${reviewId}`);
+    await deleteJSONCacheKey(`/api/reviews/game/${gameId}/user/${userId}`);
   }
 
   // append this review to all the relevant cached arrays
@@ -471,19 +481,20 @@ async function updateCachedReview(review: any, action: "create" | "update" | "de
     await appendToCachedJSONArray(`/api/reviews/game/${gameId}`, "", reviewObj);
     await appendToCachedJSONArray(`/api/reviews/user/${userId}`, "", reviewObj);
     await appendToCachedJSONArray(`/api/users/${userId}`, "reviews", reviewId);
-  } else if (action === "delete") {
-    await removeFromCachedJSONArray(`/api/reviews/game/${gameId}`, "", reviewObj);
-    await removeFromCachedJSONArray(`/api/reviews/user/${userId}`, "", reviewObj);
-    await removeFromCachedJSONArray(`/api/users/${userId}`, "reviews", reviewId);
+  } else if (action == "update" || action === "delete") {
+    // instead of trying to update the object in the array (which has issues), just refresh the route regardless
+    await deleteJSONCacheKey(`/api/reviews/game/${gameId}`);
+    await deleteJSONCacheKey(`/api/reviews/user/${userId}`);
+    await deleteJSONCacheKey(`/api/users/${userId}`, "reviews");
   }
 
   // This is unfortunately slow, but the user might notice if the ratings on the front page games don't change.
   // This forcibly refreshes all of them
-  await deleteCacheKey(`/api/games/${gameId}`);
-  await deleteCacheKey("/api/games/popular");
-  await deleteCacheKey("/api/games/newest"); // todo this could be sped up by modifying the review field of the affected game instead of deleting
-  await deleteCacheKey(`/api/games/recommended/${userId}`);
-  await deleteCacheKey(`/api/games/outside/${userId}`);
+  await deleteJSONCacheKey(`/api/games/${gameId}`);
+  await deleteJSONCacheKey("/api/games/popular");
+  await deleteJSONCacheKey("/api/games/newest"); // todo this could be sped up by modifying the review field of the affected game instead of deleting
+  await deleteJSONCacheKey(`/api/games/recommended/${userId}`);
+  await deleteJSONCacheKey(`/api/games/outside/${userId}`);
 }
 
 export default router;

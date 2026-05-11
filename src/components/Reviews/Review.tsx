@@ -120,7 +120,7 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
       let { data: deletedComment } = await axiosClient.delete(`/api/reviews/${reviewId}`, { data: { userId: username } });
 
       if (deletedComment.success) {
-        toast.success(`Comment Deleted`);
+        toast.success(`Review Deleted`);
       }
       if (setUserReview) {
         setUserReview(null);

@@ -24,13 +24,15 @@ export async function getCollectionsByUserId(userId: string) {
 
 export async function createCollection(userId: string, data: CollectionCreationData) {
   const user = await queryUserByUsername(userId);
-  const docRef = await collections.add({ ...data, userId, gameIds: [], createdAt: Date.now() } as Collection);
+  const collection = { ...data, userId, gameIds: [], createdAt: Date.now() } as Collection;
+  const docRef = await collections.add(collection);
   await user.ref.update({ collections: FieldValue.arrayUnion(docRef.id) });
-  return { message: "Collection created successfully" };
+  return { _id: docRef.id, ...collection } as WithId<Collection>;
 }
 
 export async function updateCollection(id: string, data: CollectionUpdateData) {
   const docRef = collections.doc(id);
+  const snapshot = { _id: docRef.id, ...(await docRef.get()).data() } as WithId<Collection>;
   if (!(await docRef.get()).exists) throw new NotFoundError("Collection not found");
   if (data.name) await docRef.update({ name: data.name });
   if (data.gameIdsToAdd) {
@@ -45,23 +47,17 @@ export async function updateCollection(id: string, data: CollectionUpdateData) {
     //await docRef.update({ gameIds: FieldValue.arrayRemove(...data.gameIdsToRemove) });
     await docRef.update({ gameIds: FieldValue.arrayRemove(...data.gameIdsToRemove.map(Number)) });
     console.log("trying to remove:", data.gameIdsToRemove.map(Number));
-    const updated = await docRef.get();
-    console.log("gameIds after remove:", updated.data()?.gameIds);
-    console.log(
-      "types:",
-      updated.data()?.gameIds.map((id: any) => typeof id)
-    );
   }
-  return { message: "Collection updated successfully" };
+  return snapshot;
 }
 
 export async function deleteCollection(id: string) {
   const docRef = collections.doc(id);
   const doc = await docRef.get();
   if (!doc.exists) throw new NotFoundError("Collection not found");
-  const collection = doc.data() as Collection;
+  const collection = { _id: docRef.id, ...doc.data() } as WithId<Collection>;
   await docRef.delete();
   const user = await queryUserByUsername(collection.userId);
   await user.ref.update({ collections: FieldValue.arrayRemove(id) });
-  return { message: "Collection removed successfully" };
+  return collection;
 }
