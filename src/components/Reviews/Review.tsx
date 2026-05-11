@@ -13,7 +13,7 @@ import { Link } from "react-router-dom";
 import type { ReviewType } from "@/types/types";
 import { validateString } from "../../../shared/validation";
 //UI IMPORTS//////////////////////////////////////
-import { Card, Heading, VStack, Flex, IconButton, Input, Field, Text, Avatar, Button, Spinner, Fieldset } from "@chakra-ui/react";
+import { Card, Heading, VStack, Flex, IconButton, Input, Field, Text, Avatar, Spinner, Fieldset, Box } from "@chakra-ui/react";
 import Rating from "../Rating";
 import { MdModeEdit, MdDelete } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
@@ -255,7 +255,17 @@ const Review: FC<Props> = ({ reviewId, profilePage, gameTitle, gameId, username,
               </Field.Root>
             </Fieldset.Root>
           ) : (
-            <Text wordBreak="break-word">{editedComment}</Text>
+            <>
+              {!profilePage && (
+                <Box mb={4}>
+                  <Rating
+                    readOnly={true}
+                    value={editedRating}
+                  />
+                </Box>
+              )}
+              <Text wordBreak="break-word">{editedComment}</Text>
+            </>
           )}
         </Card.Body>
       </Card.Root>

@@ -1,55 +1,79 @@
 import { Button, CloseButton, Dialog, Field, Fieldset, IconButton, Input, Textarea } from "@chakra-ui/react";
+import type { UseMutationResult } from "@tanstack/react-query";
 import { type FC, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { MdModeEdit } from "react-icons/md";
 import type { ProfileData } from "../../../shared/types.ts";
+import { validateProfileData } from "../../../shared/validation.ts";
 
 interface Props {
   initialData: ProfileData;
-  onAction: (data: ProfileData, onSuccess: () => void) => void;
+  mutation: UseMutationResult<unknown, Error, ProfileData>;
 }
 
-const ProfileEditButton: FC<Props> = ({ initialData, onAction }) => {
+const ProfileEditButton: FC<Props> = ({ initialData, mutation }) => {
   const [data, setData] = useState<ProfileData>(initialData);
   const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setData(initialData);
-  }, [initialData]);
-
+  const toggleOpen = (open: boolean) => {
+    setOpen(open);
+    if (open) {
+      setData(initialData);
+      setPending(false);
+      setError(null);
+    }
+  };
   const onChange = (event: { target: { name: string; value: string } }) => {
     setData((user) => ({ ...user, [event.target.name]: event.target.value }));
   };
 
-  const action = (_: FormData) => {
-    onAction(data, () => setOpen(false)); // only close on success
+  const action = () => {
+    try {
+      const validated = validateProfileData(data);
+      setPending(true);
+      mutation.mutate(validated, {
+        onSuccess: () => toggleOpen(false),
+        onError: (e) => {
+          setPending(false);
+          toast(e.message);
+        },
+      });
+    } catch (e: unknown) {
+      setPending(false);
+      setError(e instanceof Error ? e.message : String(e));
+    }
   };
 
   return (
     <Dialog.Root
       open={open}
-      onOpenChange={(e) => {
-        setOpen(e.open);
-        if (!e.open) setData(initialData);
-      }}
+      onOpenChange={({ open }) => toggleOpen(open)}
+      closeOnEscape={false}
+      closeOnInteractOutside={false}
     >
       <Dialog.Trigger asChild>
         <IconButton
           variant="ghost"
-          onClick={() => setOpen(true)}
+          onClick={() => toggleOpen(true)}
         >
           <MdModeEdit />
         </IconButton>
       </Dialog.Trigger>
       <Dialog.Positioner>
         <Dialog.Content>
-          <Dialog.Header>
-            <Dialog.Title>Edit Profile</Dialog.Title>
-          </Dialog.Header>
-          <Dialog.Body>
-            <form action={action}>
-              <Fieldset.Root size="lg">
+          <form action={action}>
+            <Dialog.Header>
+              <Dialog.Title>Edit Profile</Dialog.Title>
+            </Dialog.Header>
+            <Dialog.Body>
+              <Fieldset.Root
+                invalid={error !== null}
+                size="lg"
+              >
                 <Dialog.CloseTrigger asChild>
-                  <CloseButton />
+                  <CloseButton disabled={pending} />
                 </Dialog.CloseTrigger>
                 <Fieldset.Content>
                   <Field.Root>
@@ -69,12 +93,18 @@ const ProfileEditButton: FC<Props> = ({ initialData, onAction }) => {
                     />
                   </Field.Root>
                 </Fieldset.Content>
-                <Dialog.Footer>
-                  <Button type="submit">Submit</Button>
-                </Dialog.Footer>
+                {error && <Fieldset.ErrorText>{error}</Fieldset.ErrorText>}
               </Fieldset.Root>
-            </form>
-          </Dialog.Body>
+            </Dialog.Body>
+            <Dialog.Footer>
+              <Button
+                type="submit"
+                disabled={pending}
+              >
+                Submit
+              </Button>
+            </Dialog.Footer>
+          </form>
         </Dialog.Content>
       </Dialog.Positioner>
     </Dialog.Root>

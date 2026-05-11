@@ -228,7 +228,7 @@ const Profile: FC<object> = () => {
                   <Flex>
                     <ProfileEditButton
                       initialData={user}
-                      onAction={(data, onSuccess) => userMutation.mutate(data, { onSuccess })}
+                      mutation={userMutation}
                     />
                   </Flex>
 
