@@ -70,4 +70,10 @@ export async function deleteJSONCacheKey(key: string, field = "") {
   await redisClient.json.del(key, { path: field });
 }
 
+// Flush the entire cache — use after any write operation to prevent stale data
+export async function flushCache() {
+  console.log("Flushing entire Redis cache");
+  await redisClient.flushAll();
+}
+
 export default redisClient;

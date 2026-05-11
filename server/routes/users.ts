@@ -4,8 +4,8 @@ import { type AuthenticatedRequest, requireAuth } from "../middleware/requireAut
 import { BadRequestError, ForbiddenError, respondWithError } from "../../shared/errors.ts";
 import { validateProfileData, validateString } from "../../shared/validation.ts";
 import { searchUsers } from "../services/elasticsearch.ts";
+import { cacheJSONResponse, flushCache } from "../services/redis.ts";
 import { checkCache } from "../middleware/checkCache.ts";
-import { cacheJSONResponse, deleteJSONCacheKey, updateCachedJSON } from "../services/redis.ts";
 
 const router = Router();
 
@@ -43,18 +43,12 @@ router.put("/:username", requireAuth, async (req, res) => {
     if (username !== user.username) throw new ForbiddenError("A user can only update their own profile");
     const profileData = validateProfileData(req.body);
     await updateUserProfile(username, profileData);
-    await updateCachedJSON(`/api/users/${username}`, user);
-    await deleteJSONCacheKey(`/api/reviews/user/${username}`);
-    await deleteJSONCacheKey(`/api/collections/user/${username}`);
+    await flushCache();
     return res.status(201).send();
   } catch (e) {
     return respondWithError(res, e);
   }
 });
-
-//
-// ========== Friend management ==========
-//
 
 // Add a friend (accept an incoming request if one exists, or send an outgoing request otherwise)
 router.post("/:username/friends/:friendUsername", requireAuth, async (req, res) => {
@@ -71,6 +65,7 @@ router.post("/:username/friends/:friendUsername", requireAuth, async (req, res) 
     } else {
       await requestFriend(username, friendUsername);
     }
+    await flushCache();
     return res.json({ success: true });
   } catch (e) {
     return respondWithError(res, e);
@@ -92,6 +87,7 @@ router.put("/:username/friends/:friendUsername", requireAuth, async (req, res) =
     } else {
       throw new BadRequestError("No pending friend request");
     }
+    await flushCache();
     return res.json({ success: true });
   } catch (e) {
     return respondWithError(res, e);
@@ -109,7 +105,7 @@ router.delete("/:username/friends/:friendUsername", requireAuth, async (req, res
     if (!user.friends?.includes(friendUsername)) throw new BadRequestError("Users are not friends");
 
     await removeFriend(username, friendUsername);
-
+    await flushCache();
     return res.json({ success: true });
   } catch (e) {
     return respondWithError(res, e);

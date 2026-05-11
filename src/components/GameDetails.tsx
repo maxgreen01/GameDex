@@ -65,29 +65,6 @@ const GameDetails: FC<Props> = ({}) => {
   const [user] = useContext(AuthContext);
   const axiosClient = useAxiosClient();
 
-  //calculates the ratings according to the reviews.
-  useEffect(() => {
-    let allReviews = [...reviews];
-
-    if (userReview) {
-      allReviews.push(userReview);
-    }
-
-    if (allReviews.length === 0) {
-      setRating(0);
-      return;
-    }
-
-    let total = 0;
-
-    for (let i = 0; i < allReviews.length; i++) {
-      total += allReviews[i].rating;
-    }
-
-    let avg = total / allReviews.length;
-    setRating(Math.round(avg * 2) / 2);
-  }, [reviews, userReview]);
-
   //fetchingGame
   useEffect(() => {
     setLoading(true);
@@ -100,6 +77,7 @@ const GameDetails: FC<Props> = ({}) => {
         setName(data.name);
         setPlatforms(data.platforms);
         setDescription(data.description);
+        setRating(Math.round((data.rating ?? 0) * 2) / 2);
       } catch (e) {
         console.error(e);
       }

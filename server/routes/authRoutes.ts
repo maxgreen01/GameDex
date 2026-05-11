@@ -2,6 +2,7 @@ import express from "express";
 import { auth, db } from "../services/firebaseAdmin.ts";
 import { validateSignup } from "../../shared/validation.ts";
 import { addUserToSearchIndex } from "../services/elasticsearch.ts";
+import { flushCache } from "../services/redis.ts";
 
 const router = express.Router();
 
@@ -49,6 +50,7 @@ router.post("/signup", async (req, res) => {
       description: "",
     });
 
+    await flushCache();
     return res.status(201).json({ uid: userRecord.uid });
   } catch (e: any) {
     return res.status(400).json({ error: e.message });
