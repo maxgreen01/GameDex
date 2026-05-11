@@ -33,10 +33,22 @@ export async function updateCachedJSON(key: string, data: RedisJSON, expireSecon
 }
 
 // Append an item to a cached root array for a single key.
-export async function appendCachedJSONArray(key: string, field: string, item: RedisJSON, expireSeconds = 3600) {
+export async function appendToCachedJSONArray(key: string, field: string, item: RedisJSON, expireSeconds = 3600) {
   if (!(await redisClient.exists(key))) return;
   field = field === "" ? "$" : `$.${field}`;
   await redisClient.json.arrAppend(key, field, item);
+  await redisClient.expire(key, expireSeconds);
+}
+
+// Append an item to a cached root array for a single key.
+export async function removeFromCachedJSONArray(key: string, field: string, item: RedisJSON, expireSeconds = 3600) {
+  if (!(await redisClient.exists(key))) return;
+  field = field === "" ? "$" : `$.${field}`;
+  const arr = await redisClient.json.get(key, { path: field });
+  if (!Array.isArray(arr)) return;
+
+  const filteredArr = arr.filter((i) => JSON.stringify(i) !== JSON.stringify(item));
+  await redisClient.json.set(key, field, filteredArr);
   await redisClient.expire(key, expireSeconds);
 }
 
@@ -44,22 +56,5 @@ export async function appendCachedJSONArray(key: string, field: string, item: Re
 export async function deleteCacheKey(key: string) {
   await redisClient.del(key);
 }
-
-// // Update a cache entry using a MERGE to only modify the provided fields
-// async function mergeCachedJSON(key: string, data: RedisJSON, expireSeconds = 3600) {
-//   await redisClient.json.merge(key, "$", data);
-//   await redisClient.expire(key, expireSeconds);
-// }
-
-// // Update every cache entry whose key matches the provided Redis SCAN pattern.
-// // Example patterns: "/api/games/*", "/api/reviews/game/*"
-// export async function updateCachedJSONResponseByPattern(pattern: string, data: RedisJSON, expireSeconds = 3600) {
-//   for await (const keys of redisClient.scanIterator({ MATCH: pattern })) {
-//     // loop through batches of keys
-//     for (const key of keys) {
-//       await mergeCachedJSON(key, data, expireSeconds);
-//     }
-//   }
-// }
 
 export default redisClient;
