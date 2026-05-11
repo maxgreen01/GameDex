@@ -6,6 +6,7 @@ import { validateCollectionCreationData, validateCollectionUpdateData, validateS
 import { checkCache } from "../middleware/checkCache.ts";
 import { appendToCachedJSONArray, cacheJSONResponse, deleteJSONCacheKey, removeFromCachedJSONArray, updateCachedJSON } from "../services/redis.ts";
 import type { RedisJSON } from "redis";
+import { getUserByUsername } from "../data/users.ts";
 
 const router = Router();
 
@@ -23,9 +24,18 @@ router.post("/", requireAuth, async (req, res) => {
 });
 
 //get collections by user id
-router.get("/user/:userId", checkCache, async (req, res) => {
+router.get("/user/:userId", requireAuth, checkCache, async (req, res) => {
   try {
     const userId = validateString(req.params.userId, "User ID");
+    const currentUser = (req as AuthenticatedRequest).user;
+    const targetUser = await getUserByUsername(userId);
+
+    const isSelf = currentUser.username === userId;
+    const isFriend = targetUser.friends?.includes(currentUser.username);
+
+    if (targetUser.privateProfile && !isSelf && !isFriend) {
+      throw new ForbiddenError("This user's collections are private.");
+    }
     const collections = await getCollectionsByUserId(userId);
     await cacheJSONResponse(req, collections);
     return res.status(200).json(collections);

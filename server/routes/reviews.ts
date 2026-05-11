@@ -242,7 +242,7 @@ router.get("/game/:gameId", checkCache, async (req, res) => {
 });
 
 // same as getReviewsByUserId
-router.get("/user/:userId", checkCache, async (req, res) => {
+router.get("/user/:userId", requireAuth, checkCache, async (req, res) => {
   try {
     let { userId } = req.params;
 
@@ -255,6 +255,23 @@ router.get("/user/:userId", checkCache, async (req, res) => {
     }
 
     userId = userId.trim();
+
+    const currentUser = (req as any).user;
+
+    const targetUserSnapshot = await usersCollection.where("username", "==", userId).get();
+
+    if (targetUserSnapshot.empty) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    const targetUser = targetUserSnapshot.docs[0].data();
+
+    const isSelf = currentUser.username === userId;
+    const isFriend = targetUser.friends?.includes(currentUser.username);
+
+    if (targetUser.privateProfile && !isSelf && !isFriend) {
+      return res.status(403).json({ error: "This user's reviews are private." });
+    }
 
     let snapshot = await reviewsCollection.get();
     let reviews: any[] = [];

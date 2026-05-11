@@ -193,6 +193,22 @@
   }
 }
 
+@keyframes slowGlowLight {
+  0% {
+    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.3)) brightness(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5)) brightness(0.85);
+  }
+  100% {
+    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.3)) brightness(1);
+  }
+}
+
+.logo-glow-light {
+  animation: slowGlowLight 4s ease-in-out infinite;
+}
+
 .logo-glow {
   animation: slowGlow 4s ease-in-out infinite;
 }

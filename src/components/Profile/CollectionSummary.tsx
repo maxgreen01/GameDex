@@ -8,12 +8,12 @@ import { Card, HStack, Flex, Box, Input, Field, VStack, Image, Spinner, Carousel
 import { MdModeEdit, MdDelete } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
 import toast from "react-hot-toast";
-import { sum } from "firebase/firestore";
 import AuthContext from "@/components/Auth/AuthContext.tsx";
+import { useColorMode } from "../ui/color-mode";
 
 interface Props {
   summary: TCollectionSummary;
-  onUpdate: () => void;
+  onUpdate: () => Promise<void>;
   onDelete: () => void;
 }
 
@@ -25,6 +25,7 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
   let [loading, setLoading] = useState(false);
   let [errorMessage, setErrorMessage] = useState<string | null>(null);
   let [gameIdsToRemove, setGameIdsToRemove] = useState<string[]>([]);
+  const { colorMode } = useColorMode();
 
   const [user] = useContext(AuthContext);
 
@@ -63,9 +64,10 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
       let result = await updateCollection(collectionTitle, summary._id, [], gameIdsToRemove);
       //idk do smtg w result? cud be an error
 
-      onUpdate(); //triggers refetch in parent
+      await onUpdate(); //triggers refetch in parent
       setEditCollection(false);
       setGameIdsToRemove([]);
+      setLoading(false);
       console.log(result);
     } catch (e: any) {
       console.log(e);
@@ -237,7 +239,7 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
                           transition="opacity 0.2s"
                         >
                           <IconButton variant="plain">
-                            <MdDelete />
+                            <MdDelete color={colorMode === "dark" ? "black" : "white"} />
                           </IconButton>
                         </Box>
                       </Box>

@@ -16,6 +16,8 @@ import { auth } from "../firebaseClient";
 import { Box, Button, Flex, Avatar, Image, Text, Menu, Portal } from "@chakra-ui/react";
 import toast from "react-hot-toast";
 import AuthContext from "./Auth/AuthContext";
+import logoDark from "../assets/logoDark.svg";
+import { useColorMode } from "./ui/color-mode";
 //-------------------------------------------------//
 
 interface Props {
@@ -25,6 +27,7 @@ interface Props {
 const Navbar: FC<Props> = ({ profilePage = false }) => {
   const [user, setUser] = useContext(AuthContext);
   const navigate = useNavigate();
+  const { colorMode } = useColorMode();
 
   const handleLogout = async () => {
     try {
@@ -46,11 +49,11 @@ const Navbar: FC<Props> = ({ profilePage = false }) => {
       p="4"
       color="white"
       borderBottomWidth="1px"
-      borderBottomColor="#27272a"
+      borderBottomColor={colorMode == "dark" ? "#27272a" : "#e4e4e7"}
       position="sticky"
       top="0"
       h="fit-content"
-      backgroundColor={"#16171d"}
+      backgroundColor={colorMode == "dark" ? "#16171d" : "white"}
       zIndex="sticky"
     >
       <Flex
@@ -65,7 +68,7 @@ const Navbar: FC<Props> = ({ profilePage = false }) => {
             gap={2}
           >
             <Image
-              src={logo}
+              src={colorMode == "dark" ? logo : logoDark}
               alt="logo"
               boxSize="32px"
             />
