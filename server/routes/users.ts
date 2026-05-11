@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { addFriend, declineFriendRequest, getUserByUsername, requestFriend, removeFriend, revokeFriendRequest, updateUserProfile } from "../data/users.ts";
-import { type AuthenticatedRequest, optionalAuth, requireAuth } from "../middleware/requireAuth.ts";
+import { type AuthenticatedRequest, requireAuth } from "../middleware/requireAuth.ts";
 import { BadRequestError, ForbiddenError, respondWithError } from "../../shared/errors.ts";
 import { validateProfileData, validateString } from "../../shared/validation.ts";
 import { searchUsers } from "../services/elasticsearch.ts";
-import redisClient, { cacheJSONResponse, deleteJSONCacheKey } from "../services/redis.ts";
+import { cacheJSONResponse, flushCache } from "../services/redis.ts";
+import { checkCache } from "../middleware/checkCache.ts";
 
 const router = Router();
 
@@ -24,35 +25,12 @@ router.get("/search", async (req, res) => {
   }
 });
 
-router.get("/:username", optionalAuth, async (req, res) => {
+router.get("/:username", checkCache, async (req, res) => {
   try {
     const username = validateString(req.params.username, "Username");
-    const currentUser = (req as unknown as AuthenticatedRequest).user;
-
-    // Serve from cache only when the cached profile is public — private profiles
-    // must always go through the privacy check because access depends on who's asking
-    const cacheKey = req.originalUrl;
-    if (await redisClient.exists(cacheKey)) {
-      const cached = (await redisClient.json.get(cacheKey)) as Record<string, unknown> | null;
-      if (cached && !cached.privateProfile) {
-        return res.json(cached);
-      }
-    }
-
-    const targetUser = await getUserByUsername(username);
-    const isSelf = currentUser?.username === username;
-    const isFriend = targetUser.friends?.includes(currentUser?.username ?? "");
-
-    if (targetUser.privateProfile && !isSelf && !isFriend) {
-      throw new ForbiddenError("This user's profile is private.");
-    }
-
-    // Only cache public profiles — a shared URL key can't encode per-requester access rules
-    if (!targetUser.privateProfile) {
-      await cacheJSONResponse(req, targetUser);
-    }
-
-    return res.status(200).json(targetUser);
+    const user = await getUserByUsername(username);
+    await cacheJSONResponse(req, user);
+    return res.status(200).json(user);
   } catch (e) {
     return respondWithError(res, e);
   }
@@ -65,18 +43,12 @@ router.put("/:username", requireAuth, async (req, res) => {
     if (username !== user.username) throw new ForbiddenError("A user can only update their own profile");
     const profileData = validateProfileData(req.body);
     await updateUserProfile(username, profileData);
-    await deleteJSONCacheKey(`/api/users/${username}`);
-    await deleteJSONCacheKey(`/api/reviews/user/${username}`);
-    await deleteJSONCacheKey(`/api/collections/user/${username}`);
+    await flushCache();
     return res.status(201).send();
   } catch (e) {
     return respondWithError(res, e);
   }
 });
-
-//
-// ========== Friend management ==========
-//
 
 // Add a friend (accept an incoming request if one exists, or send an outgoing request otherwise)
 router.post("/:username/friends/:friendUsername", requireAuth, async (req, res) => {
@@ -93,6 +65,7 @@ router.post("/:username/friends/:friendUsername", requireAuth, async (req, res) 
     } else {
       await requestFriend(username, friendUsername);
     }
+    await flushCache();
     return res.json({ success: true });
   } catch (e) {
     return respondWithError(res, e);
@@ -114,6 +87,7 @@ router.put("/:username/friends/:friendUsername", requireAuth, async (req, res) =
     } else {
       throw new BadRequestError("No pending friend request");
     }
+    await flushCache();
     return res.json({ success: true });
   } catch (e) {
     return respondWithError(res, e);
@@ -131,7 +105,7 @@ router.delete("/:username/friends/:friendUsername", requireAuth, async (req, res
     if (!user.friends?.includes(friendUsername)) throw new BadRequestError("Users are not friends");
 
     await removeFriend(username, friendUsername);
-
+    await flushCache();
     return res.json({ success: true });
   } catch (e) {
     return respondWithError(res, e);

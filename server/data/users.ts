@@ -29,10 +29,6 @@ export async function updateUserProfile(username: string, data: ProfileData) {
   await updateUserInSearchIndex(username, data);
 }
 
-//
-// ========== Friend management ==========
-//
-
 // Send a friend request from username to friendUsername
 export async function requestFriend(username: string, friendUsername: string) {
   if (username === friendUsername) throw new BadRequestError("You cannot send a friend request to yourself!");

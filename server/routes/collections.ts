@@ -4,8 +4,7 @@ import { type AuthenticatedRequest, requireAuth } from "../middleware/requireAut
 import { ForbiddenError, respondWithError } from "../../shared/errors.ts";
 import { validateCollectionCreationData, validateCollectionUpdateData, validateString } from "../../shared/validation.ts";
 import { checkCache } from "../middleware/checkCache.ts";
-import { appendToCachedJSONArray, cacheJSONResponse, deleteJSONCacheKey, removeFromCachedJSONArray, updateCachedJSON } from "../services/redis.ts";
-import type { RedisJSON } from "redis";
+import { cacheJSONResponse, flushCache } from "../services/redis.ts";
 import { getUserByUsername } from "../data/users.ts";
 
 const router = Router();
@@ -15,8 +14,8 @@ router.post("/", requireAuth, async (req, res) => {
   try {
     const userId = (req as AuthenticatedRequest).user.username;
     const data = validateCollectionCreationData(req.body);
-    const result = await createCollection(userId, data);
-    await updateCachedCollection(result, "create");
+    await createCollection(userId, data);
+    await flushCache();
     return res.status(201).json({ message: "Collection created successfully" });
   } catch (e) {
     return respondWithError(res, e);
@@ -64,8 +63,8 @@ router.post("/:id", requireAuth, async (req, res) => {
     const collection = await getCollectionById(id);
     if (userId !== collection.userId) throw new ForbiddenError("A user can only update their own collections");
     const data = validateCollectionUpdateData(req.body);
-    const result = await updateCollection(id, data);
-    await updateCachedCollection(result, "update");
+    await updateCollection(id, data);
+    await flushCache();
     return res.status(201).json({ message: "Collection updated successfully" });
   } catch (e) {
     return respondWithError(res, e);
@@ -78,8 +77,8 @@ router.delete("/:id", requireAuth, async (req, res) => {
     const id = validateString(req.params.id, "Collection ID");
     const collection = await getCollectionById(id);
     if (userId !== collection.userId) throw new ForbiddenError("A user can only delete their own collections");
-    const result = await deleteCollection(id);
-    await updateCachedCollection(result, "delete");
+    await deleteCollection(id);
+    await flushCache();
     return res.status(204).json({ message: "Collection deleted successfully" });
   } catch (e) {
     return respondWithError(res, e);
@@ -106,34 +105,5 @@ router.get("/addToCollection/:gameId", requireAuth, async (req, res) => {
     return respondWithError(res, e);
   }
 });
-
-// update all the relevant Redis cache entries for when a collection is added or updated
-async function updateCachedCollection(collection: any, action: "create" | "update" | "delete") {
-  console.log("Updating cached collection, action:", action, "collection:", collection);
-  const collectionId = collection._id;
-  const userId = collection.userId;
-  if (!collectionId || !userId) {
-    console.error("Collection object is missing _id or userId:", collection);
-    return;
-  }
-  const collectionObj = collection as RedisJSON;
-
-  // replace this collection's own cache entry
-  if (action === "create" || action === "update") {
-    await updateCachedJSON(`/api/collections/${collectionId}`, collectionObj);
-  } else if (action === "delete") {
-    await deleteJSONCacheKey(`/api/collections/${collectionId}`);
-  }
-
-  // append this collection to all the relevant cached arrays
-  if (action === "create") {
-    await appendToCachedJSONArray(`/api/collections/user/${userId}`, "", collectionObj);
-    await appendToCachedJSONArray(`/api/users/${userId}`, "collections", collectionId);
-  } else if (action === "update" || action === "delete") {
-    // instead of trying to update the object in the array (which has issues), just refresh the route regardless
-    await deleteJSONCacheKey(`/api/collections/user/${userId}`);
-    await deleteJSONCacheKey(`/api/users/${userId}`, "collections");
-  }
-}
 
 export default router;

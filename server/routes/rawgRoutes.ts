@@ -260,10 +260,10 @@ router.get("/search", checkCache, async (req, res) => {
 
 router.get("/:id", checkCache, async (req, res) => {
   try {
-    const data = await getGameFromRAWG(req.params.id);
-    // console.log("Returned data: ", data);
-    await cacheJSONResponse(req, data);
-    return res.json(await formatGame(data));
+    const rawData = await getGameFromRAWG(req.params.id);
+    const formattedData = await formatGame(rawData);
+    await cacheJSONResponse(req, formattedData);
+    return res.json(formattedData);
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: "Failed to fetch game" });
