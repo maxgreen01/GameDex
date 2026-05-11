@@ -1,8 +1,9 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { queryUserByUsername } from "./users.ts";
-import { db } from "../firebaseAdmin.ts";
+import { db } from "../services/firebaseAdmin.ts";
 import { NotFoundError } from "../../shared/errors.ts";
 import type { Collection, CollectionCreationData, CollectionUpdateData, WithId } from "../../shared/types.ts";
+import { getGameFromRAWG } from "../routes/rawgRoutes.ts";
 
 const collections = db.collection("collections");
 
@@ -34,7 +35,7 @@ export async function updateCollection(id: string, data: CollectionUpdateData) {
   if (data.name) await docRef.update({ name: data.name });
   if (data.gameIdsToAdd) {
     for (const gameId of data.gameIdsToAdd) {
-      const gameExists = await fetch(`http://localhost:3000/api/games/${gameId}`);
+      const gameExists = await getGameFromRAWG(gameId);
       if (!gameExists) throw new NotFoundError("Game not found");
     }
 

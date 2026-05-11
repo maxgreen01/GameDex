@@ -1,6 +1,7 @@
 import express from "express";
-import { auth, db } from "../firebaseAdmin.ts";
+import { auth, db } from "../services/firebaseAdmin.ts";
 import { validateSignup } from "../../shared/validation.ts";
+import { addUserToSearchIndex } from "../services/elasticsearch.ts";
 
 const router = express.Router();
 
@@ -22,7 +23,8 @@ router.post("/signup", async (req, res) => {
     });
 
     let friends: any[] = [];
-    let pendingInvites: any[] = [];
+    let incomingRequests: string[] = [];
+    let outgoingRequests: string[] = [];
     let reviews: any[] = [];
     let collections: any[] = [];
 
@@ -31,10 +33,17 @@ router.post("/signup", async (req, res) => {
       displayName,
       email,
       friends,
-      pendingInvites,
+      incomingRequests,
+      outgoingRequests,
       reviews,
       collections,
       createdAt: Date.now(),
+    });
+
+    await addUserToSearchIndex({
+      username,
+      displayName,
+      description: "",
     });
 
     return res.status(201).json({ uid: userRecord.uid });

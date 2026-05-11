@@ -223,6 +223,7 @@ const CarouselRow: FC<Props> = ({ category, username, onLoaded }) => {
       ) : (
         <Carousel.Root
           mx="4"
+          mt="4"
           slideCount={cards.length}
           slidesPerPage={4}
           gap="4"

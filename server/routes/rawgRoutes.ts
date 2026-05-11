@@ -1,8 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import axios from "axios";
-import { db } from "../firebaseAdmin.ts";
-import { generateKey } from "node:crypto";
+import { db } from "../services/firebaseAdmin.ts";
 import { requireAuth } from "../middleware/requireAuth.ts";
 
 const router = express.Router();
@@ -22,6 +21,11 @@ const api = axios.create({
 });
 
 const reviewsCollection = db.collection("reviews");
+
+export async function getGameFromRAWG(id: string) {
+  const { data } = await api.get(`/games/${id}`);
+  return data;
+}
 
 async function getAverageRating(gameId: string) {
   let snapshot = await reviewsCollection.where("gameId", "==", gameId).get();
@@ -246,7 +250,7 @@ router.get("/search", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const { data } = await api.get(`/games/${req.params.id}`);
+    const data = await getGameFromRAWG(req.params.id);
     // console.log("Returned data: ", data);
     res.json(await formatGame(data));
   } catch (e) {

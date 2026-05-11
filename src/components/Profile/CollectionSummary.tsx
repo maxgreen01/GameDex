@@ -1,13 +1,14 @@
 //IMPORTS////////////////////////////////////////
 import { Link } from "react-router-dom";
 import type { CollectionSummary as TCollectionSummary } from "@/types/types.ts";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
 import { updateCollection, deleteCollection as delCol } from "@/data/collections";
 //UI IMPORTS//////////////////////////////////////
 import { Card, HStack, Flex, Box, Input, Field, VStack, Image, Spinner, Carousel, IconButton, Link as ChakraLink, Text } from "@chakra-ui/react";
 import { MdModeEdit, MdDelete } from "react-icons/md";
 import { FaCheck } from "react-icons/fa";
 import toast from "react-hot-toast";
+import AuthContext from "@/components/Auth/AuthContext.tsx";
 import { useColorMode } from "../ui/color-mode";
 
 interface Props {
@@ -25,6 +26,8 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
   let [errorMessage, setErrorMessage] = useState<string | null>(null);
   let [gameIdsToRemove, setGameIdsToRemove] = useState<string[]>([]);
   const { colorMode } = useColorMode();
+
+  const [user] = useContext(AuthContext);
 
   function clickEditButton() {
     setEditCollection(true);
@@ -123,7 +126,7 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
     return (
       <Card.Root
         size="md"
-        variant={"outline"}
+        variant="subtle"
       >
         <Card.Body color="fg.muted">
           <Spinner size="lg"></Spinner>
@@ -132,7 +135,10 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
     );
   } else {
     return (
-      <Card.Root variant={"outline"}>
+      <Card.Root
+        size="md"
+        variant="subtle"
+      >
         <Card.Header>
           <Flex
             w="100%"
@@ -140,32 +146,27 @@ function CollectionSummary({ summary, onUpdate, onDelete }: Props) {
             justify={"space-between"}
           >
             <Flex>
-              <VStack>
-                {editCollection ? (
-                  <div>
-                    <Field.Root invalid={!!errorMessage}>
-                      {/* <Field.Label p={2}>Title:</Field.Label> */}
-                      <Input
-                        value={collectionTitle}
-                        onChange={(e) => commentOnChange(e.target.value)}
-                      ></Input>
-                      <Field.ErrorText>{errorMessage}</Field.ErrorText>
-                    </Field.Root>
-                  </div>
-                ) : (
-                  <>
-                    <Card.Title>{summary.name}</Card.Title>
-
-                    <Text textStyle="sm">
-                      Includes {summary.games.length} game{summary.games.length === 1 ? "" : "s"}.
-                    </Text>
-                  </>
-                )}
-              </VStack>
+              {editCollection ? (
+                <Field.Root invalid={!!errorMessage}>
+                  {/* <Field.Label p={2}>Title:</Field.Label> */}
+                  <Input
+                    value={collectionTitle}
+                    onChange={(e) => commentOnChange(e.target.value)}
+                  ></Input>
+                  <Field.ErrorText>{errorMessage}</Field.ErrorText>
+                </Field.Root>
+              ) : (
+                <div>
+                  <Card.Title>{summary.name}</Card.Title>
+                  <Text textStyle="sm">
+                    Includes {summary.games.length} game{summary.games.length === 1 ? "" : "s"}.
+                  </Text>
+                </div>
+              )}
             </Flex>
 
             <Flex>
-              {!editCollection && (
+              {!editCollection && user?.username === summary.userId && (
                 <>
                   <IconButton
                     onClick={clickEditButton}

@@ -23,6 +23,8 @@ export default defineConfig({
 });
 */
 
+const backendUrl = process.env.VITE_BACKEND_URL || "http://localhost:3000";
+
 export default defineConfig({
   plugins: [react(), babel({ presets: [reactCompilerPreset()] })],
   resolve: {
@@ -31,8 +33,8 @@ export default defineConfig({
   server: {
     proxy: {
       // http://localhost:5173/api -> http://localhost:3000/api
-      "/api": "http://localhost:3000",
-      "/auth": "http://localhost:3000",
+      "/api": backendUrl,
+      "/auth": backendUrl,
     },
   },
 });

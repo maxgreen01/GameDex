@@ -51,5 +51,6 @@ export interface ReviewType {
 export type CollectionSummary = {
   _id: string;
   name: string;
+  userId: string;
   games: { gameId: string; gameImage: string }[];
 };

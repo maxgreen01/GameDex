@@ -14,12 +14,14 @@ import { getUserByUsername, updateUserProfile } from "../data/users.ts";
 import Navbar from "@/components/Navbar";
 import CollectionSummary from "@/components/Profile/CollectionSummary.tsx";
 import ProfileEditButton from "@/components/Profile/ProfileEditButton.tsx";
+import ProfileFriendPopup from "@/components/Profile/ProfileFriendPopup.tsx";
 import Review from "@/components/Reviews/Review";
-import { Flex, Box, Avatar, VStack, Text, Field, Input, Separator, Button, Tabs, Spinner } from "@chakra-ui/react";
+import { Flex, Box, Avatar, VStack, Text, Field, Input, Separator, Button, Tabs, Spinner, HStack } from "@chakra-ui/react";
 import NotFoundPage from "@/pages/NotFoundPage.tsx";
 import AuthContext from "../components/Auth/AuthContext.tsx";
 import toast from "react-hot-toast";
 import { useAxiosClient } from "@/hooks.ts";
+import ManageFriendRequestButton from "@/components/Profile/ManageFriendRequestButton.tsx";
 import { useColorMode } from "@/components/ui/color-mode.tsx";
 
 const EMPTY_USER: User = {
@@ -28,7 +30,8 @@ const EMPTY_USER: User = {
   displayName: "N/A",
   description: "N/A",
   friends: [],
-  pendingInvites: [],
+  incomingRequests: [],
+  outgoingRequests: [],
   reviews: [],
   createdAt: -1,
 };
@@ -36,14 +39,17 @@ const EMPTY_USER: User = {
 const Profile: FC<object> = () => {
   const { username } = useParams();
 
-  if (username === undefined) return <NotFoundPage />;
-
   const [currentUser] = useContext(AuthContext);
   const [userReviews, setUserReviews] = useState<ReviewType[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [showAddCollectionForm, setShowAddCollectionForm] = useState(false);
   const [newCollectionTitle, setNewCollectionTitle] = useState("");
   const [collectionLoading, setCollectionLoading] = useState(false);
+
+  // no need to store friend info in state because it comes directly from the user query
+  const [showFriendsList, setShowFriendsList] = useState(false);
+  const [showFriendRequests, setShowFriendRequests] = useState(false);
+
   let [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("reviews");
   const { colorMode } = useColorMode();
@@ -65,9 +71,12 @@ const Profile: FC<object> = () => {
     refetchOnWindowFocus: true,
   });
 
-  const userMutation = useMutation<void, void, ProfileData>({
+  const userMutation = useMutation<void, Error, ProfileData>({
     mutationFn: (profileData) => updateUserProfile(username, profileData),
-    onSuccess: () => queryClient.invalidateQueries(), // TODO: More precise invalidation?
+    onSuccess: () => queryClient.invalidateQueries(),
+    onError: (error: Error) => {
+      toast.error(error.message ?? "Failed to update profile.");
+    },
   });
 
   useEffect(() => {
@@ -77,11 +86,11 @@ const Profile: FC<object> = () => {
       try {
         setReviewsLoading(true);
 
-        let { data: reviews } = await axiosClient.get(`http://localhost:3000/api/reviews/user/${userQuery.data.username}`);
+        let { data: reviews } = await axiosClient.get(`/api/reviews/user/${userQuery.data.username}`);
 
         let reviewsWithTitles = await Promise.all(
           reviews.map(async (review: ReviewType) => {
-            let { data: game } = await axiosClient.get(`http://localhost:3000/api/games/${review.gameId}`);
+            let { data: game } = await axiosClient.get(`/api/games/${review.gameId}`);
 
             return {
               ...review,
@@ -101,19 +110,21 @@ const Profile: FC<object> = () => {
     getUserReviews();
   }, [userQuery.data]);
 
-  if (userQuery.isError) {
+  if (username === undefined || userQuery.isError) {
     return <NotFoundPage />;
   }
 
   const user = userQuery.data as User;
-  const isSelf = user.username === currentUser?.username;
+  const isSelf = !!currentUser && user?.username === currentUser.username;
   const collections = collectionsQuery.data as TCollectionSummary[] | undefined;
+  const friends = user.friends ?? [];
+  const friendRequests = user.incomingRequests ?? [];
 
   // adding collection forms
-  async function onUpdate() {
+  function onUpdate() {
     queryClient.invalidateQueries({ queryKey: ["getCollectionsByUserId", username] });
   }
-  async function onChangeAddCollection(e: React.ChangeEvent<HTMLInputElement>) {
+  function onChangeAddCollection(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
     setNewCollectionTitle(value);
 
@@ -144,7 +155,6 @@ const Profile: FC<object> = () => {
       toast.success("Collection added!");
       onUpdate();
     } catch (e) {
-      console.log("Error: Collection could not be added");
       toast.error("Error: Collection could not be added");
     }
 
@@ -197,21 +207,61 @@ const Profile: FC<object> = () => {
                 <Text textStyle="sm">{user.username}</Text>
               </VStack>
 
-              {currentUser && isSelf && (
+              {isSelf && (
                 <Flex>
                   <ProfileEditButton
                     initialData={user}
-                    onAction={userMutation.mutate}
+                    onAction={(data, onSuccess) => userMutation.mutate(data, { onSuccess })}
                   />
                 </Flex>
               )}
+
+              {/* friend request button - never show for your own profile or if you're already friends */}
+              {/* // todo this and the friend popups go off screen with thin windows */}
+              {!isSelf && currentUser && (
+                <ManageFriendRequestButton
+                  currentUser={currentUser}
+                  otherUser={user.username}
+                  axiosClient={axiosClient}
+                  queryClient={queryClient}
+                />
+              )}
             </Flex>
 
+            {/* friend info stack */}
             <Flex>
-              <VStack gap={0}>
-                <Text>Friends</Text>
-                <Text>{user.friends.length}</Text>
-              </VStack>
+              <HStack gap={10}>
+                {/* friends popup */}
+                <ProfileFriendPopup
+                  data={friends}
+                  user={user}
+                  isOpen={showFriendsList}
+                  isSelf={isSelf}
+                  onOpenChange={(e) => {
+                    setShowFriendsList(e.open);
+                    setShowFriendRequests(false);
+                  }}
+                  axiosClient={axiosClient}
+                  queryClient={queryClient}
+                />
+
+                {/* incoming friend requests popup */}
+                {isSelf && (
+                  <ProfileFriendPopup
+                    data={friendRequests}
+                    isRequests
+                    user={user}
+                    isSelf={isSelf}
+                    isOpen={showFriendRequests}
+                    onOpenChange={(e) => {
+                      setShowFriendRequests(e.open);
+                      setShowFriendsList(false);
+                    }}
+                    axiosClient={axiosClient}
+                    queryClient={queryClient}
+                  />
+                )}
+              </HStack>
             </Flex>
           </Flex>
 

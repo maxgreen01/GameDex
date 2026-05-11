@@ -61,7 +61,7 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
     //setUserReview(newReview);
 
     try {
-      await axiosClient.post(`http://localhost:3000/api/reviews`, {
+      await axiosClient.post(`/api/reviews`, {
         gameId,
         userId: username,
         rating,
@@ -69,7 +69,7 @@ const AddReviewForm: FC<Props> = ({ gameId, setUserReview, username, displayName
         displayName,
       });
 
-      let { data: userReview } = await axiosClient.get(`http://localhost:3000/api/reviews/game/${gameId}/user/${username}`);
+      let { data: userReview } = await axiosClient.get(`/api/reviews/game/${gameId}/user/${username}`);
 
       if (!userReview) {
         console.log("Error: Review could not be added");

@@ -13,7 +13,12 @@ export async function getCollectionSummariesByUserId(username: string) {
   const collections = await getCollectionsByUserId(username);
   const summaries = [];
   for (const collection of collections) {
-    const summary = { _id: collection._id, name: collection.name, games: [] as { gameId: string; gameImage: string }[] } as CollectionSummary;
+    const summary = {
+      _id: collection._id,
+      name: collection.name,
+      userId: collection.userId,
+      games: [] as { gameId: string; gameImage: string }[],
+    } as CollectionSummary;
     for (const gameId of collection.gameIds) {
       const game = await getGameById(gameId);
       let gameInfo = {
