@@ -5,7 +5,7 @@ import { BadRequestError, ForbiddenError, respondWithError } from "../../shared/
 import { validateProfileData, validateString } from "../../shared/validation.ts";
 import { searchUsers } from "../services/elasticsearch.ts";
 import { checkCache } from "../middleware/checkCache.ts";
-import { cacheJSONResponse, updateCachedJSON } from "../services/redis.ts";
+import { cacheJSONResponse, deleteJSONCacheKey, updateCachedJSON } from "../services/redis.ts";
 
 const router = Router();
 
@@ -44,6 +44,8 @@ router.put("/:username", requireAuth, async (req, res) => {
     const profileData = validateProfileData(req.body);
     await updateUserProfile(username, profileData);
     await updateCachedJSON(`/api/users/${username}`, user);
+    await deleteJSONCacheKey(`/api/reviews/user/${username}`);
+    await deleteJSONCacheKey(`/api/collections/user/${username}`);
     return res.status(201).send();
   } catch (e) {
     return respondWithError(res, e);
