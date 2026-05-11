@@ -3,6 +3,8 @@ import express from "express";
 import axios from "axios";
 import { db } from "../services/firebaseAdmin.ts";
 import { requireAuth } from "../middleware/requireAuth.ts";
+import { checkCache } from "../middleware/checkCache.ts";
+import { cacheJSONResponse } from "../services/redis.ts";
 
 const router = express.Router();
 const apiKey = process.env.RAWG_API_KEY;
@@ -27,7 +29,7 @@ export async function getGameFromRAWG(id: string) {
   return data;
 }
 
-async function getAverageRating(gameId: string) {
+export async function getAverageRating(gameId: string) {
   let snapshot = await reviewsCollection.where("gameId", "==", gameId).get();
 
   if (snapshot.empty) {
@@ -44,7 +46,7 @@ async function getAverageRating(gameId: string) {
   return total / snapshot.docs.length;
 }
 
-async function formatGame(game: any) {
+export async function formatGame(game: any) {
   return {
     id: game.id,
     slug: game.slug,
@@ -82,29 +84,31 @@ async function fetchGames(params: any) {
   return await formatGameResults(data);
 }
 
-router.get("/popular", async (req, res) => {
+router.get("/popular", checkCache, async (req, res) => {
   try {
     let page = Number(req.query.page) || 1;
     let data = await fetchGames({ ordering: "-added", page });
-    res.json(data);
+    await cacheJSONResponse(req, data);
+    return res.json(data);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: "Failed to fetch popular games" });
+    return res.status(500).json({ error: "Failed to fetch popular games" });
   }
 });
 
-router.get("/newest", async (req, res) => {
+router.get("/newest", checkCache, async (req, res) => {
   try {
     let page = Number(req.query.page) || 1;
     let data = await fetchGames({ ordering: "-released", page });
-    res.json(data);
+    await cacheJSONResponse(req, data);
+    return res.json(data);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: "Failed to fetch newest games" });
+    return res.status(500).json({ error: "Failed to fetch newest games" });
   }
 });
 
-router.get("/recommended/:userId", requireAuth, async (req, res) => {
+router.get("/recommended/:userId", requireAuth, checkCache, async (req, res) => {
   try {
     let { userId } = req.params;
 
@@ -132,6 +136,7 @@ router.get("/recommended/:userId", requireAuth, async (req, res) => {
     if (goodReviews.length === 0) {
       console.log("Hit the fallback!");
       let data = await fetchGames({ ordering: "-added" });
+      await cacheJSONResponse(req, data);
       return res.json(data);
     }
 
@@ -166,14 +171,15 @@ router.get("/recommended/:userId", requireAuth, async (req, res) => {
       ordering: "-rating",
     }); //fetching games with the top 3 genres, ordering from highest rated.
 
+    await cacheJSONResponse(req, data);
     return res.json(data);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: "Failed to fetch recommended games" });
+    return res.status(500).json({ error: "Failed to fetch recommended games" });
   }
 });
 
-router.get("/outside/:userId", requireAuth, async (req, res) => {
+router.get("/outside/:userId", requireAuth, checkCache, async (req, res) => {
   try {
     let { userId } = req.params;
 
@@ -195,6 +201,7 @@ router.get("/outside/:userId", requireAuth, async (req, res) => {
 
     if (goodReviews.length === 0) {
       let data = await fetchGames({ ordering: "-rating" });
+      await cacheJSONResponse(req, data);
       return res.json(data);
     }
 
@@ -228,34 +235,38 @@ router.get("/outside/:userId", requireAuth, async (req, res) => {
       return !gameGenreSlugs.some((slug: string) => topSlugs.includes(slug));
     });
 
+    await cacheJSONResponse(req, data);
     return res.json(data);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: "Failed to fetch outside games" });
+    return res.status(500).json({ error: "Failed to fetch outside games" });
   }
 });
 
-router.get("/search", async (req, res) => {
+router.get("/search", checkCache, async (req, res) => {
   try {
     let page = Number(req.query.page) || 1;
     let search = String(req.query.search || "");
 
     let data = await fetchGames({ search, page });
-    res.json(data);
+
+    await cacheJSONResponse(req, data, 300); // make the cache expire faster since search results aren't as likely to be reused
+    return res.json(data);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: "Failed to search games" });
+    return res.status(500).json({ error: "Failed to search games" });
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", checkCache, async (req, res) => {
   try {
     const data = await getGameFromRAWG(req.params.id);
     // console.log("Returned data: ", data);
-    res.json(await formatGame(data));
+    await cacheJSONResponse(req, data);
+    return res.json(await formatGame(data));
   } catch (e) {
     console.error(e);
-    res.status(500).json({ error: "Failed to fetch game" });
+    return res.status(500).json({ error: "Failed to fetch game" });
   }
 });
 

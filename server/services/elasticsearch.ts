@@ -1,8 +1,10 @@
 import { Client } from "@elastic/elasticsearch";
 import type { ProfileData, User } from "../../shared/types.ts";
 
+const elasticsearchUrl = process.env.IS_CONTAINERIZED === "true" ? "http://elasticsearch:9200" : "http://localhost:9200";
+
 const esClient = new Client({
-  node: "http://elasticsearch:9200",
+  node: elasticsearchUrl,
   auth: {
     username: process.env.ELASTIC_USERNAME || "elastic",
     password: process.env.ELASTIC_PASSWORD || "",

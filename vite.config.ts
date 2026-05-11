@@ -23,7 +23,7 @@ export default defineConfig({
 });
 */
 
-const backendUrl = process.env.VITE_BACKEND_URL || "http://localhost:3000";
+const backendUrl = process.env.IS_CONTAINERIZED === "true" ? "http://backend:3000" : "http://localhost:3000";
 
 export default defineConfig({
   plugins: [react(), babel({ presets: [reactCompilerPreset()] })],
