@@ -45,6 +45,10 @@ GameDex is a social game discovery platform where users can review games, build 
 
 # Running the Project
 
+First off, it is absolutely crucial that you have a .env file and a serviceAccountKey.json file (it must be named EXACTLY serviceAccountKey.json). Place the service account key in the root of the 'server' folder, and place the .env file in the project root. TO PROFESSORS: these files will be provided in our code submission, they are not provided here as this repo will be going public. Please ensure that the content of those files is exactly the same!
+
+Once you perform this step, run 'npm install'!
+
 This project is intended to be run using Docker. If you don't have Docker installed already, you can install it on Mac, Windows, or Linux by downloading Docker Desktop by following the instructions on the [official Docker website](https://docs.docker.com/get-docker/).
 
 ## Start the Application
